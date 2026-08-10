@@ -30,3 +30,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+/src/generated/prisma
+
+.env
+
+# AI Agent Folders
+.agents/
+.claude/
+.windsurf/
+

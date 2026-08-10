@@ -1,4 +1,6 @@
-@import "tailwindcss" source(none);
+/* stylelint-disable */
+/* eslint-disable */
+@import "tailwindcss";
 @source "../src";
 @import "tw-animate-css";
 
