@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Project
+        run: npm run build
+
+  deploy-staging:
+    name: Deploy to Staging EC2
+    needs: build
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for EC2 Staging Deployment
+        run: |
+          echo "This step will SSH into the Staging AWS EC2 instance and pull the latest code."
+          echo "We will configure the SSH keys (secrets.EC2_SSH_KEY) in Module 9."
+
+  deploy-prod:
+    name: Deploy to Production EC2
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for EC2 Production Deployment
+        run: |
+          echo "This step will SSH into the Production AWS EC2 instance and pull the latest code."
+          echo "We will configure the SSH keys in Module 9 after Kavita approves the staging deploy."
