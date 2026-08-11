@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import desktopBg from "@/assets/desktop-bg.png.asset.json";
 import mobileBg from "@/assets/mobile-bg.png.asset.json";
 const logo = { url: "/homelogo.png" };
@@ -80,9 +80,15 @@ function Logo({ className = "" }: { className?: string }) {
 
 function Index() {
   return (
-    <div className="min-h-screen w-full overflow-x-clip bg-white font-[var(--font-sans)] text-[color:var(--color-ink)] antialiased">
+    <div className="relative min-h-screen w-full overflow-hidden bg-[color:var(--color-background)] selection:bg-[color:var(--color-brand)] selection:text-white text-slate-900">
+      {/* Background Glow Effects for Light Glassmorphism */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-400/20 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-teal-400/20 blur-[150px] pointer-events-none" />
+      <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-amber-400/20 blur-[100px] pointer-events-none" />
+
+      <main className="relative z-10 w-full">
       {/* HERO */}
-<section className="relative isolate w-full overflow-hidden bg-[color:var(--color-cream)] md:aspect-video md:min-h-[720px] lg:min-h-[760px] xl:min-h-0">
+      <section className="relative isolate w-full overflow-hidden bg-transparent md:aspect-video md:min-h-[720px] lg:min-h-[760px] xl:min-h-0">
         <picture>
           <source media="(min-width: 768px)" srcSet="/Desktop%20BG.png" />
           <img
@@ -107,18 +113,18 @@ function Index() {
           <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
             <Logo />
             <nav className="flex shrink-0 items-center gap-3 sm:gap-5">
-              <a
-                href="#"
+              <Link
+                to="/login"
                 className="hidden text-sm font-semibold text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-brand)] sm:inline"
               >
                 Sign in
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                to="/register"
                 className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[color:var(--color-brand)] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)] sm:px-6 sm:py-2.5"
               >
                 Get Started
-              </a>
+              </Link>
             </nav>
           </div>
         </header>
@@ -126,34 +132,34 @@ function Index() {
         {/* Hero content */}
         <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-24 pt-8 sm:px-8 sm:pb-32 sm:pt-14 md:pb-40 md:pt-16 lg:pb-48 text-left">
           <div className="w-full min-w-0 max-w-lg lg:max-w-[50%] xl:max-w-2xl">
-            <span className="mb-5 inline-block rounded-full border border-[#f9ded0] bg-white/90 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[color:var(--color-brand-dark)] shadow-[0_4px_12px_rgba(242,107,33,0.08)] backdrop-blur">
+            <span className="mb-5 inline-block rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-700 shadow-sm backdrop-blur-md">
               🚀 Launching in Mumbai & India
             </span>
-            <h1 className="font-[var(--font-display)] text-[clamp(2rem,7vw,68px)] font-bold leading-[1.08] tracking-tight text-balance text-[color:var(--color-ink)]">
+            <h1 className="font-[var(--font-display)] text-[clamp(2rem,7vw,68px)] font-bold leading-[1.08] tracking-tight text-balance text-slate-900">
               Find the perfect class{" "}
-              <em className="font-medium not-italic text-[color:var(--color-ink-muted)] italic">or</em>{" "}
+              <em className="font-medium not-italic text-slate-500 italic">or</em>{" "}
               coach for{" "}
-              <span className="text-[color:var(--color-brand)]">your child.</span>
+              <span className="bg-gradient-to-r from-orange-500 to-teal-500 bg-clip-text text-transparent drop-shadow-sm">your child.</span>
             </h1>
-            <p className="mt-5 max-w-lg text-pretty text-base font-medium leading-relaxed text-[color:var(--color-ink-muted)] sm:text-lg md:text-xl">
+            <p className="mt-5 max-w-lg text-pretty text-base font-medium leading-relaxed text-slate-600 sm:text-lg md:text-xl">
               Verified hobby coaches near you. Browse, connect directly on WhatsApp,
               and enroll — zero booking fees.
             </p>
 
             {/* CTAs */}
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-              <a
-                href="#"
-                className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[color:var(--color-brand)] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(242,107,33,0.28)] transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)] sm:w-auto"
+              <Link
+                to="/register"
+                className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(249,115,22,0.4)] sm:w-auto"
               >
                 📍 Find Classes <span aria-hidden="true">→</span>
-              </a>
-              <a
-                href="#"
-                className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white/80 px-7 py-3.5 text-sm font-semibold text-[color:var(--color-ink)] backdrop-blur transition-all hover:border-[color:var(--color-brand)] hover:text-[color:var(--color-brand)] sm:w-auto"
+              </Link>
+              <Link
+                to="/register"
+                className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white/80 px-7 py-3.5 text-sm font-semibold text-slate-800 backdrop-blur-md transition-all hover:border-orange-500 hover:text-orange-600 sm:w-auto shadow-sm"
               >
                 👤 Are You A Coach?
-              </a>
+              </Link>
             </div>
 
             {/* Trust chips */}
@@ -216,41 +222,41 @@ function Index() {
       </section>
 
       {/* CATEGORIES — overlapping hero */}
-      <div className="relative z-20 mx-auto -mt-28 w-full min-w-0 max-w-7xl px-5 sm:-mt-32 sm:px-8">
-        <div className="rounded-3xl border border-white/80 bg-white/96 p-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.1)] backdrop-blur-xl sm:p-8 md:p-10">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-            {categories.map((c) => (
+        <section className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-20 sm:px-8">
+          <div className="rounded-[2.5rem] bg-white/70 backdrop-blur-2xl border border-white p-8 shadow-xl sm:p-12 md:p-16">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
+            {categories.map((category) => (
               <button
-                key={c.title}
-                className="group flex cursor-pointer flex-col items-center rounded-2xl border border-slate-100 bg-white p-6 text-center transition-all hover:-translate-y-2 hover:border-[color:var(--color-brand-light)] hover:shadow-[0_20px_40px_-12px_rgba(242,107,33,0.15)]"
+                key={category.title}
+                className="group flex cursor-pointer flex-col items-center rounded-2xl border border-slate-100 bg-white/60 p-6 text-center transition-all hover:-translate-y-2 hover:bg-white hover:border-orange-200 hover:shadow-lg"
               >
-                <div className="mb-4 grid h-16 w-16 place-items-center rounded-full bg-[color:var(--color-brand-light)] text-3xl text-[color:var(--color-brand)] sm:h-20 sm:w-20 sm:text-4xl">
-                  {c.icon}
-                </div>
-                <h3 className="mb-2 font-[var(--font-display)] text-base font-bold text-[color:var(--color-ink)]">
-                  {c.title}
-                </h3>
-                <p className="text-xs leading-snug text-[color:var(--color-ink-muted)] sm:text-[13px]">
-                  {c.desc}
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 text-3xl shadow-sm transition-transform group-hover:scale-110 group-hover:bg-orange-200">
+                    {category.icon}
+                  </div>
+                  <h3 className="mb-2 text-lg font-bold text-slate-800 transition-colors group-hover:text-orange-600">
+                    {category.title}
+                  </h3>
+                  <p className="text-sm font-medium leading-relaxed text-slate-500">
+                  {category.desc}
                 </p>
               </button>
             ))}
+            </div>
+            
+            <div className="mt-16 text-center">
+              <p className="mb-8 text-sm font-medium text-slate-500">
+                And many more hobbies to explore...
+              </p>
+              <a
+                href="#"
+                className="inline-flex items-center justify-center rounded-full bg-orange-600 px-8 py-3 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:bg-orange-700"
+              >
+                View all categories
+              </a>
+            </div>
           </div>
-          <p className="mt-8 text-center text-sm font-medium text-[color:var(--color-ink-muted)]">
-            And many more hobbies to explore…
-          </p>
-          <div className="mt-8 text-center">
-            <a
-              href="#"
-              className="inline-flex items-center justify-center rounded-full bg-[color:var(--color-brand)] px-8 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(242,107,33,0.28)] transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)]"
-            >
-              View all categories
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* SPARK SECTION */}
+        </section>
+      </main>
       <section className="w-full px-5 py-20 sm:px-8 md:py-28">
         <div className="mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
           <div className="min-w-0">
