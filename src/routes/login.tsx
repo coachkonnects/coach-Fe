@@ -114,7 +114,7 @@ function LoginPage() {
         >
           <div className="absolute inset-0 bg-[#FF7F5C] transition-transform duration-700 ease-out group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B35] to-[#FF7F5C] opacity-90" />
-          <div className="absolute inset-0 bg-[url('/cubes.png')] opacity-10 mix-blend-overlay" />
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
           
           <div className="relative z-10 text-center transform transition-all duration-500 group-hover:-translate-y-2">
             <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-2xl border border-white/30 group-hover:rotate-6 transition-all duration-500">
@@ -141,26 +141,26 @@ function LoginPage() {
           onClick={() => setActivePath('coach')}
           className="flex-1 relative group cursor-pointer overflow-hidden flex flex-col items-center justify-center p-12 min-h-[50vh] md:min-h-screen"
         >
-          <div className="absolute inset-0 bg-[#2C1810] transition-transform duration-700 ease-out group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-br from-[#2C1810] to-[#1A0F0A] opacity-90" />
-          <div className="absolute inset-0 bg-[url('/stardust.png')] opacity-20 mix-blend-overlay" />
+          <div className="absolute inset-0 bg-[#0f172a] transition-transform duration-700 ease-out group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-br from-teal-900 to-teal-950 opacity-95" />
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay" />
           
           <div className="relative z-10 text-center transform transition-all duration-500 group-hover:-translate-y-2">
-            <div className="w-24 h-24 bg-[#B85C38]/20 backdrop-blur-md rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-2xl border border-[#B85C38]/30 group-hover:-rotate-6 transition-all duration-500">
-              <svg className="w-12 h-12 text-[#F4A460]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-24 h-24 bg-teal-500/20 backdrop-blur-md rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-2xl border border-teal-500/30 group-hover:-rotate-6 transition-all duration-500">
+              <svg className="w-12 h-12 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-[#FFF8F0] mb-4 tracking-tight drop-shadow-md">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight drop-shadow-md group-hover:scale-105 transition-transform">
               I'm a Coach
             </h2>
-            <p className="text-[#F4A460]/90 text-lg font-medium max-w-xs mx-auto drop-shadow-sm">
+            <p className="text-teal-200/70 text-lg font-medium max-w-xs mx-auto drop-shadow-sm mb-8">
               Manage your students, schedule classes, and grow your impact.
             </p>
 
-            <div className="mt-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-2 text-[#FFF8F0] font-bold bg-[#B85C38]/30 w-max mx-auto px-6 py-3 rounded-full backdrop-blur-sm border border-[#B85C38]/50">
+            <div className="mt-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-2 text-white font-bold bg-teal-500/20 border border-teal-500/30 w-max mx-auto px-6 py-3 rounded-full backdrop-blur-sm group-hover:bg-emerald-500 group-hover:border-emerald-500">
               Login as Coach
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+              <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </div>
           </div>
         </div>
@@ -201,8 +201,8 @@ function LoginPage() {
             {/* Main Illustration */}
             <div className="w-64 h-64 md:w-80 md:h-80 rounded-full shadow-[0_20px_50px_rgba(255,107,53,0.3)] overflow-hidden relative z-20 border-[6px] border-white">
                <img 
-                 src="/student-beanbag.jpg" 
-                 alt="Student on beanbag" 
+                 src="/student.png" 
+                 alt="Student" 
                  className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700" 
                />
             </div>
