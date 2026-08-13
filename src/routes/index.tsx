@@ -149,7 +149,7 @@ function Index() {
             {/* CTAs */}
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
               <Link
-                to="/register"
+                to="/coaches"
                 className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(249,115,22,0.4)] sm:w-auto"
               >
                 📍 Find Classes <span aria-hidden="true">→</span>
@@ -443,12 +443,12 @@ function Index() {
             Stop scrolling group chats. <br />Start finding the right coach.
           </h2>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-            <a
-              href="#"
+            <Link
+              to="/coaches"
               className="inline-flex w-full items-center justify-center rounded-full bg-[color:var(--color-brand)] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(242,107,33,0.28)] transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)] sm:w-auto"
             >
               🔍 Find Classes Near You
-            </a>
+            </Link>
             <a
               href="#"
               className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-[color:var(--color-ink)] transition-all hover:border-[color:var(--color-brand)] hover:text-[color:var(--color-brand)] sm:w-auto"
@@ -497,8 +497,8 @@ function Index() {
             <div>
               <h4 className="mb-4 font-semibold">Platform</h4>
               <ul className="flex flex-col gap-2 text-sm text-[color:var(--color-ink-muted)]">
-                <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Find Coaches</a></li>
-                <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Become a Coach</a></li>
+                <li><Link to="/coaches" className="hover:text-[color:var(--color-brand)] transition-colors">Find Coaches</Link></li>
+                <li><Link to="/register" className="hover:text-[color:var(--color-brand)] transition-colors">Become a Coach</Link></li>
               </ul>
             </div>
             

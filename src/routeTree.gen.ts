@@ -12,8 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AdminLoginRouteImport } from './routes/admin-login'
+import { Route as CoachDashboardRouteImport } from './routes/coach-dashboard'
+import { Route as CoachesRouteImport } from './routes/coaches'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as RegisterCoachRouteImport } from './routes/register-coach'
+import { Route as RegisterStudentRouteImport } from './routes/register-student'
+import { Route as CoachSlugRouteImport } from './routes/coach.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -30,6 +35,16 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin-login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoachDashboardRoute = CoachDashboardRouteImport.update({
+  id: '/coach-dashboard',
+  path: '/coach-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachesRoute = CoachesRouteImport.update({
+  id: '/coaches',
+  path: '/coaches',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -40,43 +55,109 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterCoachRoute = RegisterCoachRouteImport.update({
+  id: '/register-coach',
+  path: '/register-coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterStudentRoute = RegisterStudentRouteImport.update({
+  id: '/register-student',
+  path: '/register-student',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachSlugRoute = CoachSlugRouteImport.update({
+  id: '/coach/$slug',
+  path: '/coach/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
+  '/coach-dashboard': typeof CoachDashboardRoute
+  '/coaches': typeof CoachesRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/register-coach': typeof RegisterCoachRoute
+  '/register-student': typeof RegisterStudentRoute
+  '/coach/$slug': typeof CoachSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
+  '/coach-dashboard': typeof CoachDashboardRoute
+  '/coaches': typeof CoachesRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/register-coach': typeof RegisterCoachRoute
+  '/register-student': typeof RegisterStudentRoute
+  '/coach/$slug': typeof CoachSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/admin-login': typeof AdminLoginRoute
+  '/coach-dashboard': typeof CoachDashboardRoute
+  '/coaches': typeof CoachesRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/register-coach': typeof RegisterCoachRoute
+  '/register-student': typeof RegisterStudentRoute
+  '/coach/$slug': typeof CoachSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/admin-login' | '/login' | '/register'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/admin-login'
+    | '/coach-dashboard'
+    | '/coaches'
+    | '/login'
+    | '/register'
+    | '/register-coach'
+    | '/register-student'
+    | '/coach/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/admin-login' | '/login' | '/register'
-  id: '__root__' | '/' | '/admin' | '/admin-login' | '/login' | '/register'
+  to:
+    | '/'
+    | '/admin'
+    | '/admin-login'
+    | '/coach-dashboard'
+    | '/coaches'
+    | '/login'
+    | '/register'
+    | '/register-coach'
+    | '/register-student'
+    | '/coach/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/admin-login'
+    | '/coach-dashboard'
+    | '/coaches'
+    | '/login'
+    | '/register'
+    | '/register-coach'
+    | '/register-student'
+    | '/coach/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  CoachDashboardRoute: typeof CoachDashboardRoute
+  CoachesRoute: typeof CoachesRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  RegisterCoachRoute: typeof RegisterCoachRoute
+  RegisterStudentRoute: typeof RegisterStudentRoute
+  CoachSlugRoute: typeof CoachSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -102,6 +183,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coach-dashboard': {
+      id: '/coach-dashboard'
+      path: '/coach-dashboard'
+      fullPath: '/coach-dashboard'
+      preLoaderRoute: typeof CoachDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coaches': {
+      id: '/coaches'
+      path: '/coaches'
+      fullPath: '/coaches'
+      preLoaderRoute: typeof CoachesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -116,6 +211,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/register-coach': {
+      id: '/register-coach'
+      path: '/register-coach'
+      fullPath: '/register-coach'
+      preLoaderRoute: typeof RegisterCoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register-student': {
+      id: '/register-student'
+      path: '/register-student'
+      fullPath: '/register-student'
+      preLoaderRoute: typeof RegisterStudentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach/$slug': {
+      id: '/coach/$slug'
+      path: '/coach/$slug'
+      fullPath: '/coach/$slug'
+      preLoaderRoute: typeof CoachSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -123,8 +239,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AdminLoginRoute: AdminLoginRoute,
+  CoachDashboardRoute: CoachDashboardRoute,
+  CoachesRoute: CoachesRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  RegisterCoachRoute: RegisterCoachRoute,
+  RegisterStudentRoute: RegisterStudentRoute,
+  CoachSlugRoute: CoachSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

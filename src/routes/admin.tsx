@@ -16,16 +16,17 @@ function AdminDashboard() {
     }
   }, [navigate]);
 
-  const [activeTab, setActiveTabState] = useState(localStorage.getItem('adminActiveTab') || 'dashboard');
-  const setActiveTab = (tab: string) => {
-    localStorage.setItem('adminActiveTab', tab);
-    setActiveTabState(tab);
-  };
+  const [activeTab, setActiveTab] = useState<string>(() => localStorage.getItem('adminActiveTab') || 'students');
 
+  useEffect(() => {
+    localStorage.setItem('adminActiveTab', activeTab);
+  }, [activeTab]);
   const [coaches, setCoaches] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [newCategoryName, setNewCategoryName] = useState("");
   const [selectedCoach, setSelectedCoach] = useState<any | null>(null);
 
-  const [studentsList, setStudentsList] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
 
   const [isFlagging, setIsFlagging] = useState(false);
@@ -68,16 +69,29 @@ function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (activeTab === 'coaches') fetchCoaches();
-    if (activeTab === 'students') fetchStudents();
-    if (activeTab === 'admins') fetchAdmins();
+    fetchProfiles();
   }, [activeTab]);
+
+    const fetchProfiles = async () => {
+      try {
+        const [studentRes, coachRes, categoryRes] = await Promise.all([
+          fetch('/api/profile/student'),
+          fetch('/api/profile/coach'),
+          fetch('/api/categories')
+        ]);
+        if (studentRes.ok) setStudents(await studentRes.json());
+        if (coachRes.ok) setCoaches(await coachRes.json());
+        if (categoryRes.ok) setCategories(await categoryRes.json());
+      } catch (e) {
+        console.error(e);
+      }
+    };
 
   const fetchStudents = async () => {
     try {
       const res = await fetch('/api/admin/students');
       const data = await res.json();
-      setStudentsList(data);
+      setStudents(data);
     } catch (e) { console.error(e); }
   };
 
@@ -163,6 +177,29 @@ function AdminDashboard() {
     } catch (e) { }
   };
 
+  const handleDeleteCoach = async (id: string) => {
+    if (!confirm("🚨 WARNING: Are you sure you want to completely DELETE this coach profile and user account? This cannot be undone!")) return;
+    try {
+      const res = await fetch(`/api/admin/coaches/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        alert("Coach profile deleted.");
+        fetchCoaches();
+      } else {
+        const error = await res.text();
+        alert("Error: " + error);
+      }
+    } catch (e) { }
+  };
+
+  const handleToggleActiveCoach = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/coaches/${id}/toggle-active`, { method: 'POST' });
+      if (res.ok) {
+        fetchCoaches();
+      }
+    } catch (e) { }
+  };
+
   const handleApproveStudent = async (id: string) => {
     if (!confirm("Are you sure you want to approve this student?")) return;
     try {
@@ -197,7 +234,33 @@ function AdminDashboard() {
           fetchStudents();
         }
       }
-    } catch (e) { }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCategoryName.trim()) return;
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newCategoryName })
+      });
+      if (res.ok) {
+        const newCat = await res.json();
+        setCategories([...categories, newCat]);
+        setNewCategoryName('');
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleDeleteCategory = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this category?")) return;
+    try {
+      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setCategories(categories.filter(c => c.id !== id));
+      }
+    } catch (e) { console.error(e); }
   };
 
   return (
@@ -212,7 +275,7 @@ function AdminDashboard() {
           {['Dashboard', 'Coaches', 'Students', 'Enquiries', 'Leads', 'Reviews', 'Classes', 'Export', 'Admins', 'Security'].map(tab => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab.toLowerCase())}
+              onClick={() => setActiveTab(tab.toLowerCase() as any)}
               className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex justify-between items-center ${activeTab === tab.toLowerCase()
                   ? 'bg-[#f26b21] text-white shadow-md'
                   : 'text-gray-400 hover:bg-gray-800 hover:text-white'
@@ -226,6 +289,13 @@ function AdminDashboard() {
               )}
             </button>
           ))}
+            <button
+              onClick={() => setActiveTab('categories')}
+              className={`pb-4 px-2 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${activeTab === 'categories' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+              Categories
+            </button>
         </div>
         <div className="p-4 border-t border-gray-800">
           <button className="w-full px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Log out</button>
@@ -264,22 +334,39 @@ function AdminDashboard() {
                         {coach.pincode ? ` - ${coach.pincode}` : ''}
                       </td>
                       <td className="p-4 text-gray-600">{coach.dateOfBirth}</td>
-                      <td className="p-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${coach.status === 'PENDING_APPROVAL' ? 'bg-amber-50 text-amber-600 border border-amber-200' :
-                          coach.status === 'APPROVED' ? 'bg-green-50 text-green-600 border border-green-200' :
-                            coach.status === 'REQUEST_CHANGE' ? 'bg-purple-50 text-purple-600 border border-purple-200' :
-                              'bg-red-50 text-red-600 border border-red-200'
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${coach.status === 'PENDING_APPROVAL' ? 'bg-amber-100 text-amber-700' :
+                          coach.status === 'APPROVED' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                           }`}>
                           {coach.status.replace('_', ' ')}
                         </span>
+                        {!coach.active && coach.status === 'APPROVED' && (
+                          <span className="ml-2 px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700">INACTIVE</span>
+                        )}
                       </td>
-                      <td className="p-4 text-right">
-                        <button
-                          onClick={() => setSelectedCoach(coach)}
-                          className="px-4 py-1.5 bg-gray-900 text-white text-sm font-bold rounded-lg hover:bg-[#f26b21] transition-colors"
-                        >
-                          Review
-                        </button>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setSelectedCoach(coach)}
+                            className="text-[#f26b21] hover:text-orange-700 font-medium text-sm border border-orange-200 px-3 py-1.5 rounded-lg hover:bg-orange-50 transition-colors"
+                          >
+                            Review
+                          </button>
+                          <button
+                            onClick={() => handleToggleActiveCoach(coach.id)}
+                            className={`text-sm font-medium border px-3 py-1.5 rounded-lg transition-colors ${coach.active ? 'text-slate-500 border-slate-200 hover:bg-slate-50' : 'text-teal-600 border-teal-200 hover:bg-teal-50'}`}
+                            title={coach.active ? "Force Deactivate" : "Force Activate"}
+                          >
+                            {coach.active ? "Deactivate" : "Activate"}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCoach(coach.id)}
+                            className="text-red-600 hover:text-red-700 font-medium text-sm border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                            title="Delete Coach"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -334,6 +421,62 @@ function AdminDashboard() {
                     <p className="font-mono text-sm text-[#f26b21] bg-orange-50 p-2 rounded-lg break-all">
                       coachkonnects.com/coaches/{selectedCoach.slug}
                     </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Category</h3>
+                    <p className="font-medium text-lg">{selectedCoach.category || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Expertise</h3>
+                    <p className="font-medium text-lg">{selectedCoach.expertise || 'Not specified'}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">About / Description</h3>
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-1 whitespace-pre-line text-gray-700">
+                      {selectedCoach.description || 'No description provided.'}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Class Mode</h3>
+                    <p className="font-medium text-lg">{selectedCoach.classMode || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Pricing</h3>
+                    <p className="font-medium text-lg">{selectedCoach.pricing || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Audience</h3>
+                    <p className="font-medium text-lg">{selectedCoach.targetAudience || 'Not specified'}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Schedule</h3>
+                    <p className="font-medium text-sm">{selectedCoach.availableDays || 'No days'} • {selectedCoach.timeSlots || 'No slots'}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Media</h3>
+                    <div className="flex gap-4">
+                      {selectedCoach.profileImageUrl && (
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-slate-500 uppercase">Headshot</p>
+                          <a href={selectedCoach.profileImageUrl} target="_blank" rel="noreferrer">
+                            <img src={selectedCoach.profileImageUrl} alt="Headshot" className="w-24 h-24 object-cover rounded-xl border border-slate-200 shadow-sm hover:opacity-80 transition-opacity" />
+                          </a>
+                        </div>
+                      )}
+                      {selectedCoach.groupImageUrl && (
+                        <div className="space-y-1">
+                          <p className="text-xs font-bold text-slate-500 uppercase">Group Photo</p>
+                          <a href={selectedCoach.groupImageUrl} target="_blank" rel="noreferrer">
+                            <img src={selectedCoach.groupImageUrl} alt="Group Photo" className="w-40 h-24 object-cover rounded-xl border border-slate-200 shadow-sm hover:opacity-80 transition-opacity" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                    {selectedCoach.introVideoUrl && (
+                      <p className="mt-3 font-medium text-sm text-blue-500 break-all">
+                        Video: <a href={selectedCoach.introVideoUrl} target="_blank" rel="noreferrer">{selectedCoach.introVideoUrl}</a>
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -398,7 +541,7 @@ function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {studentsList.map(student => (
+                  {students.map((student: any) => (
                     <tr key={student.id} className="hover:bg-gray-50 transition-colors">
                       <td className="p-4 font-bold">{student.fullName}</td>
                       <td className="p-4 text-gray-600">
@@ -426,7 +569,7 @@ function AdminDashboard() {
                       </td>
                     </tr>
                   ))}
-                  {studentsList.length === 0 && (
+                  {students.length === 0 && (
                     <tr>
                       <td colSpan={5} className="p-8 text-center text-gray-500">No students found.</td>
                     </tr>
@@ -529,6 +672,48 @@ function AdminDashboard() {
                     </button>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* Categories Tab */}
+          {activeTab === 'categories' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4">
+              <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 max-w-2xl mx-auto">
+                <h2 className="text-2xl font-bold text-slate-900 mb-6">Manage Categories</h2>
+                
+                <div className="flex gap-4 mb-8">
+                  <input 
+                    type="text" 
+                    value={newCategoryName}
+                    onChange={e => setNewCategoryName(e.target.value)}
+                    placeholder="e.g. Health & Wellness"
+                    className="flex-1 px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 shadow-sm"
+                  />
+                  <button 
+                    onClick={handleAddCategory}
+                    className="px-8 py-3.5 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 shadow-md transition-all active:scale-[0.98]"
+                  >
+                    Add Category
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {categories.map(cat => (
+                    <div key={cat.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+                      <span className="font-bold text-slate-700">{cat.name}</span>
+                      <button 
+                        onClick={() => handleDeleteCategory(cat.id)}
+                        className="text-red-500 hover:text-red-700 font-bold text-sm px-4 py-2 hover:bg-red-50 rounded-xl transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
+                  {categories.length === 0 && (
+                    <div className="text-center py-10 text-slate-500 font-medium">No categories added yet.</div>
+                  )}
+                </div>
               </div>
             </div>
           )}
