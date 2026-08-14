@@ -273,16 +273,16 @@ function LoginPage() {
                 </div>
               ) : (
                 <div className="space-y-4 animate-in fade-in zoom-in duration-300">
-                  <input
-                    type="text"
-                    maxLength={6}
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                    placeholder="------"
-                    disabled={isLoading}
-                    className="w-full px-5 py-4 bg-white/80 backdrop-blur-sm text-center tracking-[1em] font-mono text-3xl font-black text-[#FF6B35] rounded-2xl border-2 border-[#F4A460]/20 focus:outline-none focus:border-[#FF6B35] transition-all placeholder:text-[#8B4726]/20 shadow-sm"
-                    required
-                  />
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                      placeholder="------"
+                      disabled={isLoading}
+                      className="w-full px-5 py-4 bg-white/80 backdrop-blur-sm text-center tracking-widest font-mono text-3xl font-black text-[#FF6B35] rounded-2xl border-2 border-[#F4A460]/20 focus:outline-none focus:border-[#FF6B35] transition-all placeholder:text-[#8B4726]/20 shadow-sm"
+                      required
+                    />
                   <div className="flex justify-between items-center px-1">
                     <p className="text-sm text-[#8B4726] font-medium">
                       Code sent to <span className="font-bold text-[#2C1810]">{email}</span>

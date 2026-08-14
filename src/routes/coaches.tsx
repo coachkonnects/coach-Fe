@@ -7,20 +7,30 @@ export const Route = createFileRoute('/coaches')({
 
 function CoachesDirectory() {
   const [coaches, setCoaches] = useState<any[]>([]);
+  const [classes, setClasses] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
 
   useEffect(() => {
-    fetch('/api/public/coaches')
-      .then(res => res.json())
-      .then(data => setCoaches(data))
+    Promise.all([
+      fetch('/api/public/coaches').then(res => res.json()),
+      fetch('/api/public/classes').then(res => res.json()).catch(() => [])
+    ])
+      .then(([coachesData, classesData]) => {
+        setCoaches(coachesData);
+        setClasses(classesData || []);
+      })
       .catch(err => console.error(err));
   }, []);
 
+  const getCoachSpecialties = (coachEmail: string) => {
+    const coachClasses = classes.filter(c => c.user?.email === coachEmail);
+    const types = new Set(coachClasses.map(c => c.type).filter(t => t && t !== 'REGULAR'));
+    return Array.from(types);
+  };
+
   const filteredCoaches = coaches.filter(coach => {
     const searchLower = search.toLowerCase();
-    
-    // Safely get all searchable fields (handling nulls)
     const searchableFields = [
       coach.fullName,
       coach.district,
@@ -34,10 +44,79 @@ function CoachesDirectory() {
     ].map(field => (field || '').toLowerCase());
 
     const matchesSearch = searchableFields.some(field => field.includes(searchLower));
-    
     const matchesCategory = category ? coach.category === category : true;
-    return matchesSearch && matchesCategory;
+    return matchesSearch && matchesCategory && coach.status === 'APPROVED';
   });
+
+  const featuredCoaches = filteredCoaches.filter(c => c.isFeatured);
+  const regularCoaches = filteredCoaches.filter(c => !c.isFeatured);
+
+  const renderCoachCard = (coach: any, isFeatured: boolean = false) => {
+    const specialties = getCoachSpecialties(coach.user?.email);
+    return (
+      <div key={coach.id} className={`bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border ${isFeatured ? 'border-[#f26b21]' : 'border-gray-100'} overflow-hidden flex flex-col group relative`}>
+        {isFeatured && (
+          <div className="absolute top-0 right-0 bg-[#f26b21] text-white text-xs font-bold px-4 py-1 rounded-bl-xl z-20 shadow-md">
+            FEATURED
+          </div>
+        )}
+        <div 
+          className="h-32 bg-gray-100 relative overflow-hidden bg-cover bg-center"
+          style={{ backgroundImage: coach.profileImageUrl ? `url(${coach.profileImageUrl})` : 'none' }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 opacity-50 group-hover:scale-105 transition-transform duration-500" />
+          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/50 to-transparent" />
+          <div className="absolute bottom-4 left-6 text-white text-sm font-bold bg-teal-600 px-3 py-1 rounded-full shadow-lg z-10">
+            {coach.category}
+          </div>
+        </div>
+        
+        <div className="p-6 flex-1 flex flex-col">
+          <h3 className="text-2xl font-bold text-gray-900 mb-1">{coach.fullName}</h3>
+          <p className="text-[#f26b21] font-medium mb-3">{coach.expertise}</p>
+          
+          {specialties.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {specialties.map((type: any) => (
+                <span key={type} className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-orange-700">
+                  {type.replace('_', ' ')}
+                </span>
+              ))}
+            </div>
+          )}
+          
+          <div className="space-y-2 mb-6">
+            <div className="flex items-center text-gray-500 text-sm">
+              <span className="mr-2">📍</span>
+              {coach.area ? `${coach.area}, ` : ''}{coach.district}, {coach.state}
+            </div>
+            {coach.classMode && (
+              <div className="flex items-center text-gray-500 text-sm">
+                <span className="mr-2">👥</span>
+                {coach.classMode}
+              </div>
+            )}
+            {coach.pricing && (
+              <div className="flex items-center text-gray-500 text-sm">
+                <span className="mr-2">💰</span>
+                {coach.pricing}
+              </div>
+            )}
+          </div>
+          
+          <div className="mt-auto">
+            <Link 
+              to={`/coaches/${coach.slug}` as any}
+              className={`block w-full py-3 rounded-xl font-bold transition-all text-center ${isFeatured ? 'bg-[#f26b21] text-white hover:bg-[#e05a10]' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}
+            >
+              View Profile
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
@@ -78,61 +157,39 @@ function CoachesDirectory() {
 
       {/* Directory Grid */}
       <main className="max-w-7xl mx-auto px-6 sm:px-12 py-16">
-        {filteredCoaches.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCoaches.map((coach) => (
-              <div key={coach.id} className="bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col group">
-                <div 
-                  className="h-32 bg-gray-100 relative overflow-hidden bg-cover bg-center"
-                  style={{ backgroundImage: coach.profileImageUrl ? `url(${coach.profileImageUrl})` : 'none' }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 opacity-50 group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-black/20" />
-                  <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/50 to-transparent" />
-                  <div className="absolute bottom-4 left-6 text-white text-sm font-bold bg-[#f26b21] px-3 py-1 rounded-full shadow-lg z-10">
-                    {coach.category}
-                  </div>
-                </div>
-                
-                <div className="p-6 flex-1 flex flex-col">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-1">{coach.fullName}</h3>
-                  <p className="text-[#f26b21] font-medium mb-4">{coach.expertise}</p>
-                  
-                  <div className="text-gray-500 text-sm flex items-center gap-2 mb-4">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {coach.area ? `${coach.area}, ` : ''}{coach.district}, {coach.state}
-                  </div>
-
-                  <p className="text-gray-600 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
-                    {coach.description || "No description provided."}
-                  </p>
-
-                  <Link
-                    to={`/coach/${coach.slug}` as any}
-                    className="w-full text-center py-3 px-4 bg-gray-50 text-gray-900 font-bold rounded-xl border border-gray-200 hover:border-gray-300 hover:bg-gray-100 transition-colors"
-                  >
-                    View Profile
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-24 bg-white rounded-3xl border border-gray-100 shadow-sm">
-            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-              </svg>
+        {featuredCoaches.length > 0 && (
+          <div className="mb-16">
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-8 flex items-center gap-3">
+              <span className="text-[#f26b21]">★</span> Featured Coaches
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredCoaches.map(coach => renderCoachCard(coach, true))}
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No coaches found</h3>
-            <p className="text-gray-500 max-w-sm mx-auto">
-              We couldn't find any coaches matching your search criteria. Try adjusting your filters or search terms.
-            </p>
           </div>
         )}
+
+        <div>
+          {featuredCoaches.length > 0 && (
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-8">All Coaches</h2>
+          )}
+          {regularCoaches.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {regularCoaches.map(coach => renderCoachCard(coach, false))}
+            </div>
+          ) : (
+            <div className="text-center py-24 bg-white rounded-3xl border border-gray-100 shadow-sm">
+              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">No coaches found</h3>
+              <p className="text-gray-500 max-w-sm mx-auto">
+                We couldn't find any coaches matching your search criteria. Try adjusting your filters or search terms.
+              </p>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

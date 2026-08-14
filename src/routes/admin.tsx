@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
+import { LayoutDashboard, Users, UserCheck, MessageSquare, Target, Star, Calendar, Download, ShieldAlert, Lock, Grid } from 'lucide-react';
 
 export const Route = createFileRoute('/admin')({
   component: AdminDashboard,
@@ -33,7 +34,7 @@ function AdminDashboard() {
   const [flagField, setFlagField] = useState('description');
   const [flagReason, setFlagReason] = useState('');
   const [stats, setStats] = useState({ totalCoaches: 0, pending: 0, live: 0, flagged: 0 });
-  
+
   const [adminsList, setAdminsList] = useState<any[]>([]);
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [newAdminName, setNewAdminName] = useState("");
@@ -72,20 +73,20 @@ function AdminDashboard() {
     fetchProfiles();
   }, [activeTab]);
 
-    const fetchProfiles = async () => {
-      try {
-        const [studentRes, coachRes, categoryRes] = await Promise.all([
-          fetch('/api/profile/student'),
-          fetch('/api/profile/coach'),
-          fetch('/api/categories')
-        ]);
-        if (studentRes.ok) setStudents(await studentRes.json());
-        if (coachRes.ok) setCoaches(await coachRes.json());
-        if (categoryRes.ok) setCategories(await categoryRes.json());
-      } catch (e) {
-        console.error(e);
-      }
-    };
+  const fetchProfiles = async () => {
+    try {
+      const [studentRes, coachRes, categoryRes] = await Promise.all([
+        fetch('/api/profile/student'),
+        fetch('/api/profile/coach'),
+        fetch('/api/categories')
+      ]);
+      if (studentRes.ok) setStudents(await studentRes.json());
+      if (coachRes.ok) setCoaches(await coachRes.json());
+      if (categoryRes.ok) setCategories(await categoryRes.json());
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const fetchStudents = async () => {
     try {
@@ -177,6 +178,29 @@ function AdminDashboard() {
     } catch (e) { }
   };
 
+  const handleToggleFeature = async (id: number) => {
+    try {
+      const res = await fetch(`/api/admin/coaches/${id}/feature`, { method: 'POST' });
+      if (res.ok) {
+        alert("Coach feature status updated!");
+        fetchCoaches();
+        setSelectedCoach(null);
+      }
+    } catch (e) { }
+  };
+
+  const handleReject = async (id: string) => {
+    if (!confirm("Are you sure you want to completely reject this coach profile?")) return;
+    try {
+      const res = await fetch(`/api/admin/coaches/${id}/reject`, { method: 'POST' });
+      if (res.ok) {
+        alert("Profile Rejected!");
+        setSelectedCoach(null);
+        fetchCoaches();
+      }
+    } catch (e) { }
+  };
+
   const handleDeleteCoach = async (id: string) => {
     if (!confirm("🚨 WARNING: Are you sure you want to completely DELETE this coach profile and user account? This cannot be undone!")) return;
     try {
@@ -254,7 +278,6 @@ function AdminDashboard() {
   };
 
   const handleDeleteCategory = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this category?")) return;
     try {
       const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
       if (res.ok) {
@@ -263,42 +286,84 @@ function AdminDashboard() {
     } catch (e) { console.error(e); }
   };
 
+  const handleDeleteStudent = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this student?")) return;
+    try {
+      const res = await fetch(`/api/profile/student/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setStudents(students.filter((s: any) => s.id !== id));
+      } else {
+        alert("Failed to delete student.");
+      }
+    } catch (e) { console.error(e); }
+  };
+
   return (
     <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-gray-900 text-white flex flex-col shadow-2xl z-10">
-        <div className="p-6 flex items-center gap-3 border-b border-gray-800">
-          <img src="/homelogo.png" alt="CoachKonnects" className="h-10 w-auto rounded-md object-contain" />
-          <span className="text-xl font-bold tracking-tight">Admin Portal</span>
+      <div className="w-64 bg-gradient-to-b from-slate-900 via-teal-950 to-slate-900 text-white flex flex-col shadow-2xl z-10 relative">
+        <div className="p-6 border-b border-white/10 relative">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#f26b21] rounded-full blur-[80px] opacity-20"></div>
+          <div className="flex items-center gap-3 relative z-10 mb-2">
+            <img src="/homelogo.png" alt="CoachKonnects" className="h-10 w-auto rounded-md object-contain bg-white px-2 py-1" />
+          </div>
+          <p className="text-lg font-bold relative z-10 bg-gradient-to-r from-teal-400 to-orange-400 bg-clip-text text-transparent mt-6 ml-8">Admin Portal</p>
         </div>
         <div className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {['Dashboard', 'Coaches', 'Students', 'Enquiries', 'Leads', 'Reviews', 'Classes', 'Export', 'Admins', 'Security'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab.toLowerCase() as any)}
-              className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex justify-between items-center ${activeTab === tab.toLowerCase()
-                  ? 'bg-[#f26b21] text-white shadow-md'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                }`}
-            >
-              {tab}
-              {tab === 'Coaches' && coaches.length > 0 && (
-                <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
-                  {coaches.filter(c => c.status === 'PENDING_APPROVAL').length}
-                </span>
-              )}
-            </button>
-          ))}
-            <button
-              onClick={() => setActiveTab('categories')}
-              className={`pb-4 px-2 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${activeTab === 'categories' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-              Categories
-            </button>
+          {[
+            { name: 'Dashboard', icon: LayoutDashboard },
+            { name: 'Coaches', icon: UserCheck },
+            { name: 'Students', icon: Users },
+            { name: 'Categories', icon: Grid },
+            { name: 'Enquiries', icon: MessageSquare },
+            { name: 'Leads', icon: Target },
+            { name: 'Reviews', icon: Star },
+            { name: 'Classes', icon: Calendar },
+            { name: 'Export', icon: Download },
+            { name: 'Admins', icon: ShieldAlert },
+            { name: 'Security', icon: Lock }
+          ].map((module, index) => {
+            const isActive = activeTab === module.name.toLowerCase();
+            const activeColor = index % 2 === 0 ? 'bg-teal-600' : 'bg-[#f26b21]';
+            return (
+              <button
+                key={module.name}
+                onClick={() => setActiveTab(module.name.toLowerCase() as any)}
+                className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex justify-between items-center ${isActive
+                  ? `${activeColor} text-white shadow-lg`
+                  : 'text-gray-400 hover:bg-white/10 hover:text-white'
+                  }`}
+              >
+                <div className="flex items-center gap-3">
+                  <module.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-500'}`} />
+                  {module.name}
+                </div>
+                {module.name === 'Coaches' && coaches.filter(c => c.status === 'PENDING_APPROVAL').length > 0 && (
+                  <span className="bg-white/20 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
+                    {coaches.filter(c => c.status === 'PENDING_APPROVAL').length}
+                  </span>
+                )}
+                {module.name === 'Students' && students.filter(s => s.status === 'PENDING_APPROVAL').length > 0 && (
+                  <span className="bg-white/20 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
+                    {students.filter(s => s.status === 'PENDING_APPROVAL').length}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
         <div className="p-4 border-t border-gray-800">
-          <button className="w-full px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Log out</button>
+          <button
+            onClick={() => {
+              localStorage.removeItem('adminToken');
+              localStorage.removeItem('adminEmail');
+              navigate({ to: '/admin-login' });
+            }}
+            className="w-full px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors text-left flex items-center gap-3"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            Log out
+          </button>
         </div>
       </div>
 
@@ -509,17 +574,30 @@ function AdminDashboard() {
                 ) : (
                   <div className="flex gap-4 border-t pt-8">
                     <button
+                      onClick={() => handleToggleFeature(selectedCoach.id)}
+                      className="flex-1 py-4 bg-purple-50 text-purple-600 hover:bg-purple-100 font-bold rounded-2xl transition-all"
+                    >
+                      {selectedCoach.isFeatured ? '★ Remove Feature' : '☆ Feature Coach'}
+                    </button>
+                    <button
                       onClick={() => handleApprove(selectedCoach.id)}
                       disabled={selectedCoach.status !== 'PENDING_APPROVAL' && selectedCoach.status !== 'REQUEST_CHANGE'}
                       className="flex-1 py-4 bg-green-500 hover:bg-green-600 text-white font-bold rounded-2xl transition-all disabled:opacity-50"
                     >
-                      ✓ Approve & Go Live
+                      ✓ Approve
                     </button>
                     <button
                       onClick={() => setIsFlagging(true)}
-                      className="flex-1 py-4 bg-red-50 text-red-600 hover:bg-red-100 font-bold rounded-2xl transition-all"
+                      className="flex-1 py-4 bg-amber-50 text-amber-600 hover:bg-amber-100 font-bold rounded-2xl transition-all"
                     >
-                      ! Flag & Request Change
+                      ! Flag
+                    </button>
+                    <button
+                      onClick={() => handleReject(selectedCoach.id)}
+                      disabled={selectedCoach.status === 'REJECTED'}
+                      className="flex-1 py-4 bg-red-50 text-red-600 hover:bg-red-100 font-bold rounded-2xl transition-all disabled:opacity-50"
+                    >
+                      ✗ Reject
                     </button>
                   </div>
                 )}
@@ -560,12 +638,20 @@ function AdminDashboard() {
                         </span>
                       </td>
                       <td className="p-4 text-right">
-                        <button
-                          onClick={() => setSelectedStudent(student)}
-                          className="px-4 py-1.5 bg-gray-900 text-white text-sm font-bold rounded-lg hover:bg-[#f26b21] transition-colors"
-                        >
-                          Review
-                        </button>
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => setSelectedStudent(student)}
+                            className="px-4 py-1.5 bg-gray-900 text-white text-sm font-bold rounded-lg hover:bg-teal-600 transition-colors"
+                          >
+                            Review
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteStudent(student.id); }}
+                            className="px-4 py-1.5 bg-red-100 text-red-600 text-sm font-bold rounded-lg hover:bg-red-200 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -681,16 +767,16 @@ function AdminDashboard() {
             <div className="animate-in fade-in slide-in-from-bottom-4">
               <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 max-w-2xl mx-auto">
                 <h2 className="text-2xl font-bold text-slate-900 mb-6">Manage Categories</h2>
-                
+
                 <div className="flex gap-4 mb-8">
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={newCategoryName}
                     onChange={e => setNewCategoryName(e.target.value)}
                     placeholder="e.g. Health & Wellness"
                     className="flex-1 px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 shadow-sm"
                   />
-                  <button 
+                  <button
                     onClick={handleAddCategory}
                     className="px-8 py-3.5 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 shadow-md transition-all active:scale-[0.98]"
                   >
@@ -702,7 +788,7 @@ function AdminDashboard() {
                   {categories.map(cat => (
                     <div key={cat.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl">
                       <span className="font-bold text-slate-700">{cat.name}</span>
-                      <button 
+                      <button
                         onClick={() => handleDeleteCategory(cat.id)}
                         className="text-red-500 hover:text-red-700 font-bold text-sm px-4 py-2 hover:bg-red-50 rounded-xl transition-colors"
                       >
@@ -722,7 +808,7 @@ function AdminDashboard() {
           {activeTab === 'security' && (
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-6">Security Settings</h2>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-2xl">
                   <div className="flex items-start gap-4">
@@ -751,7 +837,7 @@ function AdminDashboard() {
                     <div className="w-full">
                       <h3 className="font-bold text-gray-900 text-lg">Change Password</h3>
                       <p className="text-gray-500 mt-1 mb-4 text-sm">Update your temporary password to a secure one.</p>
-                      
+
                       <form onSubmit={handleChangePassword} className="space-y-3">
                         <input
                           type="password"
@@ -810,7 +896,7 @@ function AdminDashboard() {
                             {new Date(admin.createdAt || Date.now()).toLocaleDateString()}
                           </td>
                           <td className="p-4 text-right">
-                            <button 
+                            <button
                               onClick={() => handleRevokeAdmin(admin.id)}
                               className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded transition-colors text-sm font-medium"
                             >
@@ -828,7 +914,7 @@ function AdminDashboard() {
                   </table>
                 </div>
               </div>
-              
+
               <div>
                 <form onSubmit={handleAddAdmin} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                   <div className="mb-6">
@@ -840,7 +926,7 @@ function AdminDashboard() {
                     <h3 className="text-xl font-bold text-gray-900 mb-1">Add Super Admin</h3>
                     <p className="text-sm text-gray-500">Invite a team member to manage the platform.</p>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
@@ -865,7 +951,7 @@ function AdminDashboard() {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="mt-6">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Permissions</label>
                     <div className="space-y-2">
@@ -877,7 +963,7 @@ function AdminDashboard() {
                       ))}
                     </div>
                   </div>
-                  
+
                   <button type="submit" className="w-full mt-8 bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-[#f26b21] transition-colors">
                     Send Invitation
                   </button>

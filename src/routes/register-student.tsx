@@ -173,7 +173,7 @@ function RegisterPage() {
       });
       if (res.ok) {
         alert(`Success! Your Student profile has been submitted and is Pending Admin Approval!`);
-        navigate({ to: '/login' });
+        navigate({ to: '/' });
       } else {
         const err = await res.text();
         alert("Failed to save: " + err);
@@ -254,7 +254,7 @@ function RegisterPage() {
                   value={otpCode}
                   onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))}
                   placeholder="000000"
-                  className="flex-1 px-4 py-3 bg-white border border-orange-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 font-mono tracking-[0.5em] text-center text-xl font-bold shadow-sm"
+                  className="flex-1 px-4 py-3 bg-white border border-orange-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 font-mono tracking-widest text-center text-xl font-bold shadow-sm"
                 />
                 <button
                   type="button"
