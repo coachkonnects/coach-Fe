@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import desktopBg from "@/assets/desktop-bg.png.asset.json";
 import mobileBg from "@/assets/mobile-bg.png.asset.json";
 const logo = { url: "/homelogo.png" };
@@ -79,6 +80,16 @@ function Logo({ className = "" }: { className?: string }) {
 }
 
 function Index() {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    navigate({ to: `/coaches?${params.toString()}` as any });
+  };
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[color:var(--color-background)] selection:bg-[color:var(--color-brand)] selection:text-white text-slate-900">
       {/* Background Glow Effects for Light Glassmorphism */}
@@ -87,149 +98,151 @@ function Index() {
       <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-amber-400/20 blur-[100px] pointer-events-none" />
 
       <main className="relative z-10 w-full">
-      {/* HERO */}
-      <section className="relative isolate w-full overflow-hidden bg-transparent md:aspect-video md:min-h-[720px] lg:min-h-[760px] xl:min-h-0">
-        <picture>
-          <source media="(min-width: 768px)" srcSet="/Desktop%20BG.png" />
-          <img
-            src="/Mobile%20BG1.png"
-            alt="Hero background"
+        {/* HERO */}
+        <section className="relative isolate w-full overflow-hidden bg-transparent md:aspect-video md:min-h-[720px] lg:min-h-[760px] xl:min-h-0">
+          <picture>
+            <source media="(min-width: 768px)" srcSet="/Desktop%20BG.png" />
+            <img
+              src="/Mobile%20BG1.png"
+              alt="Hero background"
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-10 h-full w-full select-none object-cover object-bottom md:object-right-bottom"
+            />
+          </picture>
+          {/* Soft fade for text legibility on the left */}
+          <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 -z-10 h-full w-full select-none object-cover object-bottom md:object-right-bottom"
+            className="absolute inset-0 -z-10 bg-gradient-to-r from-[#fdf5ed] via-[#fdf5ed]/85 to-transparent md:from-[#fdf5ed] md:via-[#fdf5ed]/70 md:to-transparent"
           />
-        </picture>
-        {/* Soft fade for text legibility on the left */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 -z-10 bg-gradient-to-r from-[#fdf5ed] via-[#fdf5ed]/85 to-transparent md:from-[#fdf5ed] md:via-[#fdf5ed]/70 md:to-transparent"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-b from-transparent to-white"
-        />
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-b from-transparent to-white"
+          />
 
-        {/* Header */}
-        <header className="relative z-10 w-full pt-4">
-          <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
-            <Logo />
-            <nav className="flex shrink-0 items-center gap-3 sm:gap-5">
-              <Link
-                to="/login"
-                className="hidden text-sm font-semibold text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-brand)] sm:inline"
-              >
-                Sign in
-              </Link>
-              <Link
-                to="/register"
-                className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[color:var(--color-brand)] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)] sm:px-6 sm:py-2.5"
-              >
-                Get Started
-              </Link>
-            </nav>
-          </div>
-        </header>
-
-        {/* Hero content */}
-        <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-24 pt-8 sm:px-8 sm:pb-32 sm:pt-14 md:pb-40 md:pt-16 lg:pb-48 text-left">
-          <div className="w-full min-w-0 max-w-lg lg:max-w-[50%] xl:max-w-2xl">
-            <span className="mb-5 inline-block rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-700 shadow-sm backdrop-blur-md">
-              🚀 Launching in Mumbai & India
-            </span>
-            <h1 className="font-[var(--font-display)] text-[clamp(2rem,7vw,68px)] font-bold leading-[1.08] tracking-tight text-balance text-slate-900">
-              Find the perfect class{" "}
-              <em className="font-medium not-italic text-slate-500 italic">or</em>{" "}
-              coach for{" "}
-              <span className="bg-gradient-to-r from-orange-500 to-teal-500 bg-clip-text text-transparent drop-shadow-sm">your child.</span>
-            </h1>
-            <p className="mt-5 max-w-lg text-pretty text-base font-medium leading-relaxed text-slate-600 sm:text-lg md:text-xl">
-              Verified hobby coaches near you. Browse, connect directly on WhatsApp,
-              and enroll — zero booking fees.
-            </p>
-
-            {/* CTAs */}
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-              <Link
-                to="/coaches"
-                className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(249,115,22,0.4)] sm:w-auto"
-              >
-                📍 Find Classes <span aria-hidden="true">→</span>
-              </Link>
-              <Link
-                to="/register"
-                className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white/80 px-7 py-3.5 text-sm font-semibold text-slate-800 backdrop-blur-md transition-all hover:border-orange-500 hover:text-orange-600 sm:w-auto shadow-sm"
-              >
-                👤 Are You A Coach?
-              </Link>
+          {/* Header */}
+          <header className="relative z-10 w-full pt-4">
+            <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
+              <Logo />
+              <nav className="flex shrink-0 items-center gap-3 sm:gap-5">
+                <Link
+                  to="/login"
+                  className="hidden text-sm font-semibold text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-brand)] sm:inline"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[color:var(--color-brand)] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)] sm:px-6 sm:py-2.5"
+                >
+                  Get Started
+                </Link>
+              </nav>
             </div>
+          </header>
 
-            {/* Trust chips */}
-            <div className="mt-8 flex flex-col gap-4">
-              <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-[color:var(--color-ink)] sm:gap-5 sm:text-[15px]">
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                  Verified Coaches
-                </div>
-                <div className="h-5 w-px bg-slate-300"></div>
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Online & Offline
-                </div>
-                <div className="h-5 w-px bg-slate-300"></div>
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                  Across India
-                </div>
+          {/* Hero content */}
+          <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-24 pt-8 sm:px-8 sm:pb-32 sm:pt-14 md:pb-40 md:pt-16 lg:pb-48 text-left">
+            <div className="w-full min-w-0 max-w-lg lg:max-w-[50%] xl:max-w-2xl">
+              <span className="mb-5 inline-block rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-700 shadow-sm backdrop-blur-md">
+                🚀 Launching in Mumbai & India
+              </span>
+              <h1 className="font-[var(--font-display)] text-[clamp(2rem,7vw,68px)] font-bold leading-[1.08] tracking-tight text-balance text-slate-900">
+                Find the perfect class{" "}
+                <em className="font-medium not-italic text-slate-500 italic">or</em>{" "}
+                coach for{" "}
+                <span className="bg-gradient-to-r from-orange-500 to-teal-500 bg-clip-text text-transparent drop-shadow-sm">your child.</span>
+              </h1>
+              <p className="mt-5 max-w-lg text-pretty text-base font-medium leading-relaxed text-slate-600 sm:text-lg md:text-xl">
+                Verified hobby coaches near you. Browse, connect directly on WhatsApp,
+                and enroll — zero booking fees.
+              </p>
+
+              {/* CTAs */}
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                <Link
+                  to="/coaches"
+                  className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(249,115,22,0.4)] sm:w-auto"
+                >
+                  📍 Find Classes <span aria-hidden="true">→</span>
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white/80 px-7 py-3.5 text-sm font-semibold text-slate-800 backdrop-blur-md transition-all hover:border-orange-500 hover:text-orange-600 sm:w-auto shadow-sm"
+                >
+                  👤 Are You A Coach?
+                </Link>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-[18px] h-[18px] text-[color:var(--color-brand)] fill-current" viewBox="0 0 24 24">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+
+              {/* Trust chips */}
+              <div className="mt-8 flex flex-col gap-4">
+                <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-[color:var(--color-ink)] sm:gap-5 sm:text-[15px]">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                  ))}
+                    Verified Coaches
+                  </div>
+                  <div className="h-5 w-px bg-slate-300"></div>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Online & Offline
+                  </div>
+                  <div className="h-5 w-px bg-slate-300"></div>
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    Across India
+                  </div>
                 </div>
-                <span className="text-[15px] font-medium text-[#1E293B]">
-                  Trusted by hobby enthusiasts across India
-                </span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} className="w-[18px] h-[18px] text-[color:var(--color-brand)] fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <span className="text-[15px] font-medium text-[#1E293B]">
+                    Trusted by hobby enthusiasts across India
+                  </span>
+                </div>
               </div>
-            </div>
 
-            {/* Search */}
-            <div className="mt-8 w-full min-w-0 max-w-xl">
-              <div className="flex w-full min-w-0 flex-col gap-2 rounded-2xl border border-black/5 bg-white p-3 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.06)] sm:flex-row sm:items-center sm:gap-0 sm:rounded-full sm:p-1.5 sm:pl-5">
-                <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 pb-2 text-sm font-medium text-[color:var(--color-ink-muted)] sm:whitespace-nowrap sm:border-b-0 sm:border-r sm:pb-0 sm:pr-4">
-                  <span className="shrink-0 text-[color:var(--color-brand)]">📍</span> Navi Mumbai & India
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search a skill or hobby"
-                  className="w-full min-w-0 flex-1 bg-transparent px-1 py-2 text-sm outline-none placeholder:text-slate-400 sm:px-4"
-                />
-                <button className="shrink-0 whitespace-nowrap rounded-full bg-[color:var(--color-brand)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)]">
-                  Search
-                </button>
+              {/* Search */}
+              <div className="mt-8 w-full min-w-0 max-w-xl">
+                <form onSubmit={handleSearch} className="flex w-full min-w-0 flex-col gap-2 rounded-2xl border border-black/5 bg-white p-3 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.06)] sm:flex-row sm:items-center sm:gap-0 sm:rounded-full sm:p-1.5 sm:pl-5">
+                  <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 pb-2 text-sm font-medium text-[color:var(--color-ink-muted)] sm:whitespace-nowrap sm:border-b-0 sm:border-r sm:pb-0 sm:pr-4">
+                    <span className="shrink-0 text-[color:var(--color-brand)]">📍</span>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search a skill , hobby or coaches near you😎"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="w-full min-w-0 flex-1 bg-transparent px-1 py-2 text-sm outline-none placeholder:text-slate-400 sm:px-4"
+                  />
+                  <button type="submit" className="shrink-0 whitespace-nowrap rounded-full bg-[color:var(--color-brand)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)]">
+                    Search
+                  </button>
+                </form>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CATEGORIES — overlapping hero */}
+        {/* CATEGORIES — overlapping hero */}
         <section className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-20 sm:px-8">
           <div className="rounded-[2.5rem] bg-white/70 backdrop-blur-2xl border border-white p-8 shadow-xl sm:p-12 md:p-16">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
-            {categories.map((category) => (
-              <button
-                key={category.title}
-                className="group flex cursor-pointer flex-col items-center rounded-2xl border border-slate-100 bg-white/60 p-6 text-center transition-all hover:-translate-y-2 hover:bg-white hover:border-orange-200 hover:shadow-lg"
-              >
+              {categories.map((category) => (
+                <button
+                  key={category.title}
+                  className="group flex cursor-pointer flex-col items-center rounded-2xl border border-slate-100 bg-white/60 p-6 text-center transition-all hover:-translate-y-2 hover:bg-white hover:border-orange-200 hover:shadow-lg"
+                >
                   <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 text-3xl shadow-sm transition-transform group-hover:scale-110 group-hover:bg-orange-200">
                     {category.icon}
                   </div>
@@ -237,12 +250,12 @@ function Index() {
                     {category.title}
                   </h3>
                   <p className="text-sm font-medium leading-relaxed text-slate-500">
-                  {category.desc}
-                </p>
-              </button>
-            ))}
+                    {category.desc}
+                  </p>
+                </button>
+              ))}
             </div>
-            
+
             <div className="mt-16 text-center">
               <p className="mb-8 text-sm font-medium text-slate-500">
                 And many more hobbies to explore...
@@ -468,7 +481,7 @@ function Index() {
               Built for people who learn for the love of it
             </h2>
           </div>
-          
+
           <div className="mb-20 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { icon: "🛡️", title: "Verified coaches", desc: "Every coach is personally reviewed and Aadhaar-verified by our team before going live." },
@@ -493,7 +506,7 @@ function Index() {
                 The premium marketplace where ambitious learners meet world-class coaches. Find your edge.
               </p>
             </div>
-            
+
             <div>
               <h4 className="mb-4 font-semibold">Platform</h4>
               <ul className="flex flex-col gap-2 text-sm text-[color:var(--color-ink-muted)]">
@@ -501,7 +514,7 @@ function Index() {
                 <li><Link to="/register" className="hover:text-[color:var(--color-brand)] transition-colors">Become a Coach</Link></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="mb-4 font-semibold">Company</h4>
               <ul className="flex flex-col gap-2 text-sm text-[color:var(--color-ink-muted)]">
@@ -511,7 +524,7 @@ function Index() {
                 <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Terms & Privacy</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="mb-4 font-semibold">Dashboards</h4>
               <ul className="flex flex-col gap-2 text-sm text-[color:var(--color-ink-muted)]">
@@ -520,7 +533,7 @@ function Index() {
               </ul>
             </div>
           </div>
-          
+
           <div className="mt-12 flex flex-col items-center justify-between border-t border-slate-200/60 pt-8 text-sm text-[color:var(--color-ink-muted)] sm:flex-row">
             <p>© 2026 CoachKonnects. All rights reserved.</p>
             <p className="mt-2 sm:mt-0">Made with intention in India.</p>

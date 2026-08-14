@@ -1,7 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router"; // test
 import { useState, useEffect, useCallback } from "react";
 import * as faceapi from "face-api.js";
 import Cropper from "react-easy-crop";
+import { startRegistration } from "@simplewebauthn/browser";
 
 export const Route = createFileRoute("/coach-dashboard")({
   component: CoachDashboard,
@@ -31,6 +32,73 @@ function CoachDashboard() {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+
+  const [classModalOpen, setClassModalOpen] = useState(false);
+  const [classForm, setClassForm] = useState<any>({
+    title: "",
+    type: "REGULAR",
+    schedule: "",
+    price: "",
+    capacity: "1",
+    description: "",
+    imageUrl: "",
+  });
+  const [isUploadingWorkshopImage, setIsUploadingWorkshopImage] = useState(false);
+  
+  const [passkeyStatus, setPasskeyStatus] = useState<"SUCCESS" | "ERROR" | null>(
+    localStorage.getItem("hasPasskeyRegistered") === "true" ? "SUCCESS" : null
+  );
+  const [passkeyMessage, setPasskeyMessage] = useState(
+    localStorage.getItem("hasPasskeyRegistered") === "true" ? "Passkey successfully registered!" : ""
+  );
+
+  const handleWorkshopImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingWorkshopImage(true);
+    const form = new FormData();
+    form.append("file", file, file.name);
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      if (res.ok) {
+        const data = await res.json();
+        setClassForm({ ...classForm, imageUrl: data.url });
+      } else {
+        alert("Upload failed");
+      }
+    } catch (err) {
+      alert("Error uploading image");
+    } finally {
+      setIsUploadingWorkshopImage(false);
+    }
+  };
+
+  const handleCreateClassSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (classForm.type === "WORKSHOP" && !classForm.imageUrl) {
+      alert("Workshop banner image is mandatory!");
+      return;
+    }
+    try {
+      const res = await fetch(`/api/classes?email=${localStorage.getItem("userEmail")}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...classForm,
+          price: parseFloat(classForm.price || "0"),
+          capacity: parseInt(classForm.capacity || "1"),
+        }),
+      });
+      if (res.ok) {
+        const newClass = await res.json();
+        setClasses([...classes, newClass]);
+        setClassModalOpen(false);
+        setClassForm({ title: "", type: "REGULAR", schedule: "", price: "", capacity: "1", description: "", imageUrl: "" });
+      }
+    } catch (err) {
+      alert("Error saving class");
+    }
+  };
 
   useEffect(() => {
     const loadModels = async () => {
@@ -64,11 +132,17 @@ function CoachDashboard() {
           setProfile(data.profile);
           setFlags(data.flags || []);
         } else {
-          // If no profile, they might need to complete registration
           navigate({ to: "/register-coach", search: { edit: true } as any });
         }
         if (Array.isArray(enquiriesData)) {
-          setEnquiries(enquiriesData);
+          setEnquiries(
+            enquiriesData.filter(
+              (e: any) =>
+                e.status === "APPROVED" ||
+                e.status === "PENDING_COACH_APPROVAL" ||
+                e.status === "REJECTED",
+            ),
+          );
         }
         if (Array.isArray(classesData)) {
           setClasses(classesData);
@@ -298,6 +372,37 @@ function CoachDashboard() {
     }
   };
 
+  const handleSetupPasskey = async () => {
+    setPasskeyStatus(null);
+    setPasskeyMessage("");
+    try {
+      const email = localStorage.getItem("userEmail");
+      const startRes = await fetch(`/api/passkeys/register/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: "coach", email })
+      });
+      if (!startRes.ok) throw new Error("Failed to start passkey registration");
+
+      const options = await startRes.json();
+      const asseResp = await startRegistration({ optionsJSON: options });
+
+      const finishRes = await fetch(`/api/passkeys/register/finish`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(asseResp)
+      });
+
+      if (!finishRes.ok) throw new Error("Failed to finish passkey registration");
+      setPasskeyStatus("SUCCESS");
+      setPasskeyMessage("Passkey successfully registered!");
+      localStorage.setItem("hasPasskeyRegistered", "true");
+    } catch (err: any) {
+      setPasskeyStatus("ERROR");
+      setPasskeyMessage(err.message || "Passkey registration failed.");
+    }
+  };
+
   const getStatusBanner = () => {
     if (profile?.active === false) {
       return (
@@ -441,10 +546,10 @@ function CoachDashboard() {
               onClick={() => setActiveTab("enquiries")}
               className={`flex-1 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${activeTab === "enquiries" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
             >
-              Student Enquiries
-              {enquiries.filter((e) => e.status === "PENDING_COACH_APPROVAL").length > 0 && (
+              Leads / Enquiries
+              {enquiries.length > 0 && (
                 <span className="bg-teal-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {enquiries.filter((e) => e.status === "PENDING_COACH_APPROVAL").length}
+                  {enquiries.length}
                 </span>
               )}
             </button>
@@ -454,7 +559,7 @@ function CoachDashboard() {
             {activeTab === "overview" && (
               <div>
                 <div className="relative mb-16">
-                  {/* Cover Photo (Banner) */}
+                  {/* Cover Photo */}
                   <div className="h-48 w-full bg-slate-200 overflow-hidden relative">
                     <img
                       src={
@@ -474,11 +579,11 @@ function CoachDashboard() {
                       alt="Profile"
                       className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl bg-white"
                     />
-                    <div className="pb-2">
-                      <h2 className="text-3xl font-extrabold text-slate-900">
+                    <div className="pb-2 bg-white/40 backdrop-blur-md px-4 py-2 rounded-xl shadow-sm border border-white/50">
+                      <h2 className="text-3xl font-extrabold text-slate-900 drop-shadow-sm">
                         {profile?.fullName}
                       </h2>
-                      <p className="text-slate-600 font-medium text-lg mt-1">
+                      <p className="text-slate-800 font-bold text-lg mt-1 drop-shadow-sm">
                         {profile?.expertise} {profile?.location ? `• ${profile.location}` : ""}
                       </p>
                     </div>
@@ -549,7 +654,7 @@ function CoachDashboard() {
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">
-                          Location (e.g. New York, NY)
+                          Location (e.g. Mumbai, MH)
                         </label>
                         <input
                           type="text"
@@ -573,14 +678,17 @@ function CoachDashboard() {
                         <label className="block text-sm font-bold text-slate-700 mb-2">
                           Target Audience
                         </label>
-                        <input
-                          type="text"
+                        <select
                           value={editForm.targetAudience || ""}
-                          onChange={(e) =>
-                            setEditForm({ ...editForm, targetAudience: e.target.value })
-                          }
-                          className="w-full px-4 py-2 border rounded-xl"
-                        />
+                          onChange={(e) => setEditForm({ ...editForm, targetAudience: e.target.value })}
+                          className="w-full px-4 py-2 border rounded-xl bg-white"
+                        >
+                          <option value="" disabled>Select age group</option>
+                          <option value="Beginners">Beginners</option>
+                          <option value="Advanced / Professionals">Advanced / Professionals</option>
+                          <option value="Kids & Teens">Kids & Teens</option>
+                          <option value="All Ages & Levels">All Ages & Levels</option>
+                        </select>
                       </div>
                       <div className="col-span-1 sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
@@ -706,6 +814,47 @@ function CoachDashboard() {
                       </div>
                     </div>
                   )}
+
+                  {!isEditing && (
+                    <div className="mt-8 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <svg className="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                            Security Settings
+                          </h3>
+                          <p className="text-sm text-slate-500 mt-1">
+                            Set up Passkeys (FaceID, TouchID) for faster, more secure login without OTP.
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleSetupPasskey}
+                          className={`px-4 py-2 font-bold rounded-xl shadow-sm transition-colors text-sm ${
+                            passkeyStatus === "SUCCESS"
+                              ? "bg-emerald-500 hover:bg-emerald-600 text-white"
+                              : passkeyStatus === "ERROR"
+                              ? "bg-red-500 hover:bg-red-600 text-white"
+                              : "bg-slate-900 hover:bg-slate-800 text-white"
+                          }`}
+                        >
+                          {passkeyStatus === "SUCCESS"
+                            ? "✓ Registered"
+                            : passkeyStatus === "ERROR"
+                            ? "Try Again"
+                            : "Register Passkey"}
+                        </button>
+                      </div>
+                      {passkeyMessage && (
+                        <p
+                          className={`mt-3 text-sm font-bold ${
+                            passkeyStatus === "SUCCESS" ? "text-emerald-600" : "text-red-600"
+                          }`}
+                        >
+                          {passkeyMessage}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -720,43 +869,7 @@ function CoachDashboard() {
                     </p>
                   </div>
                   <button
-                    onClick={() => {
-                      const title = prompt("Class Title:");
-                      if (!title) return;
-                      const typeInput = prompt(
-                        "Class Type (Enter number):\\n1. Regular Class\\n2. Workshop\\n3. Camp\\n4. Trial Class",
-                        "1",
-                      );
-                      const typeMap: any = {
-                        "1": "REGULAR",
-                        "2": "WORKSHOP",
-                        "3": "CAMP",
-                        "4": "TRIAL_CLASS",
-                      };
-                      const type = typeMap[typeInput || "1"] || "REGULAR";
-                      const schedule = prompt("Schedule (e.g. Saturdays 10:00 AM):");
-                      const price = parseFloat(prompt("Price (leave 0 if free):") || "0");
-                      const capacity = parseInt(prompt("Capacity (Number of students):") || "1");
-                      const description = prompt("Description:");
-
-                      fetch(`/api/classes?email=${localStorage.getItem("userEmail")}`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          title,
-                          type,
-                          schedule,
-                          price,
-                          capacity,
-                          description,
-                        }),
-                      })
-                        .then((r) => r.json())
-                        .then((data) => {
-                          setClasses([...classes, data]);
-                        })
-                        .catch((e) => alert("Error creating class"));
-                    }}
+                    onClick={() => setClassModalOpen(true)}
                     className="bg-[#f26b21] text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover:bg-[#e05a10] transition-colors flex items-center gap-2 whitespace-nowrap w-full sm:w-auto justify-center"
                   >
                     + Create New Class
@@ -790,7 +903,7 @@ function CoachDashboard() {
                             )}
                           </div>
                           <span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-sm font-bold">
-                            {c.price === 0 ? "Free" : `$${c.price}`}
+                            {c.price === 0 ? "Free" : `₹${c.price}`}
                           </span>
                         </div>
                         <p className="text-slate-600 mb-4 line-clamp-2">{c.description}</p>
@@ -929,7 +1042,7 @@ function CoachDashboard() {
 
             {activeTab === "enquiries" && (
               <div>
-                <h2 className="text-2xl font-extrabold text-slate-900 mb-6">Student Enquiries</h2>
+                <h2 className="text-2xl font-extrabold text-slate-900 mb-6">Leads / Enquiries</h2>
                 {enquiries.length === 0 ? (
                   <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100">
                     <p className="text-slate-500 font-medium">
@@ -946,12 +1059,27 @@ function CoachDashboard() {
                         <div className="flex justify-between items-start mb-4">
                           <div>
                             <h3 className="font-bold text-lg text-slate-900">
-                              {enquiry.student?.fullName || "Student"}
+                              {enquiry.leadName || enquiry.student?.fullName || "Visitor"}
                             </h3>
                             {enquiry.status === "APPROVED" && (
-                              <p className="text-teal-600 font-medium text-sm mt-1">
-                                Email: {enquiry.student?.user?.email}
-                              </p>
+                              <div className="mt-2 space-y-1">
+                                <p className="text-teal-600 font-medium text-sm flex items-center gap-1">
+                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                  {enquiry.leadEmail || enquiry.student?.user?.email}
+                                </p>
+                                {(enquiry.leadPhone || enquiry.student?.user?.phoneNumber) && (
+                                  <p className="text-teal-600 font-medium text-sm flex items-center gap-1">
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                                    {enquiry.leadPhone || enquiry.student?.user?.phoneNumber}
+                                  </p>
+                                )}
+                                {(enquiry.leadLocation || enquiry.student?.location) && (
+                                  <p className="text-slate-500 font-medium text-sm flex items-center gap-1">
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                    {enquiry.leadLocation || enquiry.student?.location}
+                                  </p>
+                                )}
+                              </div>
                             )}
                           </div>
                           <div>
@@ -1035,6 +1163,149 @@ function CoachDashboard() {
                 className="px-6 py-2.5 rounded-xl font-bold bg-[#f26b21] text-white hover:bg-[#e05a10]"
               >
                 Confirm & Crop
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {classModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white/80 backdrop-blur-xl border border-white/50 w-full max-w-xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-white/40 flex justify-between items-center bg-white/40">
+              <h2 className="text-2xl font-extrabold text-slate-900">
+                {classForm.type === "WORKSHOP" ? "Create Workshop" : "Create Class"}
+              </h2>
+              <button
+                onClick={() => setClassModalOpen(false)}
+                className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-slate-500 hover:bg-white hover:text-slate-800 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+              <form id="createClassForm" onSubmit={handleCreateClassSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">Title</label>
+                  <input
+                    required
+                    type="text"
+                    value={classForm.title}
+                    onChange={(e) => setClassForm({ ...classForm, title: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all"
+                    placeholder="e.g. Summer Coding Bootcamp"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Type</label>
+                    <select
+                      value={classForm.type}
+                      onChange={(e) => setClassForm({ ...classForm, type: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all"
+                    >
+                      <option value="REGULAR">Regular Class</option>
+                      <option value="WORKSHOP">Workshop</option>
+                      <option value="CAMP">Camp</option>
+                      <option value="TRIAL_CLASS">Trial Class</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Schedule</label>
+                    <input
+                      required
+                      type="text"
+                      value={classForm.schedule}
+                      onChange={(e) => setClassForm({ ...classForm, schedule: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all"
+                      placeholder="e.g. Saturdays 10:00 AM"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Price (₹)</label>
+                    <input
+                      required
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={classForm.price}
+                      onChange={(e) => setClassForm({ ...classForm, price: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all"
+                      placeholder="0.00 for free"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Capacity</label>
+                    <input
+                      required
+                      type="number"
+                      min="1"
+                      value={classForm.capacity}
+                      onChange={(e) => setClassForm({ ...classForm, capacity: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all"
+                      placeholder="Number of students"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">Description</label>
+                  <textarea
+                    rows={3}
+                    value={classForm.description}
+                    onChange={(e) => setClassForm({ ...classForm, description: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all resize-none"
+                    placeholder="Describe what students will learn..."
+                  />
+                </div>
+
+                {classForm.type === "WORKSHOP" && (
+                  <div className="p-5 rounded-2xl bg-orange-50 border border-orange-100">
+                    <label className="block text-sm font-bold text-orange-900 mb-2">Workshop Banner Image (Mandatory)</label>
+                    {classForm.imageUrl ? (
+                      <div className="relative rounded-xl overflow-hidden aspect-video bg-black/5 group">
+                        <img src={classForm.imageUrl} alt="Workshop Banner" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <label className="cursor-pointer bg-white text-slate-900 px-4 py-2 rounded-lg font-bold text-sm shadow-lg hover:bg-slate-50 transition-colors">
+                            Change Image
+                            <input type="file" className="hidden" accept="image/*" onChange={handleWorkshopImageUpload} disabled={isUploadingWorkshopImage} />
+                          </label>
+                        </div>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full aspect-video rounded-xl border-2 border-dashed border-orange-200 bg-white/50 cursor-pointer hover:bg-white hover:border-orange-400 transition-all text-orange-500">
+                        {isUploadingWorkshopImage ? (
+                          <div className="font-bold animate-pulse">Uploading...</div>
+                        ) : (
+                          <>
+                            <svg className="w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <span className="font-bold text-sm">Click to upload banner</span>
+                          </>
+                        )}
+                        <input type="file" className="hidden" accept="image/*" onChange={handleWorkshopImageUpload} disabled={isUploadingWorkshopImage} />
+                      </label>
+                    )}
+                  </div>
+                )}
+              </form>
+            </div>
+
+            <div className="p-6 border-t border-white/40 bg-white/40 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setClassModalOpen(false)}
+                className="px-6 py-3 rounded-xl font-bold bg-white/50 text-slate-600 hover:bg-white transition-colors shadow-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="createClassForm"
+                className="px-6 py-3 rounded-xl font-bold bg-[#f26b21] text-white hover:bg-[#e05a10] transition-colors shadow-md"
+              >
+                {classForm.type === "WORKSHOP" ? "Publish Workshop" : "Create Class"}
               </button>
             </div>
           </div>

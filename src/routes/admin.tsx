@@ -29,6 +29,8 @@ function AdminDashboard() {
 
   const [students, setStudents] = useState<any[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
+  
+  const [classesList, setClassesList] = useState<any[]>([]);
 
   const [isFlagging, setIsFlagging] = useState(false);
   const [flagField, setFlagField] = useState('description');
@@ -40,6 +42,7 @@ function AdminDashboard() {
   const [newAdminName, setNewAdminName] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [enquiries, setEnquiries] = useState<any[]>([]);
 
   const handleRegisterPasskey = async () => {
     try {
@@ -75,14 +78,18 @@ function AdminDashboard() {
 
   const fetchProfiles = async () => {
     try {
-      const [studentRes, coachRes, categoryRes] = await Promise.all([
+      const [studentRes, coachRes, categoryRes, enquiryRes, classRes] = await Promise.all([
         fetch('/api/profile/student'),
         fetch('/api/profile/coach'),
-        fetch('/api/categories')
+        fetch('/api/categories'),
+        fetch('/api/admin/enquiries'),
+        fetch('/api/admin/classes')
       ]);
       if (studentRes.ok) setStudents(await studentRes.json());
       if (coachRes.ok) setCoaches(await coachRes.json());
       if (categoryRes.ok) setCategories(await categoryRes.json());
+      if (enquiryRes.ok) setEnquiries(await enquiryRes.json());
+      if (classRes.ok) setClassesList(await classRes.json());
     } catch (e) {
       console.error(e);
     }
@@ -315,7 +322,6 @@ function AdminDashboard() {
             { name: 'Coaches', icon: UserCheck },
             { name: 'Students', icon: Users },
             { name: 'Categories', icon: Grid },
-            { name: 'Enquiries', icon: MessageSquare },
             { name: 'Leads', icon: Target },
             { name: 'Reviews', icon: Star },
             { name: 'Classes', icon: Calendar },
@@ -343,9 +349,19 @@ function AdminDashboard() {
                     {coaches.filter(c => c.status === 'PENDING_APPROVAL').length}
                   </span>
                 )}
-                {module.name === 'Students' && students.filter(s => s.status === 'PENDING_APPROVAL').length > 0 && (
+                {module.name === 'Students' && students.length > 0 && (
                   <span className="bg-white/20 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
-                    {students.filter(s => s.status === 'PENDING_APPROVAL').length}
+                    {students.length}
+                  </span>
+                )}
+                {module.name === 'Classes' && classesList.length > 0 && (
+                  <span className="bg-white/20 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
+                    {classesList.length}
+                  </span>
+                )}
+                {module.name === 'Leads' && enquiries.filter(e => e.status === 'PENDING_ADMIN_APPROVAL').length > 0 && (
+                  <span className="bg-white/20 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
+                    {enquiries.filter(e => e.status === 'PENDING_ADMIN_APPROVAL').length}
                   </span>
                 )}
               </button>
@@ -544,6 +560,49 @@ function AdminDashboard() {
                     )}
                   </div>
                 </div>
+
+                {selectedCoach.pendingChanges && (
+                  <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl mb-8">
+                    <h3 className="font-bold text-amber-900 mb-4 flex items-center gap-2">
+                      <span className="w-6 h-6 bg-amber-500 text-white rounded-full flex items-center justify-center text-sm">✎</span>
+                      Pending Profile Edits (Awaiting Approval)
+                    </h3>
+                    <div className="bg-white p-4 rounded-xl text-sm border border-amber-100 text-slate-800">
+                      {(() => {
+                        try {
+                          const changes = JSON.parse(selectedCoach.pendingChanges);
+                          const ignoreKeys = ['email', 'mobile', 'dob'];
+                          return (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {Object.entries(changes).map(([key, value]) => {
+                                if (ignoreKeys.includes(key) || value === null || value === '') return null;
+                                // Convert camelCase to Title Case
+                                const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                                
+                                const isImage = key.toLowerCase().includes('image');
+                                return (
+                                  <div key={key} className="border-b border-slate-100 pb-2">
+                                    <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</span>
+                                    {isImage ? (
+                                      <img src={value as string} alt={label} className="h-16 w-16 object-cover rounded shadow-sm border" />
+                                    ) : (
+                                      <span className="font-medium">{value as string}</span>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        } catch (e) {
+                          return <div className="font-mono">{selectedCoach.pendingChanges}</div>;
+                        }
+                      })()}
+                    </div>
+                    <p className="text-sm text-amber-700 mt-4 font-medium">
+                      If you approve, these changes will automatically overwrite the current profile data above.
+                    </p>
+                  </div>
+                )}
 
                 {isFlagging ? (
                   <div className="bg-red-50 border border-red-100 p-6 rounded-2xl">
@@ -971,6 +1030,136 @@ function AdminDashboard() {
               </div>
             </div>
           )}
+
+          {activeTab === 'leads' && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Leads / Enquiries</h2>
+                  <p className="text-sm text-gray-500 mt-1">Review and manage all incoming leads from the public coach profiles.</p>
+                </div>
+                <span className="bg-orange-100 text-orange-700 font-bold text-sm px-3 py-1 rounded-full">
+                  {enquiries.filter(e => e.status === 'PENDING_ADMIN_APPROVAL').length} Pending
+                </span>
+              </div>
+
+              {enquiries.length === 0 ? (
+                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+                  <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 font-medium">No leads yet. They will appear here when visitors contact coaches.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {enquiries.map((enq) => (
+                    <div key={enq.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-1">
+                            <h3 className="font-bold text-gray-900 text-lg">{enq.leadName || 'Unknown'}</h3>
+                            {enq.status === 'PENDING_ADMIN_APPROVAL' && (
+                              <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">Pending Admin</span>
+                            )}
+                            {enq.status === 'PENDING_COACH_APPROVAL' && (
+                              <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">Sent to Coach</span>
+                            )}
+                            {enq.status === 'APPROVED' && (
+                              <span className="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-0.5 rounded-full">Coach Accepted</span>
+                            )}
+                            {enq.status === 'REJECTED' && (
+                              <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">Rejected</span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 mb-3">
+                            <span>📧 {enq.leadEmail}</span>
+                            {enq.leadPhone && <span>📞 {enq.leadPhone}</span>}
+                            {enq.leadLocation && <span>📍 {enq.leadLocation}</span>}
+                            <span className="text-gray-400">→ Coach: <span className="font-medium text-gray-700">{enq.coach?.fullName}</span></span>
+                          </div>
+                          <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 text-sm text-gray-700 italic">
+                            "{enq.message}"
+                          </div>
+                        </div>
+
+                        {enq.status === 'PENDING_ADMIN_APPROVAL' && (
+                          <div className="flex sm:flex-col gap-2 shrink-0">
+                            <button
+                              onClick={async () => {
+                                await fetch(`/api/admin/enquiries/${enq.id}/approve`, { method: 'PUT' });
+                                fetchProfiles();
+                              }}
+                              className="px-4 py-2 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 transition-colors text-sm"
+                            >
+                              ✓ Approve
+                            </button>
+                            <button
+                              onClick={async () => {
+                                await fetch(`/api/admin/enquiries/${enq.id}/reject`, { method: 'PUT' });
+                                fetchProfiles();
+                              }}
+                              className="px-4 py-2 bg-white border border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-50 transition-colors text-sm"
+                            >
+                              ✕ Reject
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'classes' && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Coach Classes & Workshops</h2>
+                  <p className="text-sm text-gray-500 mt-1">Review all active classes, sessions, and workshops created by coaches.</p>
+                </div>
+                <span className="bg-teal-100 text-teal-700 font-bold text-sm px-3 py-1 rounded-full">
+                  {classesList.length} Total
+                </span>
+              </div>
+
+              {classesList.length === 0 ? (
+                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+                  <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 font-medium">No classes have been created yet.</p>
+                </div>
+              ) : (
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50 border-b text-sm text-gray-500">
+                        <th className="p-4 font-medium">Class Name</th>
+                        <th className="p-4 font-medium">Coach Email</th>
+                        <th className="p-4 font-medium">Type</th>
+                        <th className="p-4 font-medium">Schedule</th>
+                        <th className="p-4 font-medium">Pricing</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {classesList.map(cls => (
+                        <tr key={cls.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="p-4 font-bold text-gray-900">{cls.title}</td>
+                          <td className="p-4 text-gray-500">{cls.coachEmail}</td>
+                          <td className="p-4">
+                            <span className="bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1 rounded-full uppercase">
+                              {cls.type || 'REGULAR'}
+                            </span>
+                          </td>
+                          <td className="p-4 text-gray-600 text-sm">{cls.schedule}</td>
+                          <td className="p-4 text-gray-900 font-bold">₹{cls.price}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
 
         </main>
       </div>

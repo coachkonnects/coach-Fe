@@ -8,22 +8,29 @@ export const Route = createFileRoute('/coach/$slug')({
 function CoachProfilePage() {
   const { slug } = Route.useParams();
   const [coach, setCoach] = useState<any>(null);
+  const [classes, setClasses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const [showModal, setShowModal] = useState(false);
   const [enquiryMessage, setEnquiryMessage] = useState('');
   const [enquiryEmail, setEnquiryEmail] = useState('');
+  const [enquiryName, setEnquiryName] = useState('');
+  const [enquiryPhone, setEnquiryPhone] = useState('');
+  const [enquiryLocation, setEnquiryLocation] = useState('');
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/public/coach/${slug}`)
-      .then(res => {
+    Promise.all([
+      fetch(`/api/public/coach/${slug}`).then(res => {
         if (!res.ok) throw new Error('Coach not found');
         return res.json();
-      })
-      .then(data => {
-        setCoach(data);
+      }),
+      fetch(`/api/public/coach/${slug}/classes`).then(res => res.ok ? res.json() : [])
+    ])
+      .then(([coachData, classesData]) => {
+        setCoach(coachData);
+        setClasses(classesData);
         setLoading(false);
       })
       .catch(err => {
@@ -41,11 +48,14 @@ function CoachProfilePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: enquiryEmail,
+          name: enquiryName,
+          phone: enquiryPhone,
+          location: enquiryLocation,
           coachSlug: slug,
           message: enquiryMessage
         })
       });
-      
+
       const data = await res.json();
       if (res.ok) {
         alert('Your enquiry has been sent to the coach successfully!');
@@ -79,14 +89,18 @@ function CoachProfilePage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 mt-12 relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* Main Info Column */}
         <div className="lg:col-span-2 space-y-8">
-          
+
           <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-8 sm:p-12 shadow-xl shadow-slate-200/50">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-8 mb-8">
-              <div className="w-32 h-32 rounded-[2rem] bg-gradient-to-br from-orange-400 to-amber-500 shadow-lg flex items-center justify-center text-5xl font-extrabold text-white shrink-0 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
-                {coach.fullName.charAt(0)}
+              <div className="w-32 h-32 rounded-[2rem] bg-gradient-to-br from-orange-400 to-amber-500 shadow-lg flex items-center justify-center text-5xl font-extrabold text-white shrink-0 transform -rotate-3 hover:rotate-0 transition-transform duration-300 overflow-hidden">
+                {coach.profileImageUrl ? (
+                  <img src={coach.profileImageUrl} alt={coach.fullName} className="w-full h-full object-cover" />
+                ) : (
+                  coach.fullName.charAt(0)
+                )}
               </div>
               <div>
                 <div className="inline-block px-3 py-1 bg-teal-100 text-teal-800 text-xs font-black tracking-wider uppercase rounded-full mb-3 border border-teal-200">
@@ -113,7 +127,7 @@ function CoachProfilePage() {
           <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50">
             <h2 className="text-2xl font-bold text-slate-900 mb-6">Expertise & Details</h2>
             <div className="md:col-span-1 space-y-6">
-              
+
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                 <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <svg className="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -170,9 +184,9 @@ function CoachProfilePage() {
                     <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     Intro Video
                   </h3>
-                  <a 
-                    href={coach.introVideoUrl} 
-                    target="_blank" 
+                  <a
+                    href={coach.introVideoUrl}
+                    target="_blank"
                     rel="noreferrer"
                     className="block w-full py-3 bg-red-50 text-red-600 font-bold text-center rounded-xl hover:bg-red-100 transition-colors"
                   >
@@ -195,7 +209,7 @@ function CoachProfilePage() {
           <div className="bg-white/90 backdrop-blur-xl border border-white rounded-[2rem] p-8 shadow-2xl shadow-orange-500/10 sticky top-32">
             <h3 className="text-xl font-extrabold text-slate-900 mb-2">Ready to start?</h3>
             <p className="text-slate-500 mb-8 font-medium">Send an enquiry directly to {coach.fullName.split(' ')[0]} to discuss your goals and schedule.</p>
-            
+
             <button
               onClick={() => setShowModal(true)}
               className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-lg py-4 rounded-2xl transition-all shadow-[0_8px_20px_rgba(249,115,22,0.25)] hover:shadow-[0_8px_25px_rgba(249,115,22,0.35)] flex items-center justify-center gap-2 group active:scale-[0.98]"
@@ -209,6 +223,53 @@ function CoachProfilePage() {
           </div>
         </div>
 
+        {classes.length > 0 && (
+          <div className="lg:col-span-3 mt-12 pt-12 border-t border-slate-200">
+            <h2 className="text-3xl font-extrabold text-slate-900 mb-8 flex items-center gap-3">
+              <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+              Upcoming Classes & Workshops
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {classes.map(c => (
+                <div key={c.id} className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-shadow group flex flex-col">
+                  {c.type === 'WORKSHOP' && c.imageUrl && (
+                    <div className="w-full aspect-video overflow-hidden bg-slate-100 relative">
+                      <div className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">WORKSHOP</div>
+                      <img src={c.imageUrl} alt={c.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                  )}
+                  <div className="p-6 flex-1 flex flex-col">
+                    <div className="flex justify-between items-start mb-2 gap-4">
+                      <h3 className="font-bold text-xl text-slate-900">{c.title}</h3>
+                      {c.type !== 'WORKSHOP' && c.type !== 'REGULAR' && (
+                        <span className="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded whitespace-nowrap uppercase">
+                          {c.type.replace('_', ' ')}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-slate-600 text-sm mb-6 flex-1 line-clamp-3">{c.description}</p>
+                    <div className="space-y-3 pt-4 border-t border-slate-100 mt-auto">
+                      <div className="flex items-center text-sm font-medium text-slate-700">
+                        <svg className="w-4 h-4 mr-2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        {c.schedule}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center text-sm font-medium text-slate-700">
+                          <svg className="w-4 h-4 mr-2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                          Max {c.capacity}
+                        </div>
+                        <div className="text-lg font-bold text-orange-600">
+                          {c.price === 0 ? 'Free' : `₹${c.price}`}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
       </main>
 
       {/* Enquiry Modal */}
@@ -219,21 +280,64 @@ function CoachProfilePage() {
             <button onClick={() => setShowModal(false)} className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 bg-slate-100 rounded-full p-2 transition-colors">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-            
+
             <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Send an Enquiry</h2>
             <p className="text-slate-500 mb-8 font-medium">To: {coach.fullName}</p>
 
             <form onSubmit={handleSendEnquiry} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">Your Registered Student Email <span className="text-orange-500">*</span></label>
-                <input
-                  type="email"
-                  required
-                  value={enquiryEmail}
-                  onChange={e => setEnquiryEmail(e.target.value)}
-                  placeholder="hello@example.com"
-                  className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 ml-1">Full Name <span className="text-orange-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={enquiryName}
+                    onChange={e => setEnquiryName(e.target.value)}
+                    placeholder="John Doe"
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 ml-1">Phone Number <span className="text-orange-500">*</span></label>
+                  <input
+                    type="tel"
+                    required
+                    pattern="[0-9]{10}"
+                    maxLength={10}
+                    title="Please enter a valid 10-digit phone number"
+                    value={enquiryPhone}
+                    onChange={e => setEnquiryPhone(e.target.value.replace(/\D/g, ''))}
+                    placeholder="9876543210"
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 ml-1">Email Address <span className="text-orange-500">*</span></label>
+                  <input
+                    type="email"
+                    required
+                    value={enquiryEmail}
+                    onChange={e => setEnquiryEmail(e.target.value)}
+                    placeholder="hello@example.com"
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 ml-1">Location / City <span className="text-orange-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={enquiryLocation}
+                    onChange={e => setEnquiryLocation(e.target.value)}
+                    placeholder="Mumbai, MH"
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">

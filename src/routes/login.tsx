@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
-import { Mail, Music, Palette, Crown, Shield, Camera, MoreHorizontal, Sparkles, ChevronLeft, Calendar, Users, TrendingUp, Award, BookOpen } from 'lucide-react';
+import { Mail, Music, Palette, Crown, Shield, Camera, MoreHorizontal, Sparkles, ChevronLeft, Calendar, Users, TrendingUp, Award, BookOpen, Key } from 'lucide-react';
+import { startAuthentication } from '@simplewebauthn/browser';
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -19,6 +20,37 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const handlePasskeyLogin = async () => {
+    if (!email || !email.includes('@')) {
+      setError("Please enter your registered email address first.");
+      return;
+    }
+    
+    setError("");
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/passkeys/login/start");
+      const options = await res.json();
+      const asseResp = await startAuthentication({ optionsJSON: options });
+      
+      const verifyRes = await fetch("/api/passkeys/login/finish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(asseResp)
+      });
+
+      if (!verifyRes.ok) throw new Error("Passkey login failed");
+      
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userRole', 'coach');
+      navigate({ to: "/coach-dashboard" });
+    } catch (err: any) {
+      setError(err.message || "Failed to authenticate with Passkey");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -495,6 +527,27 @@ function LoginPage() {
                 </>
               )}
             </button>
+
+            {/* Passkey Login Option for Coaches - TEMPORARILY DISABLED
+            {step === 'email' && (
+              <div className="mt-4">
+                <div className="relative flex items-center py-2">
+                  <div className="flex-grow border-t border-teal-500/20"></div>
+                  <span className="flex-shrink-0 mx-4 text-teal-200/50 text-sm font-bold">OR</span>
+                  <div className="flex-grow border-t border-teal-500/20"></div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handlePasskeyLogin}
+                  disabled={isLoading}
+                  className="w-full bg-white/5 hover:bg-white/10 text-white font-bold text-lg py-4 rounded-2xl transition-all transform active:scale-95 border-2 border-teal-500/20 hover:border-teal-400 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+                >
+                  <Key className="w-5 h-5 text-teal-300" />
+                  Sign in with Passkey
+                </button>
+              </div>
+            )}
+            */}
 
             <div className="mt-8 text-center text-sm font-medium text-teal-200/60">
               New to CoachKonnects?{' '}

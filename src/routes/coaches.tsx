@@ -6,19 +6,24 @@ export const Route = createFileRoute('/coaches')({
 });
 
 function CoachesDirectory() {
+  const searchParams = new URLSearchParams(window.location.search);
+  
   const [coaches, setCoaches] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
+  const [search, setSearch] = useState(searchParams.get('q') || '');
+  const [category, setCategory] = useState(searchParams.get('category') || '');
+  const [categoriesList, setCategoriesList] = useState<any[]>([]);
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/public/coaches').then(res => res.json()),
-      fetch('/api/public/classes').then(res => res.json()).catch(() => [])
+      fetch('/api/profile/coach/live').then(res => res.json()),
+      fetch('/api/admin/classes').then(res => res.json()).catch(() => []),
+      fetch('/api/categories').then(res => res.json()).catch(() => [])
     ])
-      .then(([coachesData, classesData]) => {
+      .then(([coachesData, classesData, catsData]) => {
         setCoaches(coachesData);
         setClasses(classesData || []);
+        setCategoriesList(catsData || []);
       })
       .catch(err => console.error(err));
   }, []);
@@ -31,20 +36,21 @@ function CoachesDirectory() {
 
   const filteredCoaches = coaches.filter(coach => {
     const searchLower = search.toLowerCase();
+    
     const searchableFields = [
-      coach.fullName,
-      coach.district,
-      coach.state,
-      coach.expertise,
-      coach.pincode,
-      coach.area,
-      coach.location,
-      coach.user?.email,
-      coach.user?.phoneNumber
-    ].map(field => (field || '').toLowerCase());
+      coach.fullName, 
+      coach.expertise, 
+      coach.description,
+      coach.district, 
+      coach.state, 
+      coach.area, 
+      coach.location, 
+      coach.pincode
+    ].map(f => (f || '').toLowerCase());
 
-    const matchesSearch = searchableFields.some(field => field.includes(searchLower));
+    const matchesSearch = !searchLower || searchableFields.some(field => field.includes(searchLower));
     const matchesCategory = category ? coach.category === category : true;
+    
     return matchesSearch && matchesCategory && coach.status === 'APPROVED';
   });
 
@@ -107,7 +113,7 @@ function CoachesDirectory() {
           
           <div className="mt-auto">
             <Link 
-              to={`/coaches/${coach.slug}` as any}
+              to={`/coach/${coach.slug}` as any}
               className={`block w-full py-3 rounded-xl font-bold transition-all text-center ${isFeatured ? 'bg-[#f26b21] text-white hover:bg-[#e05a10]' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}
             >
               View Profile
@@ -131,25 +137,26 @@ function CoachesDirectory() {
             Browse our curated directory of expert coaches. Whether you're looking to master a new sport, learn a skill, or improve your fitness, we have the right mentor for you.
           </p>
 
-          <div className="flex flex-col sm:flex-row max-w-3xl mx-auto gap-4 bg-white/10 p-2 rounded-2xl backdrop-blur-md border border-white/10 shadow-2xl">
-            <input
-              type="text"
-              placeholder="Search by name, location, or expertise..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="flex-1 px-6 py-4 rounded-xl outline-none text-gray-900 font-medium bg-white/90 placeholder-gray-500 focus:bg-white transition-all"
-            />
+          <div className="flex flex-col sm:flex-row max-w-4xl mx-auto gap-4 bg-white/10 p-2 rounded-2xl backdrop-blur-md border border-white/10 shadow-2xl">
+            <div className="flex-1 flex items-center bg-white/90 rounded-xl px-4 focus-within:bg-white transition-all">
+              <span className="text-xl mr-2">🔍</span>
+              <input
+                type="text"
+                placeholder="Search by name, skill, or location..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full py-4 outline-none text-gray-900 font-medium placeholder-gray-500 bg-transparent"
+              />
+            </div>
             <select
               value={category}
               onChange={e => setCategory(e.target.value)}
               className="px-6 py-4 rounded-xl outline-none text-gray-900 font-medium bg-white/90 focus:bg-white transition-all appearance-none cursor-pointer border-r-8 border-transparent"
             >
               <option value="">All Categories</option>
-              <option value="Sports">Sports</option>
-              <option value="Fitness">Fitness</option>
-              <option value="Academics">Academics</option>
-              <option value="Music">Music</option>
-              <option value="Arts">Arts</option>
+              {categoriesList.map(c => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
             </select>
           </div>
         </div>
