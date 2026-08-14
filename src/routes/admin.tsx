@@ -29,7 +29,7 @@ function AdminDashboard() {
 
   const [students, setStudents] = useState<any[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
-  
+
   const [classesList, setClassesList] = useState<any[]>([]);
 
   const [isFlagging, setIsFlagging] = useState(false);
@@ -306,15 +306,15 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden relative">
+
       {/* Sidebar */}
-      <div className="w-64 bg-gradient-to-b from-slate-900 via-teal-950 to-slate-900 text-white flex flex-col shadow-2xl z-10 relative">
-        <div className="p-6 border-b border-white/10 relative">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#f26b21] rounded-full blur-[80px] opacity-20"></div>
+      <div className="w-64 bg-teal-900 text-white flex flex-col shadow-xl z-10 relative">
+        <div className="p-6 border-b border-teal-800 relative">
           <div className="flex items-center gap-3 relative z-10 mb-2">
-            <img src="/homelogo.png" alt="CoachKonnects" className="h-10 w-auto rounded-md object-contain bg-white px-2 py-1" />
+            <img src="/homelogo.png" alt="CoachKonnects" className="h-10 w-auto rounded-md object-contain bg-white px-2 py-1 shadow-sm" />
           </div>
-          <p className="text-lg font-bold relative z-10 bg-gradient-to-r from-teal-400 to-orange-400 bg-clip-text text-transparent mt-6 ml-8">Admin Portal</p>
+          <p className="text-lg font-bold relative z-10 bg-gradient-to-r from-orange-400 to-teal-300 bg-clip-text text-transparent mt-6 ml-8">Admin Portal</p>
         </div>
         <div className="flex-1 p-4 space-y-2 overflow-y-auto">
           {[
@@ -328,20 +328,19 @@ function AdminDashboard() {
             { name: 'Export', icon: Download },
             { name: 'Admins', icon: ShieldAlert },
             { name: 'Security', icon: Lock }
-          ].map((module, index) => {
+          ].map((module) => {
             const isActive = activeTab === module.name.toLowerCase();
-            const activeColor = index % 2 === 0 ? 'bg-teal-600' : 'bg-[#f26b21]';
             return (
               <button
                 key={module.name}
                 onClick={() => setActiveTab(module.name.toLowerCase() as any)}
                 className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex justify-between items-center ${isActive
-                  ? `${activeColor} text-white shadow-lg`
-                  : 'text-gray-400 hover:bg-white/10 hover:text-white'
+                  ? 'bg-[#f26b21] text-white shadow-md'
+                  : 'text-teal-100 hover:bg-teal-800 hover:text-white'
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <module.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-500'}`} />
+                  <module.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-teal-300'}`} />
                   {module.name}
                 </div>
                 {module.name === 'Coaches' && coaches.filter(c => c.status === 'PENDING_APPROVAL').length > 0 && (
@@ -368,14 +367,14 @@ function AdminDashboard() {
             );
           })}
         </div>
-        <div className="p-4 border-t border-gray-800">
+        <div className="p-4 border-t border-teal-800">
           <button
             onClick={() => {
               localStorage.removeItem('adminToken');
               localStorage.removeItem('adminEmail');
               navigate({ to: '/admin-login' });
             }}
-            className="w-full px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors text-left flex items-center gap-3"
+            className="w-full px-4 py-2 text-sm text-teal-200 hover:text-white hover:bg-teal-800 rounded-xl transition-colors text-left flex items-center gap-3"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
             Log out
@@ -384,15 +383,15 @@ function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className="h-16 bg-white border-b flex items-center px-8 justify-between shrink-0">
-          <h2 className="text-lg font-bold capitalize">{activeTab} Review</h2>
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center px-8 justify-between shrink-0 shadow-sm">
+          <h2 className="text-lg font-bold capitalize text-gray-900">{activeTab} Review</h2>
           <div className="flex items-center gap-4">
-            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-bold">SA</div>
+            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-bold shadow-sm border border-gray-200 text-[#f26b21]">SA</div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto p-8">
+        <main className="flex-1 overflow-auto p-8 relative z-10">
           {activeTab === 'coaches' && !selectedCoach && (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <table className="w-full text-left border-collapse">
@@ -578,7 +577,7 @@ function AdminDashboard() {
                                 if (ignoreKeys.includes(key) || value === null || value === '') return null;
                                 // Convert camelCase to Title Case
                                 const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                                
+
                                 const isImage = key.toLowerCase().includes('image');
                                 return (
                                   <div key={key} className="border-b border-slate-100 pb-2">
@@ -833,11 +832,11 @@ function AdminDashboard() {
                     value={newCategoryName}
                     onChange={e => setNewCategoryName(e.target.value)}
                     placeholder="e.g. Health & Wellness"
-                    className="flex-1 px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-indigo-500 shadow-sm"
+                    className="flex-1 px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#f26b21] shadow-sm"
                   />
                   <button
                     onClick={handleAddCategory}
-                    className="px-8 py-3.5 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 shadow-md transition-all active:scale-[0.98]"
+                    className="px-8 py-3.5 bg-[#f26b21] text-white rounded-2xl font-bold hover:bg-[#d95d1c] shadow-md transition-all active:scale-[0.98]"
                   >
                     Add Category
                   </button>
@@ -1060,7 +1059,7 @@ function AdminDashboard() {
                               <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">Pending Admin</span>
                             )}
                             {enq.status === 'PENDING_COACH_APPROVAL' && (
-                              <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">Sent to Coach</span>
+                              <span className="bg-orange-100 text-[#f26b21] text-xs font-bold px-2 py-0.5 rounded-full">Sent to Coach</span>
                             )}
                             {enq.status === 'APPROVED' && (
                               <span className="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-0.5 rounded-full">Coach Accepted</span>
