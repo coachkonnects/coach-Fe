@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import desktopBg from "@/assets/desktop-bg.png.asset.json";
 import mobileBg from "@/assets/mobile-bg.png.asset.json";
 const logo = { url: "/homelogo.png" };
@@ -64,12 +64,7 @@ const trustPoints = [
   { title: "Hobby‑only, always", body: "Just hobbies. That's the whole point, every time." },
 ];
 
-const featuredCoaches = [
-  { img: garba.url, cat: "Rhythm Stars", name: "Coach name · Garba", loc: "Navi Mumbai" },
-  { img: guitar.url, cat: "Rhythm Stars", name: "Coach name · Guitar", loc: "Palava" },
-  { img: bharatnatyam.url, cat: "Rhythm Stars", name: "Coach name · Bharatanatyam", loc: "Navi Mumbai" },
-  { img: piano.url, cat: "Rhythm Stars", name: "Coach name · Piano", loc: "Palava" },
-];
+
 
 function Logo({ className = "" }: { className?: string }) {
   return (
@@ -82,6 +77,19 @@ function Logo({ className = "" }: { className?: string }) {
 function Index() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const [featuredCoaches, setFeaturedCoaches] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/public/coaches')
+      .then(res => res.json())
+      .then(data => {
+        const manualFeatured = data.filter((c: any) => c.isFeatured === true);
+        const remaining = data.filter((c: any) => c.isFeatured !== true);
+        const topStudents = remaining.sort((a: any, b: any) => (b.studentCount || 0) - (a.studentCount || 0)).slice(0, Math.max(0, 5 - manualFeatured.length));
+        setFeaturedCoaches([...manualFeatured.slice(0, 5), ...topStudents].slice(0, 5));
+      })
+      .catch(err => console.error(err));
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -270,6 +278,8 @@ function Index() {
             </div>
           </div>
         </section>
+
+
       </main>
       <section className="w-full px-5 py-20 sm:px-8 md:py-28">
         <div className="mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
@@ -364,26 +374,31 @@ function Index() {
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {featuredCoaches.map((c) => (
-              <article
-                key={c.name}
-                className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(242,107,33,0.15)]"
+              <Link
+                to="/coach/$slug" params={{ slug: c.id }}
+                key={c.id}
+                className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(242,107,33,0.15)] relative"
               >
+                {c.isFeatured && (
+                  <div className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-black px-2 py-1 rounded-lg shadow-md z-10">FEATURED</div>
+                )}
                 <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-amber-50 to-orange-100">
                   <img
-                    src={c.img}
-                    alt={c.name}
+                    src={c.profileImageUrl || c.profilePhotoUrl || '/homelogo.png'}
+                    alt={c.fullName}
                     loading="lazy"
-                    className="absolute inset-0 h-full w-full object-contain p-3"
+                    className="absolute inset-0 h-full w-full object-cover"
                   />
                 </div>
                 <div className="p-5">
-                  <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.05em] text-[color:var(--color-brand-dark)]">
-                    {c.cat}
+                  <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.05em] text-[color:var(--color-brand-dark)] flex justify-between">
+                    <span>{c.category || c.expertise || 'Expert Coach'}</span>
+                    <span className="text-orange-500 font-black">🎯 {c.studentCount || 0}</span>
                   </div>
-                  <h4 className="font-[var(--font-display)] text-lg font-bold">{c.name}</h4>
-                  <p className="mt-1 text-sm text-[color:var(--color-ink-muted)]">📍 {c.loc}</p>
+                  <h4 className="font-[var(--font-display)] text-lg font-bold truncate">{c.fullName}</h4>
+                  <p className="mt-1 text-sm text-[color:var(--color-ink-muted)] truncate">📍 {c.area || c.location || 'Mumbai'}</p>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </div>
@@ -435,7 +450,7 @@ function Index() {
                 href="#"
                 className="mt-8 inline-flex items-center justify-center rounded-full bg-[color:var(--color-brand)] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(242,107,33,0.35)] transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)]"
               >
-                ✨ Start Teaching — It's Free
+                ✨ Start Teaching
               </a>
             </div>
             <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-white shadow-sm border border-slate-100 sm:aspect-square">

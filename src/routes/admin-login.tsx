@@ -147,7 +147,7 @@ function AdminLogin() {
             {isLoading ? "Processing..." : (step === "EMAIL" ? "Send Code" : "Verify & Login")}
           </button>
 
-          {/* {step === "EMAIL" && (
+          {step === "EMAIL" && (
             <>
               <div className="relative mt-2 flex items-center">
                 <div className="flex-grow border-t border-slate-200"></div>
@@ -166,7 +166,7 @@ function AdminLogin() {
                 Sign in with Passkey
               </button>
             </>
-          )} */}
+          )} 
         </form>
 
       </div>
