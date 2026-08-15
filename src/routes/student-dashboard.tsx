@@ -147,18 +147,18 @@ function StudentDashboard() {
     } else if (val.length > 4) {
       val = val.slice(0, 2) + '/' + val.slice(2, 4) + '/' + val.slice(4, 8);
     }
-    setEditForm(prev => ({ ...prev, dob: val, dateOfBirth: val }));
+    setEditForm((prev: any) => ({ ...prev, dob: val, dateOfBirth: val }));
   };
 
   const handlePincodeChange = async (pincode: string) => {
-    setEditForm(prev => ({ ...prev, pincode }));
+    setEditForm((prev: any) => ({ ...prev, pincode }));
     if (pincode.length === 6) {
       try {
         const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
         const data = await res.json();
         if (data && data[0].Status === "Success") {
           const po = data[0].PostOffice[0];
-          setEditForm(prev => ({
+          setEditForm((prev: any) => ({
             ...prev,
             pincode,
             area: po.Name,

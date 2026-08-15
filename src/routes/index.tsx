@@ -241,6 +241,7 @@ function Index() {
               {categories.map((category) => (
                 <button
                   key={category.title}
+                  onClick={() => navigate({ to: `/coaches?category=${encodeURIComponent(category.title)}` as any })}
                   className="group flex cursor-pointer flex-col items-center rounded-2xl border border-slate-100 bg-white/60 p-6 text-center transition-all hover:-translate-y-2 hover:bg-white hover:border-orange-200 hover:shadow-lg"
                 >
                   <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 text-3xl shadow-sm transition-transform group-hover:scale-110 group-hover:bg-orange-200">

@@ -31,17 +31,25 @@ function CoachesDirectory() {
   }, []);
 
   const filteredCoaches = coaches.filter(c => {
-    const coachClasses = classes.filter(cls => cls.coachId === c.id && cls.status === 'APPROVED');
+    const coachClasses = classes.filter(cls => cls.coachId === c.user?.id && (cls.status === 'APPROVED' || !cls.status));
     
-    const matchSearch = search ? (
-      c.fullName?.toLowerCase().includes(search.toLowerCase()) || 
-      c.area?.toLowerCase().includes(search.toLowerCase()) ||
-      c.district?.toLowerCase().includes(search.toLowerCase()) ||
-      coachClasses.some(cls => cls.category?.toLowerCase().includes(search.toLowerCase())) ||
-      c.headline?.toLowerCase().includes(search.toLowerCase())
+    const searchStr = search ? search.toLowerCase().trim() : '';
+    const matchSearch = searchStr ? (
+      String(c.fullName || '').toLowerCase().includes(searchStr) || 
+      String(c.area || '').toLowerCase().includes(searchStr) ||
+      String(c.district || '').toLowerCase().includes(searchStr) ||
+      String(c.pincode || '').toLowerCase().includes(searchStr) ||
+      String(c.category || '').toLowerCase().includes(searchStr) ||
+      String(c.expertise || '').toLowerCase().includes(searchStr) ||
+      String(c.user?.email || '').toLowerCase().includes(searchStr) ||
+      String(c.user?.phoneNumber || '').toLowerCase().includes(searchStr) ||
+      coachClasses.some(cls => String(cls.category || '').toLowerCase().includes(searchStr)) ||
+      String(c.headline || '').toLowerCase().includes(searchStr)
     ) : true;
     
-    const matchCategory = category ? coachClasses.some(cls => cls.category === category) : true;
+    const matchCategory = category ? (
+      c.category === category || coachClasses.some(cls => cls.category === category)
+    ) : true;
     
     return matchSearch && matchCategory;
   });
@@ -102,7 +110,7 @@ function CoachesDirectory() {
         {/* Results Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredCoaches.map((coach: any) => {
-             const coachClasses = classes.filter(cls => cls.coachId === coach.id && cls.status === 'APPROVED');
+             const coachClasses = classes.filter(cls => cls.coachId === coach.user?.id && (cls.status === 'APPROVED' || !cls.status));
              const rating = 4.5; // placeholder
              const reviews = 12; // placeholder
 
