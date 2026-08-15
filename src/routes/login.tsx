@@ -30,6 +30,11 @@ function LoginPage() {
     setError("");
     setIsLoading(true);
     try {
+      const profileRes = await fetch(`/api/profile/coach?email=${email}`);
+      if (!profileRes.ok) {
+        throw new Error("This email is not registered. Please apply as a coach first.");
+      }
+
       const res = await fetch("/api/passkeys/login/start");
       const options = await res.json();
       const asseResp = await startAuthentication({ optionsJSON: options });
@@ -40,7 +45,7 @@ function LoginPage() {
         body: JSON.stringify(asseResp)
       });
 
-      if (!verifyRes.ok) throw new Error("Passkey login failed");
+      if (!verifyRes.ok) throw new Error("Passkey login failed. Invalid passcode.");
       
       localStorage.setItem('userEmail', email);
       localStorage.setItem('userRole', 'coach');
@@ -528,7 +533,6 @@ function LoginPage() {
               )}
             </button>
 
-            {/* Passkey Login Option for Coaches - TEMPORARILY DISABLED
             {step === 'email' && (
               <div className="mt-4">
                 <div className="relative flex items-center py-2">
@@ -539,15 +543,14 @@ function LoginPage() {
                 <button
                   type="button"
                   onClick={handlePasskeyLogin}
-                  disabled={isLoading}
-                  className="w-full bg-white/5 hover:bg-white/10 text-white font-bold text-lg py-4 rounded-2xl transition-all transform active:scale-95 border-2 border-teal-500/20 hover:border-teal-400 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+                  disabled={isLoading || !email || !email.includes('@')}
+                  className="w-full bg-white/5 hover:bg-white/10 text-white font-bold text-lg py-4 rounded-2xl transition-all transform active:scale-95 border-2 border-teal-500/20 hover:border-teal-400 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                 >
                   <Key className="w-5 h-5 text-teal-300" />
                   Sign in with Passkey
                 </button>
               </div>
             )}
-            */}
 
             <div className="mt-8 text-center text-sm font-medium text-teal-200/60">
               New to CoachKonnects?{' '}

@@ -35,6 +35,7 @@ function CoachDashboard() {
 
   const [classModalOpen, setClassModalOpen] = useState(false);
   const [classForm, setClassForm] = useState<any>({
+    id: null,
     title: "",
     type: "REGULAR",
     schedule: "",
@@ -80,8 +81,13 @@ function CoachDashboard() {
       return;
     }
     try {
-      const res = await fetch(`/api/classes?email=${localStorage.getItem("userEmail")}`, {
-        method: "POST",
+      const isEdit = !!classForm.id;
+      const url = isEdit 
+        ? `/api/classes/${classForm.id}?email=${localStorage.getItem("userEmail")}`
+        : `/api/classes?email=${localStorage.getItem("userEmail")}`;
+        
+      const res = await fetch(url, {
+        method: isEdit ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...classForm,
@@ -91,11 +97,18 @@ function CoachDashboard() {
       });
       if (res.ok) {
         const newClass = await res.json();
-        setClasses([...classes, newClass]);
+        if (isEdit) {
+          setClasses(classes.map(c => c.id === newClass.id ? newClass : c));
+        } else {
+          setClasses([...classes, newClass]);
+        }
         setClassModalOpen(false);
-        setClassForm({ title: "", type: "REGULAR", schedule: "", price: "", capacity: "1", description: "", imageUrl: "" });
+        setClassForm({ id: null, title: "", type: "REGULAR", schedule: "", price: "", capacity: "1", description: "", imageUrl: "" });
+      } else {
+        alert("Error saving class");
       }
-    } catch (err) {
+    } catch (e) {
+      console.error(e);
       alert("Error saving class");
     }
   };
@@ -869,8 +882,11 @@ function CoachDashboard() {
                     </p>
                   </div>
                   <button
-                    onClick={() => setClassModalOpen(true)}
-                    className="bg-[#f26b21] text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover:bg-[#e05a10] transition-colors flex items-center gap-2 whitespace-nowrap w-full sm:w-auto justify-center"
+                    onClick={() => {
+                      setClassForm({ id: null, title: "", type: "REGULAR", schedule: "", price: "", capacity: "1", description: "", imageUrl: "" });
+                      setClassModalOpen(true);
+                    }}
+                    className="bg-[#f26b21] text-white px-6 py-2.5 rounded-xl font-bold hover:bg-[#d95d1c] transition-all shadow-md active:scale-95 flex items-center gap-2 w-full sm:w-auto justify-center"
                   >
                     + Create New Class
                   </button>
@@ -907,6 +923,7 @@ function CoachDashboard() {
                           </span>
                         </div>
                         <p className="text-slate-600 mb-4 line-clamp-2">{c.description}</p>
+                        
                         <div className="space-y-2 mb-6">
                           <div className="flex items-center gap-2 text-sm text-slate-600 font-medium">
                             <span>🕒</span> {c.schedule}
@@ -918,6 +935,24 @@ function CoachDashboard() {
                         <div className="flex gap-3">
                           <button
                             onClick={() => {
+                              setClassForm({
+                                id: c.id,
+                                title: c.title,
+                                type: c.type || "REGULAR",
+                                schedule: c.schedule,
+                                price: c.price,
+                                capacity: c.capacity,
+                                description: c.description || "",
+                                imageUrl: c.imageUrl || "",
+                              });
+                              setClassModalOpen(true);
+                            }}
+                            className="w-1/2 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => {
                               if (!window.confirm("Are you sure you want to delete this class?"))
                                 return;
                               fetch(
@@ -927,7 +962,7 @@ function CoachDashboard() {
                                 .then(() => setClasses(classes.filter((cl) => cl.id !== c.id)))
                                 .catch(() => alert("Error deleting class"));
                             }}
-                            className="w-full py-2 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors"
+                            className="w-1/2 py-2 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors"
                           >
                             Delete Class
                           </button>

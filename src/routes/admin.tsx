@@ -1,7 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
-import { LayoutDashboard, Users, UserCheck, MessageSquare, Target, Star, Calendar, Download, ShieldAlert, Lock, Grid } from 'lucide-react';
+import { Search, MapPin, Filter, Mail, Phone, Calendar, User, CheckCircle2, FileText, Settings, LogOut, ChevronRight, Download, Activity, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { LayoutDashboard, Users, UserCheck, MessageSquare, Target, Star, ShieldAlert, Lock, Grid } from 'lucide-react';
 
 export const Route = createFileRoute('/admin')({
   component: AdminDashboard,
@@ -24,7 +26,7 @@ function AdminDashboard() {
   }, [activeTab]);
   const [coaches, setCoaches] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [selectedCoach, setSelectedCoach] = useState<any | null>(null);
 
   const [students, setStudents] = useState<any[]>([]);
@@ -36,6 +38,72 @@ function AdminDashboard() {
   const [flagField, setFlagField] = useState('description');
   const [flagReason, setFlagReason] = useState('');
   const [stats, setStats] = useState({ totalCoaches: 0, pending: 0, live: 0, flagged: 0 });
+
+  const exportToCSV = (data: any[], filename: string) => {
+    if (!data || data.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+    const flattenObject = (obj: any, prefix = ''): any => {
+      return Object.keys(obj).reduce((acc: any, k: string) => {
+        const pre = prefix.length ? prefix + '_' : '';
+        if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
+          Object.assign(acc, flattenObject(obj[k], pre + k));
+        } else {
+          acc[pre + k] = obj[k];
+        }
+        return acc;
+      }, {});
+    };
+
+    const flatData = data.map(d => flattenObject(d));
+    const headers = Array.from(new Set(flatData.flatMap(Object.keys)));
+    const csvRows = [headers.join(',')];
+
+    for (const row of flatData) {
+      const values = headers.map(header => {
+        const val = row[header];
+        const strVal = (val === null || val === undefined) ? '' : String(val);
+        return `"${strVal.replace(/"/g, '""')}"`;
+      });
+      csvRows.push(values.join(','));
+    }
+
+    const csvString = csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', filename);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const exportToExcel = (data: any[], filename: string) => {
+    if (!data || data.length === 0) {
+      alert("No data available to export.");
+      return;
+    }
+    const flattenObject = (obj: any, prefix = ''): any => {
+      return Object.keys(obj).reduce((acc: any, k: string) => {
+        const pre = prefix.length ? prefix + '_' : '';
+        if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
+          Object.assign(acc, flattenObject(obj[k], pre + k));
+        } else {
+          acc[pre + k] = obj[k];
+        }
+        return acc;
+      }, {});
+    };
+
+    const flatData = data.map(d => flattenObject(d));
+    const worksheet = XLSX.utils.json_to_sheet(flatData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+    XLSX.writeFile(workbook, filename);
+  };
 
   const [adminsList, setAdminsList] = useState<any[]>([]);
   const [newAdminEmail, setNewAdminEmail] = useState("");
@@ -301,6 +369,40 @@ function AdminDashboard() {
         setStudents(students.filter((s: any) => s.id !== id));
       } else {
         alert("Failed to delete student.");
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleApproveClass = async (id: number) => {
+    try {
+      const res = await fetch(`/api/admin/classes/${id}/approve`, { method: 'POST' });
+      if (res.ok) {
+        setClassesList(classesList.map(c => c.id === id ? { ...c, status: 'APPROVED' } : c));
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleRejectClass = async (id: number) => {
+    const reason = window.prompt("Enter rejection reason:");
+    if (!reason) return;
+    try {
+      const res = await fetch(`/api/admin/classes/${id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason })
+      });
+      if (res.ok) {
+        setClassesList(classesList.map(c => c.id === id ? { ...c, status: 'REJECTED', rejectReason: reason } : c));
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleDeleteClass = async (id: number) => {
+    if (!window.confirm("Delete this class entirely?")) return;
+    try {
+      const res = await fetch(`/api/admin/classes/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setClassesList(classesList.filter(c => c.id !== id));
       }
     } catch (e) { console.error(e); }
   };
@@ -1159,6 +1261,78 @@ function AdminDashboard() {
             </div>
           )}
 
+          {activeTab === 'export' && (
+            <div>
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Data Export</h2>
+                  <p className="text-sm text-gray-500 mt-1">Download platform data as CSV files for reporting and backups.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Coaches</h3>
+                    <p className="text-gray-500 text-sm mb-6">Export all registered coach profiles, including their skills, pricing, and locations.</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button onClick={() => exportToCSV(coaches, 'coaches_export.csv')} className="flex-1 bg-[#f26b21] hover:bg-[#d95d1c] text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                      <Download className="w-4 h-4" /> CSV
+                    </button>
+                    <button onClick={() => exportToExcel(coaches, 'coaches_export.xlsx')} className="flex-1 bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                      <FileSpreadsheet className="w-4 h-4" /> Excel
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Students</h3>
+                    <p className="text-gray-500 text-sm mb-6">Export student profiles, including their learning goals and locations.</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button onClick={() => exportToCSV(students, 'students_export.csv')} className="flex-1 bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                      <Download className="w-4 h-4" /> CSV
+                    </button>
+                    <button onClick={() => exportToExcel(students, 'students_export.xlsx')} className="flex-1 bg-[#f26b21] hover:bg-[#d95d1c] text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                      <FileSpreadsheet className="w-4 h-4" /> Excel
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Leads / Enquiries</h3>
+                    <p className="text-gray-500 text-sm mb-6">Export all leads and enquiries made through coach profiles.</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button onClick={() => exportToCSV(enquiries, 'leads_export.csv')} className="flex-1 bg-[#f26b21] hover:bg-[#d95d1c] text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                      <Download className="w-4 h-4" /> CSV
+                    </button>
+                    <button onClick={() => exportToExcel(enquiries, 'leads_export.xlsx')} className="flex-1 bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                      <FileSpreadsheet className="w-4 h-4" /> Excel
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Classes</h3>
+                    <p className="text-gray-500 text-sm mb-6">Export all created classes, workshops, and schedules across the platform.</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button onClick={() => exportToCSV(classesList, 'classes_export.csv')} className="flex-1 bg-teal-700 hover:bg-teal-800 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                      <Download className="w-4 h-4" /> CSV
+                    </button>
+                    <button onClick={() => exportToExcel(classesList, 'classes_export.xlsx')} className="flex-1 bg-[#f26b21] hover:bg-[#d95d1c] text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                      <FileSpreadsheet className="w-4 h-4" /> Excel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
         </main>
       </div>
