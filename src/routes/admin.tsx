@@ -111,6 +111,7 @@ function AdminDashboard() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [enquiries, setEnquiries] = useState<any[]>([]);
+  const [demands, setDemands] = useState<any[]>([]);
 
   const handleRegisterPasskey = async () => {
     try {
@@ -146,18 +147,20 @@ function AdminDashboard() {
 
   const fetchProfiles = async () => {
     try {
-      const [studentRes, coachRes, categoryRes, enquiryRes, classRes] = await Promise.all([
+      const [studentRes, coachRes, categoryRes, enquiryRes, classRes, demandRes] = await Promise.all([
         fetch('/api/profile/student'),
         fetch('/api/profile/coach'),
         fetch('/api/categories'),
         fetch('/api/admin/enquiries'),
-        fetch('/api/admin/classes')
+        fetch('/api/admin/classes'),
+        fetch('/api/admin/demands')
       ]);
       if (studentRes.ok) setStudents(await studentRes.json());
       if (coachRes.ok) setCoaches(await coachRes.json());
       if (categoryRes.ok) setCategories(await categoryRes.json());
       if (enquiryRes.ok) setEnquiries(await enquiryRes.json());
       if (classRes.ok) setClassesList(await classRes.json());
+      if (demandRes.ok) setDemands(await demandRes.json());
     } catch (e) {
       console.error(e);
     }
@@ -427,6 +430,7 @@ function AdminDashboard() {
             { name: 'Students', icon: Users },
             { name: 'Categories', icon: Grid },
             { name: 'Leads', icon: Target },
+            { name: 'Demands', icon: Target },
             { name: 'Reviews', icon: Star },
             { name: 'Classes', icon: Calendar },
             { name: 'Export', icon: Download },
@@ -1208,6 +1212,69 @@ function AdminDashboard() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+
+
+          {activeTab === 'demands' && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Demanded Classes</h2>
+                  <p className="text-sm text-gray-500 mt-1">Student requests for skills not currently available on the platform.</p>
+                </div>
+                <span className="bg-orange-100 text-orange-700 font-bold text-sm px-3 py-1 rounded-full">
+                  {demands.length} Total
+                </span>
+              </div>
+
+              {demands.length === 0 ? (
+                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+                  <div className="text-gray-400 mb-3 text-4xl">📥</div>
+                  <h3 className="text-lg font-bold text-gray-900">No demands yet</h3>
+                  <p className="text-sm text-gray-500 mt-1">When students request new classes, they will appear here.</p>
+                </div>
+              ) : (
+                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-gray-50/50 border-b border-gray-100">
+                          <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Requested Skill</th>
+                          <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Location</th>
+                          <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Student Email</th>
+                          <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Date requested</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {demands.map((d: any) => (
+                          <tr key={d.id} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="py-4 px-6">
+                              <span className="inline-flex items-center gap-2 font-bold text-gray-900">
+                                {d.skillName}
+                              </span>
+                            </td>
+                            <td className="py-4 px-6">
+                              <span className="text-sm font-medium text-gray-600 bg-gray-100 px-2.5 py-1 rounded-lg">
+                                📍 {d.location}
+                              </span>
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="text-sm text-gray-900 font-medium">{d.email}</div>
+                              <a href={`mailto:${d.email}`} className="text-xs text-[#f26b21] font-bold hover:underline">Contact Student</a>
+                            </td>
+                            <td className="py-4 px-6">
+                              <div className="text-sm text-gray-500 font-medium">
+                                {new Date(d.createdAt).toLocaleDateString()}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>

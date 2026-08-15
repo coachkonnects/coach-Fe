@@ -79,14 +79,36 @@ function Index() {
   const [query, setQuery] = useState("");
   const [featuredCoaches, setFeaturedCoaches] = useState<any[]>([]);
 
+  // Demands state
+  const [demands, setDemands] = useState<any[]>([]);
+  const [showDemandModal, setShowDemandModal] = useState(false);
+  const [demandForm, setDemandForm] = useState({ skillName: '', location: '', email: '' });
+  const [demandStatus, setDemandStatus] = useState('');
+
   useEffect(() => {
     fetch('/api/public/coaches')
       .then(res => res.json())
       .then(data => {
         const manualFeatured = data.filter((c: any) => c.isFeatured === true);
         const remaining = data.filter((c: any) => c.isFeatured !== true);
-        const topStudents = remaining.sort((a: any, b: any) => (b.studentCount || 0) - (a.studentCount || 0)).slice(0, Math.max(0, 5 - manualFeatured.length));
-        setFeaturedCoaches([...manualFeatured.slice(0, 5), ...topStudents].slice(0, 5));
+        const topStudents = remaining.sort((a: any, b: any) => (b.studentCount || 0) - (a.studentCount || 0)).slice(0, Math.max(0, 6 - manualFeatured.length));
+        setFeaturedCoaches([...manualFeatured.slice(0, 6), ...topStudents].slice(0, 6));
+      })
+      .catch(err => console.error(err));
+
+    fetch('/api/public/demands')
+      .then(res => res.json())
+      .then(data => {
+        const grouped = data.reduce((acc: any, curr: any) => {
+          const key = `${curr.skillName.trim().toLowerCase()}-${curr.location.trim().toLowerCase()}`;
+          if (!acc[key]) {
+            acc[key] = { ...curr, count: 1 };
+          } else {
+            acc[key].count += 1;
+          }
+          return acc;
+        }, {});
+        setDemands(Object.values(grouped));
       })
       .catch(err => console.error(err));
   }, []);
@@ -96,6 +118,39 @@ function Index() {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
     navigate({ to: `/coaches?${params.toString()}` as any });
+  };
+
+  const handleDemandSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDemandStatus('Sending...');
+    try {
+      const res = await fetch('/api/public/demands', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(demandForm)
+      });
+      if (res.ok) {
+        setDemandStatus('Success! We will notify you when a coach joins.');
+        setTimeout(() => { setShowDemandModal(false); setDemandStatus(''); setDemandForm({ skillName: '', location: '', email: '' }); }, 2000);
+        // Refresh demands
+        fetch('/api/public/demands').then(r => r.json()).then(data => {
+          const grouped = data.reduce((acc: any, curr: any) => {
+            const key = `${curr.skillName.trim().toLowerCase()}-${curr.location.trim().toLowerCase()}`;
+            if (!acc[key]) {
+              acc[key] = { ...curr, count: 1 };
+            } else {
+              acc[key].count += 1;
+            }
+            return acc;
+          }, {});
+          setDemands(Object.values(grouped));
+        });
+      } else {
+        setDemandStatus('Error submitting request.');
+      }
+    } catch {
+      setDemandStatus('Error connecting to server.');
+    }
   };
 
   return (
@@ -281,6 +336,88 @@ function Index() {
 
 
       </main>
+
+      {/* DEMANDED CLASSES SECTION */}
+      <section className="w-full bg-[#fdf5ed] px-5 py-20 sm:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div>
+              <h2 className="font-[var(--font-display)] text-3xl font-bold tracking-tight text-[color:var(--color-ink)] md:text-4xl">
+                What students are demanding
+              </h2>
+              <p className="mt-4 text-lg text-[color:var(--color-ink-muted)] max-w-2xl">
+                Can't find the exact skill you're looking for? Students across India are requesting these classes right now. Are you a coach who can teach them?
+              </p>
+            </div>
+            <button
+              onClick={() => setShowDemandModal(true)}
+              className="shrink-0 rounded-full bg-[color:var(--color-brand)] px-6 py-3 font-semibold text-white shadow-lg shadow-orange-500/20 transition-transform hover:-translate-y-1"
+            >
+              ✋ Request a Skill
+            </button>
+          </div>
+
+          {demands.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {demands.map((d: any) => (
+                <div key={d.id} className="group relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl">
+                  <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-orange-50 opacity-50 transition-transform group-hover:scale-150"></div>
+                  <div className="relative z-10">
+                    <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-orange-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-orange-600">
+                      <span className="relative flex h-2 w-2">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75"></span>
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500"></span>
+                      </span>
+                      {d.count > 1 ? `🔥 ${d.count} Students Waiting` : 'High Demand'}
+                    </div>
+                    <h3 className="mb-1 font-[var(--font-display)] text-xl font-bold text-slate-800">{d.skillName}</h3>
+                    <p className="text-sm font-medium text-slate-500">📍 {d.location}</p>
+                    <Link to="/register" className="mt-6 inline-flex items-center font-bold text-[color:var(--color-brand)] hover:text-orange-700 transition-colors">
+                      I can teach this <span className="ml-2 text-lg">→</span>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+             <div className="text-center py-10 text-slate-500 italic">No specific demands right now. Be the first to request!</div>
+          )}
+        </div>
+      </section>
+
+      {/* Modal */}
+      {showDemandModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-2xl">
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 sm:p-8 text-center relative">
+              <button onClick={() => setShowDemandModal(false)} className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white text-slate-500 hover:bg-slate-100 flex items-center justify-center font-bold">×</button>
+              <h3 className="font-[var(--font-display)] text-2xl font-bold text-slate-800">Request a Skill</h3>
+              <p className="mt-2 text-sm text-slate-600">Tell us what you want to learn. We'll find a coach for you.</p>
+            </div>
+            <form onSubmit={handleDemandSubmit} className="p-6 sm:p-8 flex flex-col gap-5">
+              <div>
+                <label className="text-sm font-bold text-slate-700 ml-1">Skill Name (e.g. Garba)</label>
+                <input required type="text" value={demandForm.skillName} onChange={e => setDemandForm({...demandForm, skillName: e.target.value})} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
+              </div>
+              <div>
+                <label className="text-sm font-bold text-slate-700 ml-1">Your Location (e.g. Mumbai)</label>
+                <input required type="text" value={demandForm.location} onChange={e => setDemandForm({...demandForm, location: e.target.value})} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
+              </div>
+              <div>
+                <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
+                <input required type="email" value={demandForm.email} onChange={e => setDemandForm({...demandForm, email: e.target.value})} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
+              </div>
+              
+              {demandStatus && <div className="text-center text-sm font-bold text-orange-600">{demandStatus}</div>}
+              
+              <button type="submit" className="mt-2 w-full rounded-full bg-slate-900 py-3.5 text-sm font-bold text-white hover:bg-slate-800 transition-colors">
+                Submit Request
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <section className="w-full px-5 py-20 sm:px-8 md:py-28">
         <div className="mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
           <div className="min-w-0">
