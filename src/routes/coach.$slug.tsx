@@ -62,7 +62,7 @@ function CoachProfilePage() {
         setShowModal(false);
         setEnquiryMessage('');
       } else {
-        alert(data.error || 'Failed to send enquiry. Make sure you are registered as a Student.');
+        alert(data.error || 'Failed to send enquiry. Please try again.');
       }
     } catch (e) {
       alert('Error connecting to server.');
