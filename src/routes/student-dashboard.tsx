@@ -42,15 +42,19 @@ function StudentDashboard() {
       const res = await fetch(`/api/profile/student/me?email=${email}`);
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        if (res.status === 404 || errorData.error === 'Student profile not found.') {
-          navigate({ to: '/register-student' });
-          return;
+        if (res.status === 404 || errorData.error === 'Student profile not found.' || res.status === 400) {
+          setProfile(null);
+          setEditForm({});
+          // Don't throw, let them see the dashboard but with a warning
+        } else {
+          throw new Error(errorData.error || 'Failed to fetch profile');
         }
-        throw new Error(errorData.error || 'Failed to fetch profile');
+      } else {
+        const data = await res.json();
+        setProfile(data.profile);
+        setEditForm(data.profile);
       }
-      const data = await res.json();
-      setProfile(data.profile);
-      setEditForm(data.profile);
+
 
       try {
         const enqRes = await fetch(`/api/enquiries/student?email=${email}`);
@@ -124,6 +128,48 @@ function StudentDashboard() {
 
   const isUnder18 = calculateAge(editForm.dob || editForm.dateOfBirth) < 18;
 
+  const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, '');
+
+    if (val.length >= 2) {
+      let day = parseInt(val.substring(0, 2));
+      if (day > 31) val = '31' + val.substring(2);
+      if (day === 0) val = '01' + val.substring(2);
+    }
+    if (val.length >= 4) {
+      let month = parseInt(val.substring(2, 4));
+      if (month > 12) val = val.substring(0, 2) + '12' + val.substring(4);
+      if (month === 0) val = val.substring(0, 2) + '01' + val.substring(4);
+    }
+
+    if (val.length >= 3 && val.length <= 4) {
+      val = val.slice(0, 2) + '/' + val.slice(2);
+    } else if (val.length > 4) {
+      val = val.slice(0, 2) + '/' + val.slice(2, 4) + '/' + val.slice(4, 8);
+    }
+    setEditForm(prev => ({ ...prev, dob: val, dateOfBirth: val }));
+  };
+
+  const handlePincodeChange = async (pincode: string) => {
+    setEditForm(prev => ({ ...prev, pincode }));
+    if (pincode.length === 6) {
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+        const data = await res.json();
+        if (data && data[0].Status === "Success") {
+          const po = data[0].PostOffice[0];
+          setEditForm(prev => ({
+            ...prev,
+            pincode,
+            area: po.Name,
+            district: po.District,
+            state: po.State
+          }));
+        }
+      } catch (e) { console.error("Pincode fetch failed", e); }
+    }
+  };
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isUnder18 && (!editForm.parentalConsent || !editForm.parentName || !editForm.parentContact)) {
@@ -156,7 +202,7 @@ function StudentDashboard() {
     );
   }
 
-  if (error || !profile) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-orange-50/30 flex items-center justify-center p-4">
         <div className="bg-white/80 backdrop-blur-xl border border-white/50 p-8 rounded-[2rem] shadow-2xl max-w-md w-full text-center">
@@ -170,6 +216,8 @@ function StudentDashboard() {
       </div>
     );
   }
+
+
 
   const getStatusDisplay = (status: string, reason?: string) => {
     switch (status) {
@@ -264,12 +312,21 @@ function StudentDashboard() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        {!profile && (
+          <div className="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-r-2xl mb-8 flex flex-col md:flex-row md:items-center justify-between shadow-sm gap-4">
+            <div>
+              <h3 className="text-orange-800 font-black text-xl mb-1">Complete Your Profile</h3>
+              <p className="text-orange-700/80 font-medium">Please fill all the details for a better experience and to gain full access to your dashboard features.</p>
+            </div>
+
+          </div>
+        )}
 
         {/* Welcome Section */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
           <div>
             <h1 className="text-4xl font-black text-slate-800 tracking-tight mb-2 flex items-center gap-3">
-              Hello, {profile.fullName.split(' ')[0]} <Sparkles className="w-8 h-8 text-orange-500 animate-pulse" />
+              Hello, {profile?.fullName ? profile.fullName.split(' ')[0] : 'Student'} <Sparkles className="w-8 h-8 text-orange-500 animate-pulse" />
             </h1>
             <p className="text-slate-500 font-medium text-lg">Welcome to CoachKonnects</p>
           </div>
@@ -284,7 +341,7 @@ function StudentDashboard() {
 
         {/* Status Alert */}
         <div className="mb-10">
-          {getStatusDisplay(profile.status, profile.rejectReason)}
+          {profile && getStatusDisplay(profile.status, profile.rejectReason)}
         </div>
 
         {/* Dashboard Grid */}
@@ -313,7 +370,7 @@ function StudentDashboard() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Full Name</p>
-                    <p className="text-slate-800 font-bold">{profile.fullName}</p>
+                    <p className="text-slate-800 font-bold">{profile?.fullName || 'Not provided'}</p>
                   </div>
                 </div>
 
@@ -323,7 +380,7 @@ function StudentDashboard() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Email</p>
-                    <p className="text-slate-800 font-bold">{profile.user?.email}</p>
+                    <p className="text-slate-800 font-bold">{profile?.user?.email || localStorage.getItem('userEmail')}</p>
                   </div>
                 </div>
 
@@ -333,7 +390,7 @@ function StudentDashboard() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Date of Birth</p>
-                    <p className="text-slate-800 font-bold">{profile.dateOfBirth}</p>
+                    <p className="text-slate-800 font-bold">{profile?.dateOfBirth || 'Not provided'}</p>
                   </div>
                 </div>
 
@@ -343,7 +400,7 @@ function StudentDashboard() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Location</p>
-                    <p className="text-slate-800 font-bold">{profile.district}, {profile.state}</p>
+                    <p className="text-slate-800 font-bold">{profile?.district ? `${profile.district}, ${profile.state}` : 'Not provided'}</p>
                   </div>
                 </div>
               </div>
@@ -359,7 +416,7 @@ function StudentDashboard() {
                     <Heart className="w-5 h-5 text-rose-500" /> Interests
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {profile.interests ? profile.interests.split(',').map((interest: string, i: number) => (
+                    {profile?.interests ? profile.interests.split(',').map((interest: string, i: number) => (
                       <span key={i} className="px-3 py-1 bg-rose-50 text-rose-700 rounded-lg text-sm font-bold border border-rose-100">
                         {interest.trim()}
                       </span>
@@ -374,7 +431,7 @@ function StudentDashboard() {
                     <Target className="w-5 h-5 text-indigo-500" /> Preference
                   </div>
                   <span className="inline-block px-4 py-1.5 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-bold border border-indigo-100">
-                    {profile.preference || 'Not specified'}
+                    {profile?.preference || 'Not specified'}
                   </span>
                 </div>
               </div>
@@ -538,7 +595,9 @@ function StudentDashboard() {
                   <input
                     type="text"
                     value={editForm.dob || editForm.dateOfBirth || ''}
-                    onChange={e => setEditForm({ ...editForm, dob: e.target.value })}
+                    onChange={handleDobChange}
+                    maxLength={10}
+                    placeholder="DD/MM/YYYY"
                     className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm"
                   />
                 </div>
@@ -560,11 +619,13 @@ function StudentDashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 ml-1">District / City</label>
+                  <label className="text-sm font-bold text-slate-700 ml-1">Pincode</label>
                   <input
                     type="text"
-                    value={editForm.district || ''}
-                    onChange={e => setEditForm({ ...editForm, district: e.target.value })}
+                    value={editForm.pincode || ''}
+                    maxLength={6}
+                    onChange={e => handlePincodeChange(e.target.value.replace(/\D/g, ''))}
+                    placeholder="400001"
                     className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm"
                   />
                 </div>
@@ -581,11 +642,11 @@ function StudentDashboard() {
                   />
                 </div>
                 <div className="space-y-2 md:col-span-1">
-                  <label className="text-sm font-bold text-slate-700 ml-1">Pincode</label>
+                  <label className="text-sm font-bold text-slate-700 ml-1">District / City</label>
                   <input
                     type="text"
-                    value={editForm.pincode || ''}
-                    onChange={e => setEditForm({ ...editForm, pincode: e.target.value })}
+                    value={editForm.district || ''}
+                    onChange={e => setEditForm({ ...editForm, district: e.target.value })}
                     className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm"
                   />
                 </div>

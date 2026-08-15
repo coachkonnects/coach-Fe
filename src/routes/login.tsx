@@ -12,6 +12,14 @@ type AuthPath = 'selection' | 'student' | 'coach';
 function LoginPage() {
   const navigate = useNavigate();
   const [activePath, setActivePath] = useState<AuthPath>('selection');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const type = params.get('type');
+    if (type === 'student' || type === 'coach') {
+      setActivePath(type as AuthPath);
+    }
+  }, []);
   
   // Auth state
   const [email, setEmail] = useState('');
