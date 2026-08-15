@@ -118,24 +118,6 @@ function CoachRegisterPage() {
     isFresher: false
   });
 
-  const [isLocating, setIsLocating] = useState(false);
-
-  const fallbackToIpLocation = async () => {
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      const data = await res.json();
-      if (data && data.city) {
-        setFormData(prev => ({ ...prev, district: data.city, state: data.region || '' }));
-      } else {
-        alert("Location detection failed. Please enter manually.");
-      }
-    } catch (e) {
-      console.error("IP fallback failed", e);
-      alert("Location detection failed. Please enter manually.");
-    }
-    setIsLocating(false);
-  };
-
   const handlePincodeChange = async (pincode: string) => {
     setFormData(prev => ({ ...prev, pincode }));
     if (pincode.length === 6) {
@@ -156,40 +138,6 @@ function CoachRegisterPage() {
     }
   };
 
-  const handleDetectLocation = () => {
-    setIsLocating(true);
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`);
-          const data = await res.json();
-          if (data && data.address) {
-            const city = data.address.city || data.address.town || data.address.village || data.address.county || data.address.state_district || data.address.suburb || '';
-            const state = data.address.state || '';
-            const postcode = data.address.postcode || '';
-
-            if (postcode) {
-              handlePincodeChange(postcode);
-              setIsLocating(false);
-            } else if (city || state) {
-              setFormData(prev => ({ ...prev, district: city, state: state }));
-              setIsLocating(false);
-            } else {
-              fallbackToIpLocation();
-            }
-          } else {
-            fallbackToIpLocation();
-          }
-        } catch (e) {
-          fallbackToIpLocation();
-        }
-      }, () => {
-        fallbackToIpLocation();
-      });
-    } else {
-      fallbackToIpLocation();
-    }
-  };
 
   const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value.replace(/\D/g, '');
@@ -639,17 +587,7 @@ function CoachRegisterPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-3 pl-5 bg-teal-50/80 border border-teal-100 rounded-2xl mt-6 backdrop-blur-sm shadow-sm transition-all hover:bg-teal-50">
-                <div className="flex items-center gap-3 text-teal-800 text-sm font-bold">Auto-detect my location</div>
-                <button
-                  type="button"
-                  onClick={handleDetectLocation}
-                  disabled={isLocating}
-                  className="px-6 py-2.5 bg-white border border-teal-200 rounded-xl text-teal-700 text-sm font-bold shadow-sm"
-                >
-                  {isLocating ? 'Detecting...' : 'Detect'}
-                </button>
-              </div>
+
             </div>
           )}
 

@@ -30,9 +30,10 @@ function LoginPage() {
     setError("");
     setIsLoading(true);
     try {
-      const profileRes = await fetch(`/api/profile/coach?email=${email}`);
+      const roleStr = activePath as string;
+      const profileRes = await fetch(`/api/profile/${roleStr === 'coach' ? 'coach' : 'student'}/me?email=${email}`);
       if (!profileRes.ok) {
-        throw new Error("This email is not registered. Please apply as a coach first.");
+        throw new Error(`This email is not registered as a ${roleStr}. Please register first.`);
       }
 
       const res = await fetch("/api/passkeys/login/start");
@@ -48,8 +49,8 @@ function LoginPage() {
       if (!verifyRes.ok) throw new Error("Passkey login failed. Invalid passcode.");
       
       localStorage.setItem('userEmail', email);
-      localStorage.setItem('userRole', 'coach');
-      navigate({ to: "/coach-dashboard" });
+      localStorage.setItem('userRole', roleStr);
+      navigate({ to: `/${roleStr}-dashboard` });
     } catch (err: any) {
       setError(err.message || "Failed to authenticate with Passkey");
     } finally {
@@ -117,6 +118,8 @@ function LoginPage() {
 
       if (activePath === 'coach') {
         navigate({ to: '/coach-dashboard' });
+      } else if (activePath === 'student') {
+        navigate({ to: '/student-dashboard' });
       } else {
         navigate({ to: '/' });
       }
@@ -354,11 +357,28 @@ function LoginPage() {
                 )}
               </button>
 
-
+              {step === 'email' && (
+                <div className="mt-4">
+                  <div className="relative flex items-center py-2">
+                    <div className="flex-grow border-t border-[#F4A460]/30"></div>
+                    <span className="flex-shrink-0 mx-4 text-[#8B4726]/50 text-sm font-bold">OR</span>
+                    <div className="flex-grow border-t border-[#F4A460]/30"></div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handlePasskeyLogin}
+                    disabled={isLoading || !email || !email.includes('@')}
+                    className="w-full bg-white hover:bg-[#FFF8F0] text-[#2C1810] font-bold text-lg py-4 rounded-2xl transition-all transform active:scale-95 border-2 border-[#F4A460]/20 hover:border-[#FF6B35] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                  >
+                    <Key className="w-5 h-5 text-[#FF6B35]" />
+                    Sign in with Passkey
+                  </button>
+                </div>
+              )}
 
               <div className="mt-8 text-center text-sm font-medium text-[#8B4726]">
                 New here?{' '}
-                <a href="/register" className="font-black text-[#FF6B35] hover:underline transition-colors">
+                <a href="/register-student" className="font-black text-[#FF6B35] hover:underline transition-colors">
                   Create an account
                 </a>
               </div>

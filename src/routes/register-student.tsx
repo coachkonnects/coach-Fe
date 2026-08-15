@@ -13,30 +13,19 @@ function RegisterPage() {
     fullName: '',
     mobile: '',
     dob: '',
+    parentalConsent: false,
+    parentName: '',
+    parentContact: '',
+    gender: '',
     district: '',
     state: '',
     pincode: '',
     area: '',
-    location: ''
+    location: '',
+    interests: '',
+    preference: '',
+    heardFrom: ''
   });
-
-  const [isLocating, setIsLocating] = useState(false);
-
-  const fallbackToIpLocation = async () => {
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      const data = await res.json();
-      if (data && data.city) {
-        setFormData(prev => ({ ...prev, district: data.city, state: data.region || '' }));
-      } else {
-        alert("Location detection failed. Please enter manually.");
-      }
-    } catch (e) {
-      console.error("IP fallback failed", e);
-      alert("Location detection failed. Please enter manually.");
-    }
-    setIsLocating(false);
-  };
 
   const handlePincodeChange = async (pincode: string) => {
     setFormData(prev => ({ ...prev, pincode }));
@@ -58,41 +47,6 @@ function RegisterPage() {
     }
   };
 
-  const handleDetectLocation = () => {
-    setIsLocating(true);
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`);
-          const data = await res.json();
-          if (data && data.address) {
-            const city = data.address.city || data.address.town || data.address.village || data.address.county || data.address.state_district || data.address.suburb || '';
-            const state = data.address.state || '';
-            const postcode = data.address.postcode || '';
-
-            if (postcode) {
-              handlePincodeChange(postcode); // Auto-trigger the pincode API for standardisation
-              setIsLocating(false);
-            } else if (city || state) {
-              setFormData(prev => ({ ...prev, district: city, state: state }));
-              setIsLocating(false);
-            } else {
-              fallbackToIpLocation();
-            }
-          } else {
-            fallbackToIpLocation();
-          }
-        } catch (e) {
-          console.error("Nominatim error", e);
-          fallbackToIpLocation();
-        }
-      }, (err) => {
-        fallbackToIpLocation();
-      });
-    } else {
-      fallbackToIpLocation();
-    }
-  };
 
   const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value.replace(/\D/g, '');
@@ -120,6 +74,25 @@ function RegisterPage() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
+
+  const calculateAge = (dobString: string) => {
+    if (!dobString || dobString.length < 10) return 99;
+    const parts = dobString.split('/');
+    if (parts.length !== 3) return 99;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
+    const dob = new Date(year, month, day);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const isUnder18 = calculateAge(formData.dob) < 18;
 
   const handleSendOtp = async () => {
     if (!formData.email) return alert("Please enter an email first");
@@ -164,6 +137,10 @@ function RegisterPage() {
   const handleSubmitProfile = async () => {
     if (!emailVerified) return alert("Please verify your email first!");
     if (!formData.fullName) return alert("Please enter your name!");
+    if (isUnder18 && (!formData.parentalConsent || !formData.parentName || !formData.parentContact)) {
+      alert("Parental consent and details are required for students under 18.");
+      return;
+    }
 
     try {
       const res = await fetch(`/api/profile/student`, {
@@ -185,7 +162,7 @@ function RegisterPage() {
   };
 
   const handleResetForm = () => {
-    setFormData({ email: '', fullName: '', mobile: '', dob: '', district: '', state: '', pincode: '', area: '', location: '' });
+    setFormData({ email: '', fullName: '', mobile: '', dob: '', parentalConsent: false, parentName: '', parentContact: '', gender: '', district: '', state: '', pincode: '', area: '', location: '', heardFrom: '', interests: '', preference: '' });
     setOtpSent(false);
     setEmailVerified(false);
     setOtpCode('');
@@ -226,7 +203,7 @@ function RegisterPage() {
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
                   placeholder="hello@example.com"
                   disabled={emailVerified}
-                  className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all disabled:opacity-50 text-slate-900 placeholder-slate-400 shadow-sm"
+                  className="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all disabled:opacity-50 text-slate-900 placeholder-slate-400 shadow-sm"
                 />
               </div>
               <button
@@ -280,7 +257,7 @@ function RegisterPage() {
                   value={formData.fullName}
                   onChange={e => setFormData({ ...formData, fullName: e.target.value })}
                   placeholder="John Doe"
-                  className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
+                  className="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
                 />
               </div>
             </div>
@@ -297,7 +274,7 @@ function RegisterPage() {
                   value={formData.mobile}
                   onChange={e => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
                   placeholder="9876543210"
-                  className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all font-mono shadow-sm placeholder:text-slate-400"
+                  className="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all font-mono shadow-sm placeholder:text-slate-400"
                 />
               </div>
             </div>
@@ -316,9 +293,23 @@ function RegisterPage() {
                   onChange={handleDobChange}
                   maxLength={10}
                   placeholder="DD/MM/YYYY"
-                  className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
+                  className="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm placeholder:text-slate-400"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 ml-1">Gender <span className="text-orange-500">*</span></label>
+              <select
+                value={formData.gender}
+                onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm text-slate-700"
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
           </div>
 
@@ -331,7 +322,7 @@ function RegisterPage() {
                 value={formData.pincode}
                 onChange={e => handlePincodeChange(e.target.value.replace(/\D/g, ''))}
                 placeholder="400001"
-                className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all font-mono shadow-sm placeholder:text-slate-400"
+                className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all font-mono shadow-sm placeholder:text-slate-400"
               />
               <p className="text-xs text-slate-500 ml-1 font-medium">Type 6 digits to auto-fill District & State!</p>
             </div>
@@ -343,7 +334,7 @@ function RegisterPage() {
                 value={formData.area}
                 onChange={e => setFormData({ ...formData, area: e.target.value })}
                 placeholder="e.g. Andheri West"
-                className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
+                className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
               />
             </div>
           </div>
@@ -356,7 +347,7 @@ function RegisterPage() {
                 value={formData.district}
                 onChange={e => setFormData({ ...formData, district: e.target.value })}
                 placeholder="e.g. Mumbai"
-                className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
+                className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
               />
             </div>
 
@@ -367,7 +358,7 @@ function RegisterPage() {
                 value={formData.state}
                 onChange={e => setFormData({ ...formData, state: e.target.value })}
                 placeholder="e.g. Maharashtra"
-                className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
+                className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
               />
             </div>
           </div>
@@ -379,27 +370,52 @@ function RegisterPage() {
               value={formData.location}
               onChange={e => setFormData({ ...formData, location: e.target.value })}
               placeholder="e.g. Near Train Station"
-              className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
+              className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
             />
           </div>
 
-              <div className="flex items-center justify-between p-3 pl-5 bg-teal-50/80 border border-teal-100 rounded-2xl mt-6 backdrop-blur-sm shadow-sm transition-all hover:bg-teal-50">
-                <div className="flex items-center gap-3 text-teal-800 text-sm font-bold">
-                  <svg className="w-5 h-5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                  Auto-detect my location
-                </div>
-                <button
-                  type="button"
-                  onClick={handleDetectLocation}
-                  disabled={isLocating}
-                  className="px-6 py-2.5 bg-white border border-teal-200 rounded-xl text-teal-700 text-sm font-bold hover:bg-teal-50 hover:border-teal-300 shadow-sm transition-colors disabled:opacity-50"
-                >
-                  {isLocating ? 'Detecting...' : 'Detect'}
-                </button>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 ml-1">Interests / Subjects <span className="text-orange-500">*</span></label>
+              <input
+                type="text"
+                value={formData.interests}
+                onChange={e => setFormData({ ...formData, interests: e.target.value })}
+                placeholder="e.g. Photography, Yoga, Guitar"
+                className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm placeholder:text-slate-400"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 ml-1">Learning Preference <span className="text-orange-500">*</span></label>
+              <select
+                value={formData.preference}
+                onChange={e => setFormData({ ...formData, preference: e.target.value })}
+                className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm text-slate-700"
+              >
+                <option value="">Select Mode</option>
+                <option value="Online">Online</option>
+                <option value="In-person">In-person</option>
+                <option value="Both">Both</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-2 mt-6">
+            <label className="text-sm font-bold text-slate-700 ml-1">Where did you hear about us?</label>
+            <input
+              type="text"
+              value={formData.heardFrom}
+              onChange={e => setFormData({ ...formData, heardFrom: e.target.value })}
+              placeholder="e.g. Google, Friend, Social Media"
+              className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm placeholder:text-slate-400"
+            />
+          </div>
+
+
 
               <div className="flex justify-between items-center pt-8 mt-4 border-t border-slate-100">
-                <button type="button" onClick={handleResetForm} className="px-8 py-4 bg-white border border-slate-200 rounded-2xl text-slate-500 font-bold hover:text-slate-900 hover:border-slate-300 shadow-sm transition-colors">
+                <button type="button" onClick={handleResetForm} className="px-8 py-4 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl text-slate-500 font-bold hover:text-slate-900 hover:border-slate-300 shadow-sm transition-colors">
                   Cancel
                 </button>
                 <button

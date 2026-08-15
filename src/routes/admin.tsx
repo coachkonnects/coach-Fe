@@ -408,10 +408,12 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden relative">
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-teal-50/50 to-orange-50/30 font-sans text-gray-900 overflow-hidden relative">
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-teal-400/10 rounded-full blur-[150px] -z-10 mix-blend-multiply"></div>
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-orange-400/10 rounded-full blur-[120px] -z-10 mix-blend-multiply"></div>
 
       {/* Sidebar */}
-      <div className="w-64 bg-teal-900 text-white flex flex-col shadow-xl z-10 relative">
+      <div className="w-64 bg-teal-900/90 backdrop-blur-3xl text-white flex flex-col shadow-2xl z-10 relative border-r border-white/10">
         <div className="p-6 border-b border-teal-800 relative">
           <div className="flex items-center gap-3 relative z-10 mb-2">
             <img src="/homelogo.png" alt="CoachKonnects" className="h-10 w-auto rounded-md object-contain bg-white px-2 py-1 shadow-sm" />
@@ -486,7 +488,7 @@ function AdminDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10">
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center px-8 justify-between shrink-0 shadow-sm">
+        <header className="h-20 bg-white/60 backdrop-blur-xl border-b border-white flex items-center px-8 justify-between shrink-0 shadow-sm">
           <h2 className="text-lg font-bold capitalize text-gray-900">{activeTab} Review</h2>
           <div className="flex items-center gap-4">
             <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-bold shadow-sm border border-gray-200 text-[#f26b21]">SA</div>
@@ -495,7 +497,7 @@ function AdminDashboard() {
 
         <main className="flex-1 overflow-auto p-8 relative z-10">
           {activeTab === 'coaches' && !selectedCoach && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-xl border border-white overflow-hidden">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-gray-50 border-b text-sm text-gray-500">
@@ -767,7 +769,7 @@ function AdminDashboard() {
 
           {/* Students List View */}
           {activeTab === 'students' && !selectedStudent && (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-xl border border-white overflow-hidden">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-gray-50 border-b text-sm text-gray-500">
@@ -1030,7 +1032,7 @@ function AdminDashboard() {
           {activeTab === 'admins' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-xl border border-white overflow-hidden">
                   <div className="p-6 border-b flex justify-between items-center bg-gray-50">
                     <h3 className="font-bold text-gray-800 text-lg">Active Admins</h3>
                   </div>
@@ -1229,7 +1231,7 @@ function AdminDashboard() {
                   <p className="text-gray-500 font-medium">No classes have been created yet.</p>
                 </div>
               ) : (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-xl border border-white overflow-hidden">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-gray-50 border-b text-sm text-gray-500">

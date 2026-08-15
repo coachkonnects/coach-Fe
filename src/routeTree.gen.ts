@@ -18,6 +18,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RegisterCoachRouteImport } from './routes/register-coach'
 import { Route as RegisterStudentRouteImport } from './routes/register-student'
+import { Route as StudentDashboardRouteImport } from './routes/student-dashboard'
 import { Route as CoachSlugRouteImport } from './routes/coach.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -65,6 +66,11 @@ const RegisterStudentRoute = RegisterStudentRouteImport.update({
   path: '/register-student',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentDashboardRoute = StudentDashboardRouteImport.update({
+  id: '/student-dashboard',
+  path: '/student-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoachSlugRoute = CoachSlugRouteImport.update({
   id: '/coach/$slug',
   path: '/coach/$slug',
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/register-coach': typeof RegisterCoachRoute
   '/register-student': typeof RegisterStudentRoute
+  '/student-dashboard': typeof StudentDashboardRoute
   '/coach/$slug': typeof CoachSlugRoute
 }
 export interface FileRoutesByTo {
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/register-coach': typeof RegisterCoachRoute
   '/register-student': typeof RegisterStudentRoute
+  '/student-dashboard': typeof StudentDashboardRoute
   '/coach/$slug': typeof CoachSlugRoute
 }
 export interface FileRoutesById {
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/register-coach': typeof RegisterCoachRoute
   '/register-student': typeof RegisterStudentRoute
+  '/student-dashboard': typeof StudentDashboardRoute
   '/coach/$slug': typeof CoachSlugRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/register-coach'
     | '/register-student'
+    | '/student-dashboard'
     | '/coach/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/register-coach'
     | '/register-student'
+    | '/student-dashboard'
     | '/coach/$slug'
   id:
     | '__root__'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/register-coach'
     | '/register-student'
+    | '/student-dashboard'
     | '/coach/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -157,6 +169,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   RegisterCoachRoute: typeof RegisterCoachRoute
   RegisterStudentRoute: typeof RegisterStudentRoute
+  StudentDashboardRoute: typeof StudentDashboardRoute
   CoachSlugRoute: typeof CoachSlugRoute
 }
 
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterStudentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/student-dashboard': {
+      id: '/student-dashboard'
+      path: '/student-dashboard'
+      fullPath: '/student-dashboard'
+      preLoaderRoute: typeof StudentDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/coach/$slug': {
       id: '/coach/$slug'
       path: '/coach/$slug'
@@ -245,6 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   RegisterCoachRoute: RegisterCoachRoute,
   RegisterStudentRoute: RegisterStudentRoute,
+  StudentDashboardRoute: StudentDashboardRoute,
   CoachSlugRoute: CoachSlugRoute,
 }
 export const routeTree = rootRouteImport

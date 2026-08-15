@@ -513,7 +513,11 @@ function CoachDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/50 to-orange-50/30 py-12 px-4 sm:px-6 relative overflow-hidden">
+      {/* Decorative Blobs */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-teal-400/10 rounded-full blur-[120px] -z-10 mix-blend-multiply"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-orange-400/10 rounded-full blur-[100px] -z-10 mix-blend-multiply"></div>
+
       <div className="max-w-3xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Coach Dashboard</h1>
@@ -530,7 +534,7 @@ function CoachDashboard() {
 
         {getStatusBanner()}
 
-        <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden relative">
+        <div className="bg-white/80 backdrop-blur-2xl rounded-[3rem] shadow-xl border border-white overflow-hidden relative">
           <div className="flex flex-col sm:flex-row border-b border-slate-200 bg-slate-50">
             <button
               onClick={() => setActiveTab("overview")}
@@ -560,9 +564,9 @@ function CoachDashboard() {
               className={`flex-1 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${activeTab === "enquiries" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
             >
               Leads / Enquiries
-              {enquiries.length > 0 && (
+              {enquiries.filter((e: any) => e.status === 'PENDING_COACH_APPROVAL').length > 0 && (
                 <span className="bg-teal-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {enquiries.length}
+                  {enquiries.filter((e: any) => e.status === 'PENDING_COACH_APPROVAL').length}
                 </span>
               )}
             </button>
@@ -615,7 +619,7 @@ function CoachDashboard() {
                           if (isEditing) {
                             setIsEditing(false);
                           } else {
-                            setEditForm(profile);
+                            setEditForm({ ...profile, mobile: profile?.user?.phoneNumber || "" });
                             setIsEditing(true);
                           }
                         }}
@@ -642,7 +646,7 @@ function CoachDashboard() {
                   </div>
 
                   {isEditing ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10 bg-white/60 backdrop-blur-md p-6 rounded-3xl shadow-sm border border-white">
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">
                           Full Name
@@ -673,6 +677,21 @@ function CoachDashboard() {
                           type="text"
                           value={editForm.location || ""}
                           onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                          className="w-full px-4 py-2 border rounded-xl"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                          Mobile Number
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={10}
+                          value={editForm.mobile || ""}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            if (val.length <= 10) setEditForm({ ...editForm, mobile: val });
+                          }}
                           className="w-full px-4 py-2 border rounded-xl"
                         />
                       </div>
@@ -906,7 +925,7 @@ function CoachDashboard() {
                     {classes.map((c) => (
                       <div
                         key={c.id}
-                        className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group"
+                        className="bg-white/70 backdrop-blur-md border border-white rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
                       >
                         <div className="absolute top-0 right-0 w-24 h-24 bg-[#f26b21]/5 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
                         <div className="flex justify-between items-start mb-4">
@@ -994,7 +1013,7 @@ function CoachDashboard() {
                   </button>
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-white/70 backdrop-blur-md border border-white rounded-[2rem] overflow-hidden shadow-sm">
                   {[
                     "MONDAY",
                     "TUESDAY",
@@ -1089,7 +1108,7 @@ function CoachDashboard() {
                     {enquiries.map((enquiry) => (
                       <div
                         key={enquiry.id}
-                        className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm"
+                        className="bg-white/70 backdrop-blur-md border border-white p-6 rounded-[2rem] shadow-sm hover:shadow-xl transition-all"
                       >
                         <div className="flex justify-between items-start mb-4">
                           <div>
@@ -1168,7 +1187,7 @@ function CoachDashboard() {
 
       {cropModalOpen && cropImageSrc && (
         <div className="fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden flex flex-col shadow-2xl">
+          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] border border-white w-full max-w-2xl overflow-hidden flex flex-col shadow-2xl">
             <div className="p-6 border-b">
               <h3 className="text-xl font-bold">Crop Image</h3>
               <p className="text-sm text-slate-500">Adjust the image so it looks perfect.</p>
