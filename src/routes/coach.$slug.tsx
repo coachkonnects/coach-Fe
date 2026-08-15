@@ -13,6 +13,12 @@ function CoachProfilePage() {
   const [error, setError] = useState('');
 
   const [showModal, setShowModal] = useState(false);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('contact=true')) {
+      setShowModal(true);
+    }
+  }, []);
   const [enquiryMessage, setEnquiryMessage] = useState('');
   const [enquiryEmail, setEnquiryEmail] = useState('');
   const [enquiryName, setEnquiryName] = useState('');

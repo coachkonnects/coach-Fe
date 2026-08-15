@@ -40,7 +40,14 @@ function StudentDashboard() {
 
     try {
       const res = await fetch(`/api/profile/student/me?email=${email}`);
-      if (!res.ok) throw new Error('Failed to fetch profile');
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        if (res.status === 404 || errorData.error === 'Student profile not found.') {
+          navigate({ to: '/register-student' });
+          return;
+        }
+        throw new Error(errorData.error || 'Failed to fetch profile');
+      }
       const data = await res.json();
       setProfile(data.profile);
       setEditForm(data.profile);
