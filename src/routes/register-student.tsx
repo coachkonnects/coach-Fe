@@ -74,6 +74,15 @@ function RegisterPage() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [countdown]);
 
   const calculateAge = (dobString: string) => {
     if (!dobString || dobString.length < 10) return 99;
@@ -101,10 +110,11 @@ function RegisterPage() {
       const res = await fetch('/api/auth/request-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email })
+        body: JSON.stringify({ email: formData.email, intendedRole: "STUDENT" })
       });
       if (res.ok) {
         setOtpSent(true);
+        setCountdown(30);
         alert("OTP sent to your email!");
       }
     } catch (err) {
@@ -240,6 +250,16 @@ function RegisterPage() {
                   className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl font-bold shadow-md disabled:opacity-50 transition-all"
                 >
                   Confirm
+                </button>
+              </div>
+              <div className="flex justify-end mt-2">
+                <button 
+                  type="button" 
+                  onClick={handleSendOtp} 
+                  disabled={countdown > 0 || isVerifying}
+                  className="text-sm text-orange-600 font-bold hover:underline disabled:opacity-50 disabled:hover:no-underline"
+                >
+                  {countdown > 0 ? `Resend (${countdown}s)` : "Resend OTP"}
                 </button>
               </div>
             </div>

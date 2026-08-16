@@ -28,6 +28,15 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [countdown]);
 
   const handlePasskeyLogin = async () => {
     if (!email || !email.includes('@')) {
@@ -75,7 +84,7 @@ function LoginPage() {
       const res = await fetch('/api/auth/request-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email, intendedRole: activePath.toUpperCase() })
       });
       
       if (!res.ok) {
@@ -89,6 +98,7 @@ function LoginPage() {
       }
       
       setStep('otp');
+      setCountdown(30);
       setSuccess('Security code sent! Check your inbox.');
     } catch (err: any) {
       setError(err.message);
@@ -335,9 +345,19 @@ function LoginPage() {
                     <p className="text-sm text-[#8B4726] font-medium">
                       Code sent to <span className="font-bold text-[#2C1810]">{email}</span>
                     </p>
-                    <button type="button" onClick={() => { setStep('email'); setSuccess(''); setError(''); }} className="text-[#FF6B35] hover:underline text-sm font-bold">
-                      Edit
-                    </button>
+                    <div className="flex items-center space-x-3">
+                      <button type="button" onClick={() => { setStep('email'); setSuccess(''); setError(''); }} className="text-[#FF6B35] hover:underline text-sm font-bold">
+                        Edit
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={handleRequestOtp} 
+                        disabled={countdown > 0 || isLoading}
+                        className="text-[#FF6B35] disabled:text-[#8B4726]/40 hover:underline text-sm font-bold transition-all"
+                      >
+                        {countdown > 0 ? `Resend OTP (${countdown}s)` : 'Resend OTP'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -531,9 +551,19 @@ function LoginPage() {
                   <p className="text-sm text-teal-200/60 font-medium">
                     Code sent to <span className="font-bold text-white">{email}</span>
                   </p>
-                  <button type="button" onClick={() => { setStep('email'); setSuccess(''); setError(''); }} className="text-teal-400 hover:underline text-sm font-bold">
-                    Edit
-                  </button>
+                  <div className="flex items-center space-x-3">
+                    <button type="button" onClick={() => { setStep('email'); setSuccess(''); setError(''); }} className="text-teal-400 hover:underline text-sm font-bold">
+                      Edit
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={handleRequestOtp} 
+                      disabled={countdown > 0 || isLoading}
+                      className="text-teal-400 disabled:text-teal-200/30 hover:underline text-sm font-bold transition-all"
+                    >
+                      {countdown > 0 ? `Resend (${countdown}s)` : 'Resend'}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

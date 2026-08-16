@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
 
 export const Route = createFileRoute("/admin-login")({
@@ -15,6 +15,16 @@ function AdminLogin() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  // Timer effect
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [countdown]);
 
   const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +35,7 @@ function AdminLogin() {
       const res = await fetch('/api/auth/request-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email, intendedRole: "ADMIN" })
       });
 
       if (!res.ok) {
@@ -33,6 +43,7 @@ function AdminLogin() {
       }
 
       setStep("OTP");
+      setCountdown(30);
       setSuccess("Security code sent! Check your inbox.");
     } catch (err: any) {
       setError(err.message);
@@ -133,8 +144,16 @@ function AdminLogin() {
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center tracking-[1em] font-mono text-2xl font-black outline-none focus:border-orange-500 focus:bg-white"
                 required
               />
-              <div className="flex justify-end mt-2">
-                <button type="button" onClick={() => { setStep('EMAIL'); setSuccess(''); setError(''); }} className="text-sm text-orange-500 font-bold">Edit Email</button>
+              <div className="flex justify-end mt-2 space-x-3">
+                <button type="button" onClick={() => { setStep('EMAIL'); setSuccess(''); setError(''); }} className="text-sm text-orange-500 font-bold hover:underline">Edit Email</button>
+                <button 
+                  type="button" 
+                  onClick={handleRequestOtp} 
+                  disabled={countdown > 0 || isLoading}
+                  className="text-sm text-orange-500 font-bold hover:underline disabled:opacity-50 disabled:hover:no-underline"
+                >
+                  {countdown > 0 ? `Resend (${countdown}s)` : 'Resend OTP'}
+                </button>
               </div>
             </div>
           )}
