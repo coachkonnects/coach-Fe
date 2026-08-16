@@ -26,6 +26,17 @@ jobs:
       - name: Build Project
         run: npm run build
 
+      - name: Clear old deployment on EC2
+        if: github.event_name == 'push'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "--- Clearing old deployment ---"
+            rm -rf /home/ubuntu/frontend/.output
+
       - name: Copy built output to EC2
         if: github.event_name == 'push'
         uses: appleboy/scp-action@v0.1.7
@@ -33,7 +44,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: ".output/"
+          source: ".output"
           target: "/home/ubuntu/frontend/"
 
       - name: Restart Frontend Service on EC2
