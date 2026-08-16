@@ -1,18 +1,13 @@
-name: CI/CD Pipeline
+name: Frontend CI/CD Pipeline
 
 on:
   push:
     branches:
       - main
-      - staging
-  pull_request:
-    branches:
-      - main
-      - staging
 
 jobs:
-  build:
-    name: Build & Test
+  build-and-deploy:
+    name: Build & Deploy Frontend
     runs-on: ubuntu-latest
 
     steps:
@@ -31,24 +26,31 @@ jobs:
       - name: Build Project
         run: npm run build
 
-  deploy-staging:
-    name: Deploy to Staging EC2
-    needs: build
-    if: github.ref == 'refs/heads/staging'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Placeholder for EC2 Staging Deployment
-        run: |
-          echo "This step will SSH into the Staging AWS EC2 instance and pull the latest code."
-          echo "We will configure the SSH keys (secrets.EC2_SSH_KEY) in Module 9."
+      - name: Copy built output to EC2
+        if: github.event_name == 'push'
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: ".output/"
+          target: "/home/ubuntu/frontend/"
 
-  deploy-prod:
-    name: Deploy to Production EC2
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Placeholder for EC2 Production Deployment
-        run: |
-          echo "This step will SSH into the Production AWS EC2 instance and pull the latest code."
-          echo "We will configure the SSH keys in Module 9 after Kavita approves the staging deploy."
+      - name: Restart Frontend Service on EC2
+        if: github.event_name == 'push'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "--- Restarting the frontend service ---"
+            sudo systemctl restart coachkonnects-frontend
+
+            echo "--- Waiting for service to start ---"
+            sleep 5
+
+            echo "--- Checking service status ---"
+            sudo systemctl status coachkonnects-frontend --no-pager
+
+            echo "--- Frontend Deployment Complete! ---"
