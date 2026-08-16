@@ -12,6 +12,25 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+if (typeof window !== 'undefined') {
+  const originalFetch = window.fetch;
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    let url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    
+    if (url.startsWith('/api/admin') || url.startsWith('/api/profile') || url.startsWith('/api/upload')) {
+        const token = localStorage.getItem('adminToken') || localStorage.getItem('session_token') || localStorage.getItem('token');
+        if (token) {
+            init = init || {};
+            init.headers = {
+                ...init.headers,
+                'Authorization': `Bearer ${token}`
+            };
+        }
+    }
+    return originalFetch(input, init);
+  };
+}
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
