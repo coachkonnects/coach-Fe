@@ -171,15 +171,10 @@ function CoachRegisterPage() {
     try {
       const res = await fetch('/api/auth/request-otp', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken || localStorage.getItem('token') || ''}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, intendedRole: "COACH" })
       });
       if (res.ok) {
-        const data = await res.json();
-        setAuthToken(data.token || data.session_token);
         setOtpSent(true);
         alert("OTP sent to your email!");
       }
@@ -199,6 +194,8 @@ function CoachRegisterPage() {
         body: JSON.stringify({ email: formData.email, code: otpCode })
       });
       if (res.ok) {
+        const data = await res.json();
+        setAuthToken(data.token || data.session_token);
         setOtpSent(false);
         setEmailVerified(true);
       } else {
@@ -407,7 +404,10 @@ function CoachRegisterPage() {
     try {
       const res = await fetch(endpoint, {
         method: method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken || localStorage.getItem('coachToken') || ''}`
+        },
         body: JSON.stringify(payload)
       });
       if (res.ok) {
@@ -677,7 +677,7 @@ function CoachRegisterPage() {
                       type="number"
                       min="0"
                       value={formData.minPrice}
-                      onChange={e => setFormData({ ...formData, minPrice: e.target.value })}
+                      onChange={e => setFormData({ ...formData, minPrice: e.target.value.replace(/-/g, '') })}
                       placeholder="Min (e.g. 500)"
                       className="w-full pl-9 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
                     />
@@ -689,7 +689,7 @@ function CoachRegisterPage() {
                       type="number"
                       min="0"
                       value={formData.maxPrice}
-                      onChange={e => setFormData({ ...formData, maxPrice: e.target.value })}
+                      onChange={e => setFormData({ ...formData, maxPrice: e.target.value.replace(/-/g, '') })}
                       placeholder="Max (e.g. 1500)"
                       className="w-full pl-9 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
                     />

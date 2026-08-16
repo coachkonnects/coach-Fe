@@ -110,15 +110,10 @@ function RegisterPage() {
     try {
       const res = await fetch('/api/auth/request-otp', {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken || localStorage.getItem('token') || ''}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, intendedRole: "STUDENT" })
       });
       if (res.ok) {
-        const data = await res.json();
-        setAuthToken(data.token || data.session_token);
         setOtpSent(true);
         setCountdown(30);
         alert("OTP sent to your email!");
@@ -139,6 +134,8 @@ function RegisterPage() {
         body: JSON.stringify({ email: formData.email, code: otpCode })
       });
       if (res.ok) {
+        const data = await res.json();
+        setAuthToken(data.token || data.session_token);
         setOtpSent(false);
         setEmailVerified(true);
       } else {
@@ -161,7 +158,10 @@ function RegisterPage() {
     try {
       const res = await fetch(`/api/profile/student`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken || localStorage.getItem('token') || ''}`
+        },
         body: JSON.stringify(formData)
       });
       if (res.ok) {
