@@ -161,6 +161,7 @@ function CoachRegisterPage() {
 
   const [isVerifying, setIsVerifying] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [authToken, setAuthToken] = useState("");
   const [otpCode, setOtpCode] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
 
@@ -170,10 +171,15 @@ function CoachRegisterPage() {
     try {
       const res = await fetch('/api/auth/request-otp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken || localStorage.getItem('token') || ''}`
+        },
         body: JSON.stringify({ email: formData.email, intendedRole: "COACH" })
       });
       if (res.ok) {
+        const data = await res.json();
+        setAuthToken(data.token || data.session_token);
         setOtpSent(true);
         alert("OTP sent to your email!");
       }
