@@ -669,6 +669,7 @@ function CoachRegisterPage() {
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">₹</span>
                     <input
                       type="number"
+                      min="0"
                       value={formData.minPrice}
                       onChange={e => setFormData({ ...formData, minPrice: e.target.value })}
                       placeholder="Min (e.g. 500)"
@@ -680,6 +681,7 @@ function CoachRegisterPage() {
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">₹</span>
                     <input
                       type="number"
+                      min="0"
                       value={formData.maxPrice}
                       onChange={e => setFormData({ ...formData, maxPrice: e.target.value })}
                       placeholder="Max (e.g. 1500)"
