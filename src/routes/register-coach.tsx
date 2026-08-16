@@ -321,10 +321,10 @@ function CoachRegisterPage() {
         const form = new FormData();
         form.append("file", blob, `${cropType}.jpg`);
         try {
-          const res = await fetch('/api/uploads', { method: 'POST', body: form });
+          const res = await fetch('/api/upload', { method: 'POST', body: form });
           if (res.ok) {
-            const fileUrl = await res.text();
-            setFormData(prev => ({ ...prev, [isGroup ? 'groupImageUrl' : 'profileImageUrl']: fileUrl }));
+            const data = await res.json();
+            setFormData(prev => ({ ...prev, [isGroup ? 'groupImageUrl' : 'profileImageUrl']: data.url }));
             alert("✅ Perfect! Image accepted and optimized.");
           } else {
             alert("Failed to upload image to server.");
