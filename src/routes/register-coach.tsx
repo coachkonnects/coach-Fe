@@ -14,8 +14,12 @@ function CoachRegisterPage() {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [demandId, setDemandId] = useState<string | null>(null);
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const demand = searchParams.get('demandId');
+    if (demand) setDemandId(demand);
     const savedEmail = localStorage.getItem('userEmail');
     const savedRole = localStorage.getItem('userRole');
     

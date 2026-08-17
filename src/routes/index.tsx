@@ -372,7 +372,7 @@ function Index() {
                     </div>
                     <h3 className="mb-1 font-[var(--font-display)] text-xl font-bold text-slate-800">{d.skillName}</h3>
                     <p className="text-sm font-medium text-slate-500">📍 {d.location}</p>
-                    <Link to="/register" className="mt-6 inline-flex items-center font-bold text-[color:var(--color-brand)] hover:text-orange-700 transition-colors">
+                    <Link to={`/register-coach?demandId=${d.id}` as any} className="mt-6 inline-flex items-center font-bold text-[color:var(--color-brand)] hover:text-orange-700 transition-colors">
                       I can teach this <span className="ml-2 text-lg">→</span>
                     </Link>
                   </div>

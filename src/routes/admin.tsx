@@ -11,6 +11,87 @@ export const Route = createFileRoute('/admin')({
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>(() => localStorage.getItem('adminActiveTab') || 'students');
+  const [coaches, setCoaches] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [selectedCoach, setSelectedCoach] = useState<any | null>(null);
+  const [students, setStudents] = useState<any[]>([]);
+  const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
+  const [studentSortConfig, setStudentSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
+  const [showLeaveWarning, setShowLeaveWarning] = useState(false);
+
+
+  const handleCategoryChange = async (e: any) => {
+    const newCategory = e.target.value;
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`/api/admin/coaches/${selectedCoach.id}/category`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ category: newCategory })
+      });
+      if (res.ok) {
+        setSelectedCoach({ ...selectedCoach, category: newCategory });
+        setCoaches(coaches.map((c: any) => c.id === selectedCoach.id ? { ...c, category: newCategory } : c));
+      } else {
+        alert('Failed to update category.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error updating category.');
+    }
+  };
+
+  const handleExpertiseChange = async (newExpertise: string) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`/api/admin/coaches/${selectedCoach.id}/expertise`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ expertise: newExpertise })
+      });
+      if (res.ok) {
+        setSelectedCoach({ ...selectedCoach, expertise: newExpertise });
+        setCoaches(coaches.map((c: any) => c.id === selectedCoach.id ? { ...c, expertise: newExpertise } : c));
+      } else {
+        alert('Failed to update expertise.');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    // Always push sentinel first so Back never immediately exits
+    window.history.pushState({ adminDashboard: true }, '');
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      // Always immediately push a new sentinel so the NEXT back press is also guarded
+      window.history.pushState({ adminDashboard: true }, '');
+
+      if (selectedCoach || selectedStudent) {
+        setSelectedCoach(null);
+        setSelectedStudent(null);
+        setIsFlagging(false);
+      } else {
+        // Show beautiful leave warning
+        setShowLeaveWarning(true);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedCoach, selectedStudent]);
 
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
@@ -19,18 +100,45 @@ function AdminDashboard() {
     }
   }, [navigate]);
 
-  const [activeTab, setActiveTab] = useState<string>(() => localStorage.getItem('adminActiveTab') || 'students');
 
   useEffect(() => {
     localStorage.setItem('adminActiveTab', activeTab);
   }, [activeTab]);
-  const [coaches, setCoaches] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [selectedCoach, setSelectedCoach] = useState<any | null>(null);
 
-  const [students, setStudents] = useState<any[]>([]);
-  const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortedData = (data: any[], config: typeof sortConfig) => {
+    if (!config) return data;
+    return [...data].sort((a, b) => {
+      let aVal = a[config.key];
+      let bVal = b[config.key];
+
+      if (config.key === 'email') {
+        aVal = a.user?.email || '';
+        bVal = b.user?.email || '';
+      }
+
+      if (aVal < bVal) return config.direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return config.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const handleStudentSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (studentSortConfig && studentSortConfig.key === key && studentSortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setStudentSortConfig({ key, direction });
+  };
+
 
   const [classesList, setClassesList] = useState<any[]>([]);
 
@@ -146,6 +254,9 @@ function AdminDashboard() {
 
   useEffect(() => {
     fetchProfiles();
+    if (activeTab === 'admins') {
+      fetchAdmins();
+    }
   }, [activeTab]);
 
   const fetchBlockedWords = async () => {
@@ -154,7 +265,7 @@ function AdminDashboard() {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
       });
       if (res.ok) setBlockedWords(await res.json());
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleAddBlockedWord = async (e: React.FormEvent) => {
@@ -163,7 +274,7 @@ function AdminDashboard() {
     try {
       const res = await fetch('/api/admin/security/blocked-words', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
         },
@@ -176,7 +287,7 @@ function AdminDashboard() {
         const data = await res.json();
         alert(data.error || "Failed to add word");
       }
-    } catch(e) {}
+    } catch (e) { }
   };
 
   const handleDeleteBlockedWord = async (id: number) => {
@@ -186,7 +297,7 @@ function AdminDashboard() {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
       });
       if (res.ok) fetchBlockedWords();
-    } catch(e) {}
+    } catch (e) { }
   };
 
   useEffect(() => {
@@ -224,7 +335,11 @@ function AdminDashboard() {
 
   const fetchAdmins = async () => {
     try {
-      const res = await fetch('/api/admin/super-admins');
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch('/api/admin/super-admins', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch admins');
       const data = await res.json();
       setAdminsList(data);
     } catch (e) { console.error(e); }
@@ -464,7 +579,22 @@ function AdminDashboard() {
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-orange-400/10 rounded-full blur-[120px] -z-10 mix-blend-multiply"></div>
 
       {/* Sidebar */}
-      <div className="w-64 bg-teal-900/90 backdrop-blur-3xl text-white flex flex-col shadow-2xl z-10 relative border-r border-white/10">
+
+      {/* Mobile Header */}
+      <div className="md:hidden absolute top-0 left-0 right-0 h-16 bg-teal-900 text-white flex items-center justify-between px-4 z-20 shadow-md">
+        <img src="/homelogo.png" alt="CoachKonnects" className="h-8 w-auto rounded object-contain bg-white px-2 shadow-sm" />
+        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-white">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+      </div>
+
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div className="md:hidden fixed inset-0 bg-black/50 z-30" onClick={() => setIsSidebarOpen(false)}></div>
+      )}
+
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0 transition duration-200 ease-in-out w-64 bg-teal-900/90 backdrop-blur-3xl text-white flex flex-col shadow-2xl z-40 md:z-10 border-r border-white/10`}>
         <div className="p-6 border-b border-teal-800 relative">
           <div className="flex items-center gap-3 relative z-10 mb-2">
             <img src="/homelogo.png" alt="CoachKonnects" className="h-10 w-auto rounded-md object-contain bg-white px-2 py-1 shadow-sm" />
@@ -489,7 +619,7 @@ function AdminDashboard() {
             return (
               <button
                 key={module.name}
-                onClick={() => setActiveTab(module.name.toLowerCase() as any)}
+                onClick={() => { setActiveTab(module.name.toLowerCase() as any); setIsSidebarOpen(false); }}
                 className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex justify-between items-center ${isActive
                   ? 'bg-[#f26b21] text-white shadow-md'
                   : 'text-teal-100 hover:bg-teal-800 hover:text-white'
@@ -549,19 +679,19 @@ function AdminDashboard() {
 
         <main className="flex-1 overflow-auto p-8 relative z-10">
           {activeTab === 'coaches' && !selectedCoach && (
-            <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-xl border border-white overflow-hidden">
+            <div className="bg-white/80 backdrop-blur-2xl md:rounded-[2rem] rounded-xl shadow-xl border border-white overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-gray-50 border-b text-sm text-gray-500">
-                    <th className="p-4 font-medium">Name</th>
-                    <th className="p-4 font-medium">Location</th>
-                    <th className="p-4 font-medium">Date of Birth</th>
+                    <th className="p-4 font-medium cursor-pointer" onClick={() => handleSort('fullName')}>Name {sortConfig?.key === 'fullName' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                    <th className="p-4 font-medium cursor-pointer" onClick={() => handleSort('location')}>Location {sortConfig?.key === 'location' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                    <th className="p-4 font-medium cursor-pointer" onClick={() => handleSort('email')}>Email Address {sortConfig?.key === 'email' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
                     <th className="p-4 font-medium">Status</th>
                     <th className="p-4 font-medium text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {coaches.map(coach => (
+                  {getSortedData(coaches, sortConfig).map((coach: any) => (
                     <tr key={coach.id} className="hover:bg-gray-50 transition-colors">
                       <td className="p-4 font-bold">{coach.fullName}</td>
                       <td className="p-4 text-gray-600">
@@ -569,7 +699,7 @@ function AdminDashboard() {
                         {coach.district}, {coach.state}
                         {coach.pincode ? ` - ${coach.pincode}` : ''}
                       </td>
-                      <td className="p-4 text-gray-600">{coach.dateOfBirth}</td>
+                      <td className="p-4 text-gray-600">{coach.user?.email || 'N/A'}</td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${coach.status === 'PENDING_APPROVAL' ? 'bg-amber-100 text-amber-700' :
                           coach.status === 'APPROVED' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -621,9 +751,10 @@ function AdminDashboard() {
             <div className="max-w-3xl mx-auto">
               <button
                 onClick={() => { setSelectedCoach(null); setIsFlagging(false); }}
-                className="text-gray-500 font-medium text-sm flex items-center gap-1 mb-6 hover:text-gray-900"
+                className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded-xl hover:bg-teal-100 hover:text-teal-900 transition-all shadow-sm"
               >
-                ← Back to List
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                Back to Coaches
               </button>
 
               <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
@@ -660,11 +791,27 @@ function AdminDashboard() {
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Category</h3>
-                    <p className="font-medium text-lg">{selectedCoach.category || 'Not specified'}</p>
+                    <select
+                      value={selectedCoach.category || ''}
+                      onChange={handleCategoryChange}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base font-medium bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    >
+                      <option value="">-- Select Category --</option>
+                      {categories.map((cat: any) => (
+                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Expertise</h3>
-                    <p className="font-medium text-lg">{selectedCoach.expertise || 'Not specified'}</p>
+                    <input
+                      type="text"
+                      defaultValue={selectedCoach.expertise || ''}
+                      onBlur={(e) => handleExpertiseChange(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base font-medium bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+                      placeholder="e.g. Yoga, Guitar, Python..."
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Click away to save</p>
                   </div>
                   <div className="col-span-2">
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">About / Description</h3>
@@ -821,19 +968,19 @@ function AdminDashboard() {
 
           {/* Students List View */}
           {activeTab === 'students' && !selectedStudent && (
-            <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-xl border border-white overflow-hidden">
+            <div className="bg-white/80 backdrop-blur-2xl md:rounded-[2rem] rounded-xl shadow-xl border border-white overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-gray-50 border-b text-sm text-gray-500">
-                    <th className="p-4 font-medium">Name</th>
-                    <th className="p-4 font-medium">Location</th>
-                    <th className="p-4 font-medium">Date of Birth</th>
+                    <th className="p-4 font-medium cursor-pointer hover:text-gray-800 select-none" onClick={() => handleStudentSort('fullName')}>Name {studentSortConfig?.key === 'fullName' ? (studentSortConfig.direction === 'asc' ? '↑' : '↓') : <span className="opacity-30">↕</span>}</th>
+                    <th className="p-4 font-medium cursor-pointer hover:text-gray-800 select-none" onClick={() => handleStudentSort('location')}>Location {studentSortConfig?.key === 'location' ? (studentSortConfig.direction === 'asc' ? '↑' : '↓') : <span className="opacity-30">↕</span>}</th>
+                    <th className="p-4 font-medium cursor-pointer hover:text-gray-800 select-none" onClick={() => handleStudentSort('email')}>Email {studentSortConfig?.key === 'email' ? (studentSortConfig.direction === 'asc' ? '↑' : '↓') : <span className="opacity-30">↕</span>}</th>
                     <th className="p-4 font-medium">Status</th>
                     <th className="p-4 font-medium text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {students.map((student: any) => (
+                  {getSortedData(students, studentSortConfig).map((student: any) => (
                     <tr key={student.id} className="hover:bg-gray-50 transition-colors">
                       <td className="p-4 font-bold">{student.fullName}</td>
                       <td className="p-4 text-gray-600">
@@ -841,7 +988,7 @@ function AdminDashboard() {
                         {student.district}, {student.state}
                         {student.pincode ? ` - ${student.pincode}` : ''}
                       </td>
-                      <td className="p-4 text-gray-600">{student.dateOfBirth}</td>
+                      <td className="p-4 text-gray-600">{student.user?.email || 'N/A'}</td>
                       <td className="p-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${student.status === 'PENDING_APPROVAL' ? 'bg-amber-50 text-amber-600 border border-amber-200' :
                           student.status === 'APPROVED' ? 'bg-green-50 text-green-600 border border-green-200' :
@@ -884,9 +1031,10 @@ function AdminDashboard() {
             <div className="max-w-3xl mx-auto">
               <button
                 onClick={() => setSelectedStudent(null)}
-                className="text-gray-500 font-medium text-sm flex items-center gap-1 mb-6 hover:text-gray-900"
+                className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded-xl hover:bg-teal-100 hover:text-teal-900 transition-all shadow-sm"
               >
-                ← Back to List
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                Back to Students
               </button>
 
               <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
@@ -1027,16 +1175,16 @@ function AdminDashboard() {
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-2xl mt-8">
                   <h3 className="font-bold text-gray-900 text-lg mb-4">Blocked Words Filter</h3>
                   <p className="text-sm text-gray-500 mb-6">These words will be blocked in real-time across the entire application (e.g. bios, descriptions). Prevents bad words and restricted subjects.</p>
-                  
+
                   <form onSubmit={handleAddBlockedWord} className="flex gap-3 mb-6">
-                    <input 
-                      type="text" 
-                      value={newBlockedWord} 
-                      onChange={e => setNewBlockedWord(e.target.value)} 
-                      placeholder="Enter word to block..." 
-                      className="flex-1 rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-500 outline-none" 
+                    <input
+                      type="text"
+                      value={newBlockedWord}
+                      onChange={e => setNewBlockedWord(e.target.value)}
+                      placeholder="Enter word to block..."
+                      className="flex-1 rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-500 outline-none"
                     />
-                    <select 
+                    <select
                       value={newBlockedWordCategory}
                       onChange={e => setNewBlockedWordCategory(e.target.value)}
                       className="rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-500 outline-none"
@@ -1061,7 +1209,43 @@ function AdminDashboard() {
                     ))}
                   </div>
                 </div>
-                
+
+                <div className="bg-white rounded-2xl border border-teal-100 shadow-sm p-6 max-w-2xl">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-teal-50 p-3 rounded-xl text-teal-600">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-lg">Fix Coach SEO URLs</h3>
+                      <p className="text-gray-500 mt-1 text-sm mb-4">Regenerate all old ugly URLs like <code className="bg-gray-100 px-1 rounded text-xs">franz-coach-1786940298576</code> into clean SEO-friendly ones like <code className="bg-gray-100 px-1 rounded text-xs">franz-ok-mumbai-coach-a3f2</code>. Run this once after deploying.</p>
+                      <button
+                        onClick={async () => {
+                          if (!window.confirm('This will update ALL coach profile URLs. Existing links will break. Continue?')) return;
+                          try {
+                            const res = await fetch('/api/admin/coaches/reslug-all', {
+                              method: 'POST',
+                              headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+                            });
+                            const data = await res.json();
+                            if (res.ok) {
+                              alert(`✅ Success! ${data.message}`);
+                            } else {
+                              alert(`❌ Error: ${data.error}`);
+                            }
+                          } catch (err) {
+                            alert('❌ Request failed. Make sure the backend is running.');
+                          }
+                        }}
+                        className="bg-teal-600 text-white font-medium px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors"
+                      >
+                        🔗 Fix All Coach URLs
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-2xl">
                   <div className="flex items-start gap-4">
                     <div className="bg-orange-50 p-3 rounded-xl text-orange-500">
@@ -1122,7 +1306,7 @@ function AdminDashboard() {
           {activeTab === 'admins' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-                <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-xl border border-white overflow-hidden">
+                <div className="bg-white/80 backdrop-blur-2xl md:rounded-[2rem] rounded-xl shadow-xl border border-white overflow-x-auto">
                   <div className="p-6 border-b flex justify-between items-center bg-gray-50">
                     <h3 className="font-bold text-gray-800 text-lg">Active Admins</h3>
                   </div>
@@ -1136,21 +1320,37 @@ function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {adminsList.map(admin => (
+                      {adminsList.map((admin: any) => (
                         <tr key={admin.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="p-4 font-bold text-slate-800">{admin.email}</td>
                           <td className="p-4">
-                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600 border border-blue-200">
-                              SUPER ADMIN
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                                {(admin.email || '?')[0].toUpperCase()}
+                              </div>
+                              <div>
+                                <div className="font-semibold text-slate-800 text-sm">{admin.email}</div>
+                                <div className="text-xs text-gray-400">{admin.phoneNumber || 'No phone'}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                              admin.role === 'SUPER_ADMIN'
+                                ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                : 'bg-blue-50 text-blue-600 border-blue-200'
+                            }`}>
+                              {admin.role || 'ADMIN'}
                             </span>
                           </td>
                           <td className="p-4 text-gray-500 text-sm">
-                            {new Date(admin.createdAt || Date.now()).toLocaleDateString()}
+                            {admin.createdAt
+                              ? new Date(admin.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                              : '—'}
                           </td>
                           <td className="p-4 text-right">
                             <button
                               onClick={() => handleRevokeAdmin(admin.id)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded transition-colors text-sm font-medium"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1 rounded-lg transition-colors text-sm font-medium border border-transparent hover:border-red-100"
                             >
                               Revoke
                             </button>
@@ -1159,7 +1359,9 @@ function AdminDashboard() {
                       ))}
                       {adminsList.length === 0 && (
                         <tr>
-                          <td colSpan={3} className="p-8 text-center text-gray-500">No other admins found.</td>
+                          <td colSpan={4} className="p-10 text-center">
+                            <div className="text-gray-400 text-sm">No admins found. Add one using the form →</div>
+                          </td>
                         </tr>
                       )}
                     </tbody>
@@ -1384,7 +1586,7 @@ function AdminDashboard() {
                   <p className="text-gray-500 font-medium">No classes have been created yet.</p>
                 </div>
               ) : (
-                <div className="bg-white/80 backdrop-blur-2xl rounded-[2rem] shadow-xl border border-white overflow-hidden">
+                <div className="bg-white/80 backdrop-blur-2xl md:rounded-[2rem] rounded-xl shadow-xl border border-white overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="bg-gray-50 border-b text-sm text-gray-500">
@@ -1491,6 +1693,37 @@ function AdminDashboard() {
 
         </main>
       </div>
+
+      {showLeaveWarning && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center transform animate-scale-in">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5 border-4 border-red-100">
+              <svg className="w-10 h-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Leave Admin Portal?</h2>
+            <p className="text-gray-500 text-sm leading-relaxed mb-8">
+              You are about to exit the Admin Portal.<br />
+              Any unsaved changes will be lost.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLeaveWarning(false)}
+                className="flex-1 py-3 px-4 rounded-2xl border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all"
+              >
+                Stay
+              </button>
+              <button
+                onClick={() => { setShowLeaveWarning(false); navigate({ to: '/admin-login' }); }}
+                className="flex-1 py-3 px-4 rounded-2xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-all shadow-md shadow-red-200"
+              >
+                Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

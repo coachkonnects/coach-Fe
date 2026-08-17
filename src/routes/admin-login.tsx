@@ -69,7 +69,7 @@ function AdminLogin() {
       const data = await res.json();
       localStorage.setItem("adminToken", data.token || "dummy-admin-token");
       localStorage.setItem("adminEmail", email);
-      navigate({ to: "/admin" });
+      navigate({ to: "/admin", replace: true });
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -99,7 +99,7 @@ function AdminLogin() {
       const data = await verifyRes.json();
       localStorage.setItem("adminToken", data.token);
       localStorage.setItem("adminEmail", data.email || email);
-      navigate({ to: "/admin" });
+      navigate({ to: "/admin", replace: true });
     } catch (err: any) {
       setError(err.message || "Failed to authenticate with Passkey");
     }
