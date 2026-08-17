@@ -417,12 +417,14 @@ function CoachRegisterPage() {
       if (!formData.fullName) return alert("Please enter your name!");
       if (nameError) return alert(nameError);
       if (!formData.mobile || formData.mobile.length < 10) return alert("Please enter a valid 10-digit mobile number!");
-      if (!formData.dob) return alert("Please enter your Date of Birth!");
+      if (!formData.dob || formData.dob.length !== 10) return alert("Please enter a complete Date of Birth (DD/MM/YYYY)!");
       const dobParts = formData.dob.split('/');
-      if (dobParts.length === 3) {
-        const age = new Date().getFullYear() - parseInt(dobParts[2]);
-        if (age > 100) return alert("Date of Birth cannot be more than 100 years ago!");
-      }
+      if (dobParts.length !== 3) return alert("Please enter a valid Date of Birth (DD/MM/YYYY)!");
+      const year = parseInt(dobParts[2], 10);
+      const currentYear = new Date().getFullYear();
+      if (isNaN(year) || year < 1900 || year > currentYear) return alert(`Please enter a valid year between 1900 and ${currentYear}!`);
+      const age = currentYear - year;
+      if (age > 100) return alert("Date of Birth cannot be more than 100 years ago!");
       if (!formData.pincode || formData.pincode.length !== 6 || !formData.district) return alert("Please enter a valid 6-digit Pincode and wait for location to auto-fill!");
       setStep(2);
     } else if (step === 2) {
