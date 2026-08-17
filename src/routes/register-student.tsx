@@ -24,8 +24,11 @@ function RegisterPage() {
     location: '',
     interests: '',
     preference: '',
-    heardFrom: ''
+    heardFrom: '',
+    parentEmail: ''
   });
+
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handlePincodeChange = async (pincode: string) => {
     setFormData(prev => ({ ...prev, pincode }));
@@ -37,13 +40,20 @@ function RegisterPage() {
           const po = data[0].PostOffice[0];
           setFormData(prev => ({
             ...prev,
-            pincode,
             area: po.Name,
             district: po.District,
             state: po.State
           }));
+        } else {
+          alert("Invalid Pincode! Please enter a valid 6-digit Indian pincode.");
+          setFormData(prev => ({ ...prev, area: '', district: '', state: '' }));
         }
-      } catch (e) { console.error("Pincode fetch failed", e); }
+      } catch (e) {
+        console.error("Pincode fetch failed", e);
+        setFormData(prev => ({ ...prev, area: '', district: '', state: '' }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, area: '', district: '', state: '' }));
     }
   };
 
@@ -177,12 +187,17 @@ function RegisterPage() {
     if (!formData.mobile || formData.mobile.length < 10) return alert("Please enter a valid 10-digit mobile number!");
     if (!formData.dob) return alert("Please enter your Date of Birth!");
     if (!formData.gender) return alert("Please select your Gender!");
-    if (!formData.pincode) return alert("Please enter your Pincode!");
+    if (!formData.pincode || formData.pincode.length !== 6 || !formData.district) return alert("Please enter a valid 6-digit Pincode and wait for location to auto-fill!");
     if (!formData.interests) return alert("Please select your Interests/Subjects!");
     if (!formData.preference) return alert("Please select your Learning Preference!");
     
-    if (isUnder18 && (!formData.parentalConsent || !formData.parentName || !formData.parentContact)) {
-      alert("Parental consent and details are required for students under 18.");
+    if (isUnder18 && (!formData.parentalConsent || !formData.parentName || !formData.parentContact || !formData.parentEmail)) {
+      alert("Parental consent and all parent details (Name, Contact, Email) are required for students under 18.");
+      return;
+    }
+
+    if (!termsAccepted) {
+      alert("Please agree to the Terms of Service and Privacy Policy.");
       return;
     }
 
@@ -475,6 +490,49 @@ function RegisterPage() {
               placeholder="e.g. Google, Friend, Social Media"
               className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm placeholder:text-slate-400"
             />
+          </div>
+
+          {isUnder18 && (
+            <div className="md:col-span-2 bg-gradient-to-r from-amber-50 to-orange-50 p-6 rounded-2xl border border-amber-200 shadow-sm mt-8">
+              <h3 className="font-bold text-amber-900 mb-4 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                Parental Consent Required (Under 18)
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-semibold text-amber-900 mb-2">Parent/Guardian Name</label>
+                  <input type="text" className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all shadow-sm" placeholder="Full Name" value={formData.parentName} onChange={e => setFormData({ ...formData, parentName: e.target.value })} />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-amber-900 mb-2">Parent/Guardian Contact</label>
+                  <input type="text" className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all shadow-sm" placeholder="Mobile Number" value={formData.parentContact} onChange={e => setFormData({ ...formData, parentContact: e.target.value.replace(/\D/g, '').substring(0, 10) })} />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-amber-900 mb-2">Parent/Guardian Email</label>
+                  <input type="email" className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all shadow-sm" placeholder="Email Address" value={formData.parentEmail} onChange={e => setFormData({ ...formData, parentEmail: e.target.value })} />
+                </div>
+              </div>
+              <label className="flex items-start gap-3 cursor-pointer group">
+                <div className="relative flex items-center justify-center mt-1">
+                  <input type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-amber-400 rounded bg-white checked:bg-amber-500 checked:border-amber-500 transition-colors cursor-pointer" checked={formData.parentalConsent} onChange={e => setFormData({ ...formData, parentalConsent: e.target.checked })} />
+                  <svg className="absolute w-3.5 h-3.5 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <span className="text-sm text-amber-900 font-medium leading-relaxed group-hover:text-amber-700 transition-colors">I confirm that I am the parent/guardian of this student and I permit the student to register on CoachKonnects.</span>
+              </label>
+            </div>
+          )}
+
+          {/* Terms of Service */}
+          <div className="md:col-span-2 mt-8 border-t border-slate-100 pt-6">
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center mt-0.5">
+                <input type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded bg-white checked:bg-teal-500 checked:border-teal-500 transition-colors cursor-pointer" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} />
+                <svg className="absolute w-3.5 h-3.5 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+              </div>
+              <span className="text-sm text-slate-700 font-medium leading-relaxed">
+                I agree to CoachKonnects' <a href="#" className="text-teal-600 hover:underline">Terms of Service</a> and <a href="#" className="text-teal-600 hover:underline">Privacy Policy</a>.
+              </span>
+            </label>
           </div>
 
 

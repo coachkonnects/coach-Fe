@@ -160,13 +160,20 @@ function StudentDashboard() {
           const po = data[0].PostOffice[0];
           setEditForm((prev: any) => ({
             ...prev,
-            pincode,
             area: po.Name,
             district: po.District,
             state: po.State
           }));
+        } else {
+          alert("Invalid Pincode! Please enter a valid 6-digit Indian pincode.");
+          setEditForm((prev: any) => ({ ...prev, area: '', district: '', state: '' }));
         }
-      } catch (e) { console.error("Pincode fetch failed", e); }
+      } catch (e) {
+        console.error("Pincode fetch failed", e);
+        setEditForm((prev: any) => ({ ...prev, area: '', district: '', state: '' }));
+      }
+    } else {
+      setEditForm((prev: any) => ({ ...prev, area: '', district: '', state: '' }));
     }
   };
 
@@ -342,6 +349,20 @@ function StudentDashboard() {
         {/* Status Alert */}
         <div className="mb-10">
           {profile && getStatusDisplay(profile.status, profile.rejectReason)}
+          
+          {profile?.parentalConsent && (
+            <div className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-bold shadow-sm ${
+              profile.parentConsentVerified 
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                : 'bg-amber-50 text-amber-700 border-amber-200'
+            }`}>
+              {profile.parentConsentVerified ? (
+                <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Parental Consent: Verified</>
+              ) : (
+                <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Parental Consent: Pending Email Verification</>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Dashboard Grid */}

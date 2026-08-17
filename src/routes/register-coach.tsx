@@ -105,6 +105,7 @@ function CoachRegisterPage() {
     area: '',
     location: '',
     category: '',
+    customCategory: '',
     expertise: '',
     description: '',
     classMode: '',
@@ -132,13 +133,20 @@ function CoachRegisterPage() {
           const po = data[0].PostOffice[0];
           setFormData(prev => ({
             ...prev,
-            pincode,
             area: po.Name,
             district: po.District,
             state: po.State
           }));
+        } else {
+          alert("Invalid Pincode! Please enter a valid 6-digit Indian pincode.");
+          setFormData(prev => ({ ...prev, area: '', district: '', state: '' }));
         }
-      } catch (e) { console.error("Pincode fetch failed", e); }
+      } catch (e) {
+        console.error("Pincode fetch failed", e);
+        setFormData(prev => ({ ...prev, area: '', district: '', state: '' }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, area: '', district: '', state: '' }));
     }
   };
 
@@ -410,10 +418,10 @@ function CoachRegisterPage() {
       if (nameError) return alert(nameError);
       if (!formData.mobile || formData.mobile.length < 10) return alert("Please enter a valid 10-digit mobile number!");
       if (!formData.dob) return alert("Please enter your Date of Birth!");
-      if (!formData.pincode) return alert("Please enter your Pincode!");
+      if (!formData.pincode || formData.pincode.length !== 6 || !formData.district) return alert("Please enter a valid 6-digit Pincode and wait for location to auto-fill!");
       setStep(2);
     } else if (step === 2) {
-      if (!formData.category || !formData.expertise || !formData.description) return alert("Please fill in all expertise fields!");
+      if (!formData.category || (formData.category === 'Other' && !formData.customCategory) || !formData.expertise || !formData.description) return alert("Please fill in all expertise fields!");
       if (bioError) return alert(bioError);
       setStep(3);
     } else if (step === 3) {
@@ -435,6 +443,7 @@ function CoachRegisterPage() {
 
     const payload = {
       ...formData,
+      category: formData.category === 'Other' ? formData.customCategory : formData.category,
       pricing: `₹${formData.minPrice} - ₹${formData.maxPrice}`,
       availableDays: formData.availableDays.join(", "),
       timeSlots: formData.timeBlocks.join(", ")
@@ -635,8 +644,8 @@ function CoachRegisterPage() {
                   <input
                     type="text"
                     value={formData.area}
-                    onChange={e => setFormData({ ...formData, area: e.target.value })}
-                    placeholder="e.g. Andheri West"
+                    readOnly
+                    placeholder="Auto-filled from Pincode"
                     className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
                   />
                 </div>
@@ -645,8 +654,9 @@ function CoachRegisterPage() {
                   <input
                     type="text"
                     value={formData.district}
-                    onChange={e => setFormData({ ...formData, district: e.target.value })}
-                    className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
+                    readOnly
+                    placeholder="Auto-filled"
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none text-slate-500 shadow-sm"
                   />
                 </div>
               </div>
@@ -669,14 +679,24 @@ function CoachRegisterPage() {
                     {categories.map(cat => (
                       <option key={cat.id} value={cat.name}>{cat.name}</option>
                     ))}
+                    <option value="Other">Other (Specify below)</option>
                   </select>
+                  {formData.category === 'Other' && (
+                    <input
+                      type="text"
+                      placeholder="Enter new category"
+                      value={formData.customCategory}
+                      onChange={e => setFormData({ ...formData, customCategory: e.target.value })}
+                      className="w-full mt-3 px-5 py-3.5 bg-white border border-orange-300 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
+                    />
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Specific Expertise <span className="text-orange-500">*</span></label>
                   <input
                     type="text"
                     value={formData.expertise}
-                    onChange={e => setFormData({ ...formData, expertise: e.target.value })}
+                    onChange={e => setFormData({ ...formData, expertise: e.target.value.replace(/[^a-zA-Z\s]/g, "") })}
                     placeholder="e.g. High School Physics, Vinyasa Yoga"
                     className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
                   />
@@ -830,9 +850,8 @@ function CoachRegisterPage() {
                         Analyzing Face...
                       </div>
                     ) : formData.profileImageUrl ? (
-                      <div className="flex flex-col items-center gap-2">
-                        <img src={formData.profileImageUrl} alt="Preview" className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md" />
-                        <span className="text-green-600 font-bold text-xs">✓ Accepted</span>
+                      <div className="flex flex-col items-center justify-center gap-2 h-full">
+                        <span className="text-green-600 font-bold text-sm">✅ Perfect! Image accepted</span>
                         <button type="button" onClick={() => setFormData({...formData, profileImageUrl: ''})} className="text-xs text-slate-500 hover:underline relative z-20">Remove</button>
                       </div>
                     ) : (
@@ -876,9 +895,8 @@ function CoachRegisterPage() {
                           Analyzing Faces...
                         </div>
                       ) : formData.groupImageUrl ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <img src={formData.groupImageUrl} alt="Preview" className="w-24 h-16 rounded-xl object-cover border-4 border-white shadow-md" />
-                          <span className="text-green-600 font-bold text-xs">✓ Accepted</span>
+                        <div className="flex flex-col items-center justify-center gap-2 h-full">
+                          <span className="text-green-600 font-bold text-sm">✅ Perfect! Image accepted</span>
                           <button type="button" onClick={() => setFormData({...formData, groupImageUrl: ''})} className="text-xs text-slate-500 hover:underline relative z-20">Remove</button>
                         </div>
                       ) : (
@@ -909,7 +927,7 @@ function CoachRegisterPage() {
                   <input
                     type="text"
                     value={formData.instagram}
-                    onChange={e => setFormData({ ...formData, instagram: e.target.value.replace('@', '') })}
+                    onChange={e => setFormData({ ...formData, instagram: e.target.value.replace(/[^a-zA-Z0-9_.]/g, '') })}
                     placeholder="yourhandle"
                     className="w-full pl-10 pr-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
                   />
