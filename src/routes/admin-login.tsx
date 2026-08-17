@@ -61,7 +61,7 @@ function AdminLogin() {
       const res = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: otp })
+        body: JSON.stringify({ email, code: otp, intendedRole: "ADMIN" })
       });
 
       if (!res.ok) throw new Error("Invalid code");

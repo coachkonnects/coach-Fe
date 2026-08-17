@@ -38,6 +38,9 @@ function AdminDashboard() {
   const [flagField, setFlagField] = useState('description');
   const [flagReason, setFlagReason] = useState('');
   const [stats, setStats] = useState({ totalCoaches: 0, pending: 0, live: 0, flagged: 0 });
+  const [blockedWords, setBlockedWords] = useState<any[]>([]);
+  const [newBlockedWord, setNewBlockedWord] = useState('');
+  const [newBlockedWordCategory, setNewBlockedWordCategory] = useState('CUSTOM');
 
   const exportToCSV = (data: any[], filename: string) => {
     if (!data || data.length === 0) {
@@ -144,6 +147,51 @@ function AdminDashboard() {
   useEffect(() => {
     fetchProfiles();
   }, [activeTab]);
+
+  const fetchBlockedWords = async () => {
+    try {
+      const res = await fetch('/api/admin/security/blocked-words/all', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      if (res.ok) setBlockedWords(await res.json());
+    } catch (e) {}
+  };
+
+  const handleAddBlockedWord = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBlockedWord.trim()) return;
+    try {
+      const res = await fetch('/api/admin/security/blocked-words', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+        },
+        body: JSON.stringify({ word: newBlockedWord, category: newBlockedWordCategory })
+      });
+      if (res.ok) {
+        setNewBlockedWord('');
+        fetchBlockedWords();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to add word");
+      }
+    } catch(e) {}
+  };
+
+  const handleDeleteBlockedWord = async (id: number) => {
+    try {
+      const res = await fetch(`/api/admin/security/blocked-words/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      if (res.ok) fetchBlockedWords();
+    } catch(e) {}
+  };
+
+  useEffect(() => {
+    fetchBlockedWords();
+  }, []);
 
   const fetchProfiles = async () => {
     try {
@@ -976,6 +1024,44 @@ function AdminDashboard() {
               <h2 className="text-xl font-bold text-gray-900 mb-6">Security Settings</h2>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-2xl mt-8">
+                  <h3 className="font-bold text-gray-900 text-lg mb-4">Blocked Words Filter</h3>
+                  <p className="text-sm text-gray-500 mb-6">These words will be blocked in real-time across the entire application (e.g. bios, descriptions). Prevents bad words and restricted subjects.</p>
+                  
+                  <form onSubmit={handleAddBlockedWord} className="flex gap-3 mb-6">
+                    <input 
+                      type="text" 
+                      value={newBlockedWord} 
+                      onChange={e => setNewBlockedWord(e.target.value)} 
+                      placeholder="Enter word to block..." 
+                      className="flex-1 rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-500 outline-none" 
+                    />
+                    <select 
+                      value={newBlockedWordCategory}
+                      onChange={e => setNewBlockedWordCategory(e.target.value)}
+                      className="rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-500 outline-none"
+                    >
+                      <option value="CUSTOM">Custom</option>
+                      <option value="PROFANITY">Profanity / Bad Word</option>
+                      <option value="EDUCATIONAL">Educational (Maths, English)</option>
+                    </select>
+                    <button type="submit" className="bg-orange-500 text-white font-bold px-6 py-2 rounded-xl hover:bg-orange-600 transition-colors">Add</button>
+                  </form>
+
+                  <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto p-2 border border-gray-100 rounded-xl bg-slate-50">
+                    {blockedWords.length === 0 && <span className="text-gray-400 text-sm">No blocked words.</span>}
+                    {blockedWords.map(bw => (
+                      <div key={bw.id} className="flex items-center gap-2 bg-white border border-gray-200 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
+                        <span>{bw.word}</span>
+                        <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{bw.category}</span>
+                        <button onClick={() => handleDeleteBlockedWord(bw.id)} className="text-red-500 hover:bg-red-50 p-1 rounded-full ml-1">
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-2xl">
                   <div className="flex items-start gap-4">
                     <div className="bg-orange-50 p-3 rounded-xl text-orange-500">

@@ -71,6 +71,9 @@ function RegisterPage() {
   };
 
   const [isVerifying, setIsVerifying] = useState(false);
+  const [blockedWords, setBlockedWords] = useState<string[]>([]);
+  const [nameError, setNameError] = useState('');
+  const [interestsError, setInterestsError] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [authToken, setAuthToken] = useState("");
   const [otpCode, setOtpCode] = useState('');
@@ -103,6 +106,26 @@ function RegisterPage() {
   };
 
   const isUnder18 = calculateAge(formData.dob) < 18;
+
+  const fetchBlockedWords = async () => {
+    try {
+      const res = await fetch('/api/config/blocked-words');
+      if (res.ok) setBlockedWords(await res.json());
+    } catch(e) {}
+  };
+
+  useEffect(() => {
+    fetchBlockedWords();
+  }, []);
+
+  const validateNoBlockedWords = (text: string): string | null => {
+    for (const word of blockedWords) {
+      if (text.includes(word)) {
+        return `The word "${word}" is not allowed.`;
+      }
+    }
+    return null;
+  };
 
   const handleSendOtp = async () => {
     if (!formData.email) return alert("Please enter an email first");
@@ -150,6 +173,14 @@ function RegisterPage() {
   const handleSubmitProfile = async () => {
     if (!emailVerified) return alert("Please verify your email first!");
     if (!formData.fullName) return alert("Please enter your name!");
+    if (nameError || interestsError) return alert("Please remove blocked words before submitting.");
+    if (!formData.mobile || formData.mobile.length < 10) return alert("Please enter a valid 10-digit mobile number!");
+    if (!formData.dob) return alert("Please enter your Date of Birth!");
+    if (!formData.gender) return alert("Please select your Gender!");
+    if (!formData.pincode) return alert("Please enter your Pincode!");
+    if (!formData.interests) return alert("Please select your Interests/Subjects!");
+    if (!formData.preference) return alert("Please select your Learning Preference!");
+    
     if (isUnder18 && (!formData.parentalConsent || !formData.parentName || !formData.parentContact)) {
       alert("Parental consent and details are required for students under 18.");
       return;
@@ -281,7 +312,11 @@ function RegisterPage() {
                 <input
                   type="text"
                   value={formData.fullName}
-                  onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+                  onChange={e => {
+                    const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                    setFormData({ ...formData, fullName: val });
+                    setNameError(validateNoBlockedWords(val) || '');
+                  }}
                   placeholder="John Doe"
                   className="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm placeholder:text-slate-400"
                 />
@@ -406,7 +441,11 @@ function RegisterPage() {
               <input
                 type="text"
                 value={formData.interests}
-                onChange={e => setFormData({ ...formData, interests: e.target.value })}
+                onChange={e => {
+                    const val = e.target.value;
+                    setFormData({ ...formData, interests: val });
+                    setInterestsError(validateNoBlockedWords(val) || '');
+                  }}
                 placeholder="e.g. Photography, Yoga, Guitar"
                 className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm placeholder:text-slate-400"
               />

@@ -160,10 +160,42 @@ function CoachRegisterPage() {
   };
 
   const [isVerifying, setIsVerifying] = useState(false);
+  const [blockedWords, setBlockedWords] = useState<string[]>([]);
+  const [bioError, setBioError] = useState('');
+  const [nameError, setNameError] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [authToken, setAuthToken] = useState("");
   const [otpCode, setOtpCode] = useState('');
+  const [countdown, setCountdown] = useState(0);
   const [emailVerified, setEmailVerified] = useState(false);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [countdown]);
+
+  const fetchBlockedWords = async () => {
+    try {
+      const res = await fetch('/api/config/blocked-words');
+      if (res.ok) setBlockedWords(await res.json());
+    } catch(e) {}
+  };
+
+  useEffect(() => {
+    fetchBlockedWords();
+  }, []);
+
+  const validateNoBlockedWords = (text: string): string | null => {
+    for (const word of blockedWords) {
+      if (text.includes(word)) {
+        return `The word "${word}" is not allowed.`;
+      }
+    }
+    return null;
+  };
 
   const handleSendOtp = async () => {
     if (!formData.email) return alert("Please enter an email first");
@@ -176,6 +208,7 @@ function CoachRegisterPage() {
       });
       if (res.ok) {
         setOtpSent(true);
+        setCountdown(30);
         alert("OTP sent to your email!");
       }
     } catch (err) {
@@ -370,9 +403,14 @@ function CoachRegisterPage() {
     if (step === 1) {
       if (!emailVerified) return alert("Please verify your email first!");
       if (!formData.fullName) return alert("Please enter your name!");
+      if (nameError) return alert(nameError);
+      if (!formData.mobile || formData.mobile.length < 10) return alert("Please enter a valid 10-digit mobile number!");
+      if (!formData.dob) return alert("Please enter your Date of Birth!");
+      if (!formData.pincode) return alert("Please enter your Pincode!");
       setStep(2);
     } else if (step === 2) {
       if (!formData.category || !formData.expertise || !formData.description) return alert("Please fill in all expertise fields!");
+      if (bioError) return alert(bioError);
       setStep(3);
     } else if (step === 3) {
       if (!formData.classMode || !formData.minPrice || !formData.maxPrice || !formData.targetAudience) return alert("Please fill in all class details!");
@@ -519,6 +557,17 @@ function CoachRegisterPage() {
                       Confirm
                     </button>
                   </div>
+                  <div className="flex justify-end mt-2 space-x-4">
+                    <button type="button" onClick={() => { setOtpSent(false); setOtpCode(''); }} className="text-sm text-orange-600 font-bold hover:underline">Edit Email</button>
+                    <button 
+                      type="button" 
+                      onClick={handleSendOtp} 
+                      disabled={countdown > 0 || isVerifying}
+                      className="text-sm text-orange-600 font-bold hover:underline disabled:opacity-50 disabled:hover:no-underline"
+                    >
+                      {countdown > 0 ? `Resend (${countdown}s)` : 'Resend OTP'}
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -528,10 +577,15 @@ function CoachRegisterPage() {
                   <input
                     type="text"
                     value={formData.fullName}
-                    onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+                    onChange={e => {
+                      const val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                      setFormData({ ...formData, fullName: val });
+                      setNameError(validateNoBlockedWords(val) || '');
+                    }}
                     placeholder="Coach Name"
-                    className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
+                    className={`w-full px-5 py-3.5 bg-white border rounded-2xl focus:outline-none shadow-sm ${nameError ? 'border-red-500' : 'border-slate-200 focus:border-orange-500'}`}
                   />
+                  {nameError && <p className="text-red-500 text-xs font-bold mt-1">{nameError}</p>}
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Mobile Number <span className="text-orange-500">*</span></label>
@@ -629,7 +683,11 @@ function CoachRegisterPage() {
                 <textarea
                   rows={5}
                   value={formData.description}
-                  onChange={e => setFormData({ ...formData, description: e.target.value })}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setFormData({ ...formData, description: val });
+                    setBioError(validateNoBlockedWords(val) || '');
+                  }}
                   placeholder="Introduce yourself to students..."
                   className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm resize-none"
                 ></textarea>
@@ -639,7 +697,7 @@ function CoachRegisterPage() {
 
           {step === 3 && (
             <div className="animate-in fade-in slide-in-from-right-4 space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Class Mode <span className="text-orange-500">*</span></label>
                   <select
@@ -655,17 +713,30 @@ function CoachRegisterPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Target Audience <span className="text-orange-500">*</span></label>
-                  <select
-                    value={formData.targetAudience}
-                    onChange={e => setFormData({ ...formData, targetAudience: e.target.value })}
-                    className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
-                  >
-                    <option value="">Select Audience</option>
-                    <option value="Beginners">Beginners</option>
-                    <option value="Advanced / Professionals">Advanced / Professionals</option>
-                    <option value="Kids & Teens">Kids & Teens</option>
-                    <option value="All Ages & Levels">All Ages & Levels</option>
-                  </select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {['Beginners', 'Advanced / Professionals', 'Kids & Teens', 'All Ages & Levels'].map(audience => (
+                      <label key={audience} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${formData.targetAudience.includes(audience) ? 'bg-orange-50 border-orange-500' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
+                        <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 ${formData.targetAudience.includes(audience) ? 'bg-orange-500 border-orange-500' : 'bg-white border-slate-300'}`}>
+                          {formData.targetAudience.includes(audience) && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                        </div>
+                        <span className={`text-sm font-bold leading-tight ${formData.targetAudience.includes(audience) ? 'text-orange-700' : 'text-slate-700'}`}>{audience}</span>
+                        <input
+                          type="checkbox"
+                          className="hidden"
+                          checked={formData.targetAudience.includes(audience)}
+                          onChange={(e) => {
+                            let current = formData.targetAudience ? formData.targetAudience.split(', ') : [];
+                            if (e.target.checked) {
+                              current.push(audience);
+                            } else {
+                              current = current.filter(a => a !== audience);
+                            }
+                            setFormData({ ...formData, targetAudience: current.join(', ') });
+                          }}
+                        />
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
               <div className="space-y-2">
@@ -674,10 +745,9 @@ function CoachRegisterPage() {
                   <div className="relative flex-1">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">₹</span>
                     <input
-                      type="number"
-                      min="0"
+                      type="text"
                       value={formData.minPrice}
-                      onChange={e => setFormData({ ...formData, minPrice: e.target.value.replace(/-/g, '') })}
+                      onChange={e => setFormData({ ...formData, minPrice: e.target.value.replace(/\D/g, '') })}
                       placeholder="Min (e.g. 500)"
                       className="w-full pl-9 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
                     />
@@ -686,10 +756,9 @@ function CoachRegisterPage() {
                   <div className="relative flex-1">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">₹</span>
                     <input
-                      type="number"
-                      min="0"
+                      type="text"
                       value={formData.maxPrice}
-                      onChange={e => setFormData({ ...formData, maxPrice: e.target.value.replace(/-/g, '') })}
+                      onChange={e => setFormData({ ...formData, maxPrice: e.target.value.replace(/\D/g, '') })}
                       placeholder="Max (e.g. 1500)"
                       className="w-full pl-9 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
                     />
