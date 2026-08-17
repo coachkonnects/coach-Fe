@@ -1210,42 +1210,6 @@ function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-teal-100 shadow-sm p-6 max-w-2xl">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-teal-50 p-3 rounded-xl text-teal-600">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-lg">Fix Coach SEO URLs</h3>
-                      <p className="text-gray-500 mt-1 text-sm mb-4">Regenerate all old ugly URLs like <code className="bg-gray-100 px-1 rounded text-xs">franz-coach-1786940298576</code> into clean SEO-friendly ones like <code className="bg-gray-100 px-1 rounded text-xs">franz-ok-mumbai-coach-a3f2</code>. Run this once after deploying.</p>
-                      <button
-                        onClick={async () => {
-                          if (!window.confirm('This will update ALL coach profile URLs. Existing links will break. Continue?')) return;
-                          try {
-                            const res = await fetch('/api/admin/coaches/reslug-all', {
-                              method: 'POST',
-                              headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
-                            });
-                            const data = await res.json();
-                            if (res.ok) {
-                              alert(`✅ Success! ${data.message}`);
-                            } else {
-                              alert(`❌ Error: ${data.error}`);
-                            }
-                          } catch (err) {
-                            alert('❌ Request failed. Make sure the backend is running.');
-                          }
-                        }}
-                        className="bg-teal-600 text-white font-medium px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors"
-                      >
-                        🔗 Fix All Coach URLs
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-2xl">
                   <div className="flex items-start gap-4">
                     <div className="bg-orange-50 p-3 rounded-xl text-orange-500">
