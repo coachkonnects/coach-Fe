@@ -121,7 +121,7 @@ function RegisterPage() {
     try {
       const res = await fetch('/api/config/blocked-words');
       if (res.ok) setBlockedWords(await res.json());
-    } catch(e) {}
+    } catch (e) { }
   };
 
   useEffect(() => {
@@ -190,7 +190,7 @@ function RegisterPage() {
     if (!formData.pincode || formData.pincode.length !== 6 || !formData.district) return alert("Please enter a valid 6-digit Pincode and wait for location to auto-fill!");
     if (!formData.interests) return alert("Please select your Interests/Subjects!");
     if (!formData.preference) return alert("Please select your Learning Preference!");
-    
+
     if (isUnder18 && (!formData.parentalConsent || !formData.parentName || !formData.parentContact || !formData.parentEmail)) {
       alert("Parental consent and all parent details (Name, Contact, Email) are required for students under 18.");
       return;
@@ -204,14 +204,14 @@ function RegisterPage() {
     try {
       const res = await fetch(`/api/profile/student`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authToken || localStorage.getItem('token') || ''}`
         },
         body: JSON.stringify(formData)
       });
       if (res.ok) {
-        alert(`Success! Your Student profile has been submitted and is Pending Admin Approval!`);
+        alert(`Success! Your Student profile has been submitted`);
         navigate({ to: '/' });
       } else {
         const err = await res.text();
@@ -224,7 +224,7 @@ function RegisterPage() {
   };
 
   const handleResetForm = () => {
-    setFormData({ email: '', fullName: '', mobile: '', dob: '', parentalConsent: false, parentName: '', parentContact: '', gender: '', district: '', state: '', pincode: '', area: '', location: '', heardFrom: '', interests: '', preference: '' });
+    setFormData({ email: '', fullName: '', mobile: '', dob: '', parentalConsent: false, parentName: '', parentContact: '', parentEmail: '', gender: '', district: '', state: '', pincode: '', area: '', location: '', heardFrom: '', interests: '', preference: '' });
     setOtpSent(false);
     setEmailVerified(false);
     setOtpCode('');
@@ -305,9 +305,9 @@ function RegisterPage() {
                 </button>
               </div>
               <div className="flex justify-end mt-2">
-                <button 
-                  type="button" 
-                  onClick={handleSendOtp} 
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
                   disabled={countdown > 0 || isVerifying}
                   className="text-sm text-orange-600 font-bold hover:underline disabled:opacity-50 disabled:hover:no-underline"
                 >
@@ -457,10 +457,10 @@ function RegisterPage() {
                 type="text"
                 value={formData.interests}
                 onChange={e => {
-                    const val = e.target.value;
-                    setFormData({ ...formData, interests: val });
-                    setInterestsError(validateNoBlockedWords(val) || '');
-                  }}
+                  const val = e.target.value;
+                  setFormData({ ...formData, interests: val });
+                  setInterestsError(validateNoBlockedWords(val) || '');
+                }}
                 placeholder="e.g. Photography, Yoga, Guitar"
                 className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm placeholder:text-slate-400"
               />
@@ -537,19 +537,19 @@ function RegisterPage() {
 
 
 
-              <div className="flex justify-between items-center pt-8 mt-4 border-t border-slate-100">
-                <button type="button" onClick={handleResetForm} className="px-8 py-4 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl text-slate-500 font-bold hover:text-slate-900 hover:border-slate-300 shadow-sm transition-colors">
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmitProfile}
-                  className="px-10 py-4 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white rounded-2xl font-bold shadow-md transition-all flex items-center gap-2 group active:scale-[0.98]"
-                >
-                  Submit Student Profile
-                  <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                </button>
-              </div>
+          <div className="flex justify-between items-center pt-8 mt-4 border-t border-slate-100">
+            <button type="button" onClick={handleResetForm} className="px-8 py-4 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl text-slate-500 font-bold hover:text-slate-900 hover:border-slate-300 shadow-sm transition-colors">
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmitProfile}
+              className="px-10 py-4 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white rounded-2xl font-bold shadow-md transition-all flex items-center gap-2 group active:scale-[0.98]"
+            >
+              Submit Student Profile
+              <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </button>
+          </div>
 
         </form>
 
