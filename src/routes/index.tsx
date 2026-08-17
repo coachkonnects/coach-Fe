@@ -659,11 +659,11 @@ function Index() {
             </div>
 
             <div>
-              <h4 className="mb-4 font-semibold">Dashboards</h4>
-              <ul className="flex flex-col gap-2 text-sm text-[color:var(--color-ink-muted)]">
-                <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Student</a></li>
-                <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Coach</a></li>
-              </ul>
+              {/* <h4 className="mb-4 font-semibold">Dashboards</h4> */}
+              {/* <ul className="flex flex-col gap-2 text-sm text-[color:var(--color-ink-muted)]"> */}
+              {/* <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Student</a></li> */}
+              {/* <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Coach</a></li> */}
+              {/* </ul> */}
             </div>
           </div>
 
