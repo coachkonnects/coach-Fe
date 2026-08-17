@@ -83,7 +83,7 @@ function Index() {
   const [demands, setDemands] = useState<any[]>([]);
   const [showAllDemands, setShowAllDemands] = useState(false);
   const [showDemandModal, setShowDemandModal] = useState(false);
-  const [demandForm, setDemandForm] = useState({ skillName: '', location: '', email: '' });
+  const [demandForm, setDemandForm] = useState({ skillName: '', location: '', email: '', mobileNumber: '', pincode: '' });
   const [demandStatus, setDemandStatus] = useState('');
   const [serverCategories, setServerCategories] = useState<any[]>([]);
   const [showAllCats, setShowAllCats] = useState(false);
@@ -139,7 +139,7 @@ function Index() {
       });
       if (res.ok) {
         setDemandStatus('Success! We will notify you when a coach joins.');
-        setTimeout(() => { setShowDemandModal(false); setDemandStatus(''); setDemandForm({ skillName: '', location: '', email: '' }); }, 2000);
+        setTimeout(() => { setShowDemandModal(false); setDemandStatus(''); setDemandForm({ skillName: '', location: '', email: '', mobileNumber: '', pincode: '' }); }, 2000);
         // Refresh demands
         fetch('/api/public/demands').then(r => r.json()).then(data => {
           const grouped = data.reduce((acc: any, curr: any) => {

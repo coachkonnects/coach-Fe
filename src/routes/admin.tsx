@@ -16,6 +16,10 @@ function AdminDashboard() {
   const [coaches, setCoaches] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryExpertises, setNewCategoryExpertises] = useState('');
+  const [editingCategory, setEditingCategory] = useState<any | null>(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
+  const [editingCategoryExpertises, setEditingCategoryExpertises] = useState('');
   const [selectedCoach, setSelectedCoach] = useState<any | null>(null);
   const [students, setStudents] = useState<any[]>([]);
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
@@ -510,12 +514,44 @@ function AdminDashboard() {
       const res = await fetch('/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newCategoryName })
+        body: JSON.stringify({ name: newCategoryName, expertises: newCategoryExpertises })
       });
       if (res.ok) {
         const newCat = await res.json();
         setCategories([...categories, newCat]);
         setNewCategoryName('');
+        setNewCategoryExpertises('');
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleEditCategory = async (id: number) => {
+    if (!editingCategoryName.trim()) return;
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`/api/admin/categories/${id}/edit`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name: editingCategoryName, expertises: editingCategoryExpertises })
+      });
+      if (res.ok) {
+        const updatedCat = await res.json();
+        setCategories(categories.map(c => c.id === id ? updatedCat : c));
+        setEditingCategory(null);
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleApproveCategory = async (id: number) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`/api/admin/categories/${id}/approve`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const updatedCat = await res.json();
+        setCategories(categories.map(c => c.id === id ? updatedCat : c));
       }
     } catch (e) { console.error(e); }
   };
@@ -920,7 +956,7 @@ function AdminDashboard() {
                       className="w-full p-3 rounded-xl border border-red-200 mb-4 focus:outline-none focus:ring-2 focus:ring-red-500"
                     >
                       <option value="name">Name / Profile Picture</option>
-                      <option value="description">Description (Spam/Educational Content)</option>
+                      <option value="description">Description (Spam Content)</option>
                       <option value="location">Location</option>
                     </select>
                     <textarea
@@ -1129,40 +1165,108 @@ function AdminDashboard() {
           {/* Categories Tab */}
           {activeTab === 'categories' && (
             <div className="animate-in fade-in slide-in-from-bottom-4">
-              <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 p-8 max-w-2xl mx-auto">
-                <h2 className="text-2xl font-bold text-slate-900 mb-6">Manage Categories</h2>
-
-                <div className="flex gap-4 mb-8">
-                  <input
-                    type="text"
-                    value={newCategoryName}
-                    onChange={e => setNewCategoryName(e.target.value)}
-                    placeholder="e.g. Health & Wellness"
-                    className="flex-1 px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#f26b21] shadow-sm"
-                  />
-                  <button
-                    onClick={handleAddCategory}
-                    className="px-8 py-3.5 bg-[#f26b21] text-white rounded-2xl font-bold hover:bg-[#d95d1c] shadow-md transition-all active:scale-[0.98]"
-                  >
-                    Add Category
-                  </button>
+              <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+                <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-slate-900">Manage Categories & Expertises</h2>
+                    <p className="text-sm text-slate-500 mt-1">Add, edit, or approve categories requested by coaches.</p>
+                  </div>
+                  <div className="flex gap-2 w-full md:w-auto">
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={e => setNewCategoryName(e.target.value)}
+                      placeholder="Category Name"
+                      className="px-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#f26b21] text-sm flex-1 md:w-48"
+                    />
+                    <input
+                      type="text"
+                      value={newCategoryExpertises}
+                      onChange={e => setNewCategoryExpertises(e.target.value)}
+                      placeholder="Expertises (comma separated)"
+                      className="px-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#f26b21] text-sm flex-1 md:w-64"
+                    />
+                    <button
+                      onClick={handleAddCategory}
+                      className="px-4 py-2 bg-[#f26b21] text-white rounded-xl font-bold hover:bg-[#d95d1c] shadow-sm text-sm whitespace-nowrap"
+                    >
+                      + Add
+                    </button>
+                  </div>
                 </div>
 
-                <div className="space-y-3">
-                  {categories.map(cat => (
-                    <div key={cat.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl">
-                      <span className="font-bold text-slate-700">{cat.name}</span>
-                      <button
-                        onClick={() => handleDeleteCategory(cat.id)}
-                        className="text-red-500 hover:text-red-700 font-bold text-sm px-4 py-2 hover:bg-red-50 rounded-xl transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  ))}
-                  {categories.length === 0 && (
-                    <div className="text-center py-10 text-slate-500 font-medium">No categories added yet.</div>
-                  )}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs uppercase tracking-wider">
+                        <th className="p-4 font-bold">Category Name</th>
+                        <th className="p-4 font-bold">Expertises</th>
+                        <th className="p-4 font-bold">Status</th>
+                        <th className="p-4 font-bold text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-sm">
+                      {categories.map((cat: any) => (
+                        <tr key={cat.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4 font-semibold text-slate-800">
+                            {editingCategory === cat.id ? (
+                              <input 
+                                type="text" 
+                                value={editingCategoryName} 
+                                onChange={e => setEditingCategoryName(e.target.value)} 
+                                className="px-3 py-1 border rounded w-full"
+                              />
+                            ) : (
+                              cat.name
+                            )}
+                          </td>
+                          <td className="p-4 text-slate-600">
+                            {editingCategory === cat.id ? (
+                              <input 
+                                type="text" 
+                                value={editingCategoryExpertises} 
+                                onChange={e => setEditingCategoryExpertises(e.target.value)} 
+                                className="px-3 py-1 border rounded w-full"
+                                placeholder="comma separated"
+                              />
+                            ) : (
+                              cat.expertises || <span className="text-slate-400 italic">None</span>
+                            )}
+                          </td>
+                          <td className="p-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${cat.approved ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                              {cat.approved ? 'Approved' : 'Pending'}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right space-x-2 whitespace-nowrap">
+                            {editingCategory === cat.id ? (
+                              <>
+                                <button onClick={() => handleEditCategory(cat.id)} className="text-green-600 hover:text-green-800 font-bold px-2">Save</button>
+                                <button onClick={() => setEditingCategory(null)} className="text-slate-500 hover:text-slate-700 font-bold px-2">Cancel</button>
+                              </>
+                            ) : (
+                              <>
+                                {!cat.approved && (
+                                  <button onClick={() => handleApproveCategory(cat.id)} className="text-indigo-600 hover:text-indigo-800 font-bold px-2">Approve</button>
+                                )}
+                                <button onClick={() => {
+                                  setEditingCategory(cat.id);
+                                  setEditingCategoryName(cat.name);
+                                  setEditingCategoryExpertises(cat.expertises || '');
+                                }} className="text-blue-600 hover:text-blue-800 font-bold px-2">Edit</button>
+                                <button onClick={() => handleDeleteCategory(cat.id)} className="text-red-600 hover:text-red-800 font-bold px-2">Delete</button>
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                      {categories.length === 0 && (
+                        <tr>
+                          <td colSpan={4} className="p-8 text-center text-slate-500 font-medium">No categories found.</td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -1193,7 +1297,7 @@ function AdminDashboard() {
                     >
                       <option value="CUSTOM">Custom</option>
                       <option value="PROFANITY">Profanity / Bad Word</option>
-                      <option value="EDUCATIONAL">Educational (Maths, English)</option>
+                      
                     </select>
                     <button type="submit" className="bg-orange-500 text-white font-bold px-6 py-2 rounded-xl hover:bg-orange-600 transition-colors">Add</button>
                   </form>

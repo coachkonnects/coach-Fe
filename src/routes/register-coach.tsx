@@ -22,7 +22,7 @@ function CoachRegisterPage() {
     if (demand) setDemandId(demand);
     const savedEmail = localStorage.getItem('userEmail');
     const savedRole = localStorage.getItem('userRole');
-    
+
     // Only enter Edit Mode if explicitly requested via query parameter
     const isEditRequested = window.location.search.includes('edit=true');
 
@@ -30,7 +30,7 @@ function CoachRegisterPage() {
       setIsEditMode(true);
       setEmailVerified(true);
       setFormData(prev => ({ ...prev, email: savedEmail }));
-      
+
       fetch(`/api/profile/coach/me?email=${savedEmail}`)
         .then(res => res.json())
         .then(data => {
@@ -119,7 +119,7 @@ function CoachRegisterPage() {
     introVideoUrl: '',
     instagram: '',
     socialLinks: '',
-    consent: false,
+    consent: true,
     isFresher: false
   });
 
@@ -193,7 +193,7 @@ function CoachRegisterPage() {
     try {
       const res = await fetch('/api/config/blocked-words');
       if (res.ok) setBlockedWords(await res.json());
-    } catch(e) {}
+    } catch (e) { }
   };
 
   useEffect(() => {
@@ -298,13 +298,13 @@ function CoachRegisterPage() {
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) return alert("❌ Error: File is too large. Please upload an image smaller than 10MB.");
     if (!modelsLoaded) return alert("AI Models are still loading, please wait a second and try again.");
-    
+
     const url = URL.createObjectURL(file);
     setCropImageSrc(url);
     setCropType(type);
     setCropModalOpen(true);
     setZoom(1);
-    
+
     // Clear input so same file can be selected again
     e.target.value = '';
   };
@@ -312,7 +312,7 @@ function CoachRegisterPage() {
   const handleCropConfirm = async () => {
     if (!cropImageSrc || !croppedAreaPixels) return;
     setCropModalOpen(false);
-    
+
     const isGroup = cropType === 'group';
     const setIsUploadingTarget = isGroup ? setIsUploadingGroup : setIsUploading;
     setIsUploadingTarget(true);
@@ -320,7 +320,7 @@ function CoachRegisterPage() {
     try {
       const croppedCanvas = await getCroppedImg(cropImageSrc, croppedAreaPixels);
       const detections = await faceapi.detectAllFaces(croppedCanvas as any, new faceapi.TinyFaceDetectorOptions());
-      
+
       if (isGroup) {
         if (detections.length < 2) {
           alert(`❌ Error: Only ${detections.length} face(s) detected. A group photo must have at least 2 visible faces.`);
@@ -443,8 +443,6 @@ function CoachRegisterPage() {
     if (step === 5) {
       if (!formData.profileImageUrl) return alert("Please upload a profile headshot!");
       if (!formData.groupImageUrl) return alert("Please upload a group action photo!");
-      if (!formData.instagram) return alert("Instagram handle is mandatory!");
-      if (!formData.consent) return alert("You must agree to the content terms!");
     }
 
     const payload = {
@@ -461,7 +459,7 @@ function CoachRegisterPage() {
     try {
       const res = await fetch(endpoint, {
         method: method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authToken || localStorage.getItem('coachToken') || ''}`
         },
@@ -578,9 +576,9 @@ function CoachRegisterPage() {
                   </div>
                   <div className="flex justify-end mt-2 space-x-4">
                     <button type="button" onClick={() => { setOtpSent(false); setOtpCode(''); }} className="text-sm text-orange-600 font-bold hover:underline">Edit Email</button>
-                    <button 
-                      type="button" 
-                      onClick={handleSendOtp} 
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
                       disabled={countdown > 0 || isVerifying}
                       className="text-sm text-orange-600 font-bold hover:underline disabled:opacity-50 disabled:hover:no-underline"
                     >
@@ -703,7 +701,7 @@ function CoachRegisterPage() {
                     type="text"
                     value={formData.expertise}
                     onChange={e => setFormData({ ...formData, expertise: e.target.value.replace(/[^a-zA-Z\s]/g, "") })}
-                    placeholder="e.g. High School Physics, Vinyasa Yoga"
+                    placeholder="e.g. Chess, Voice training, Vinyasa Yoga"
                     className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
                   />
                 </div>
@@ -822,8 +820,8 @@ function CoachRegisterPage() {
                 <label className="text-sm font-bold text-slate-700 ml-1">Time Slots / Availability <span className="text-orange-500">*</span></label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
-                    "Morning (6 AM - 12 PM)", 
-                    "Afternoon (12 PM - 5 PM)", 
+                    "Morning (6 AM - 12 PM)",
+                    "Afternoon (12 PM - 5 PM)",
                     "Evening (5 PM - 10 PM)"
                   ].map(block => {
                     const isSelected = formData.timeBlocks.includes(block);
@@ -848,7 +846,7 @@ function CoachRegisterPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Profile Headshot <span className="text-orange-500">*</span></label>
-                  
+
                   <div className="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50 hover:bg-slate-100 transition-colors relative h-48 flex flex-col items-center justify-center">
                     {isUploading ? (
                       <div className="text-indigo-600 font-bold flex flex-col items-center justify-center">
@@ -858,7 +856,7 @@ function CoachRegisterPage() {
                     ) : formData.profileImageUrl ? (
                       <div className="flex flex-col items-center justify-center gap-2 h-full">
                         <span className="text-green-600 font-bold text-sm">✅ Perfect! Image accepted</span>
-                        <button type="button" onClick={() => setFormData({...formData, profileImageUrl: ''})} className="text-xs text-slate-500 hover:underline relative z-20">Remove</button>
+                        <button type="button" onClick={() => setFormData({ ...formData, profileImageUrl: '' })} className="text-xs text-slate-500 hover:underline relative z-20">Remove</button>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center px-4">
@@ -867,10 +865,10 @@ function CoachRegisterPage() {
                         <span className="text-[10px] text-slate-400 mt-1 leading-tight">Must contain exactly 1 visible face (AI Validated)</span>
                       </div>
                     )}
-                    
+
                     {!isUploading && !formData.profileImageUrl && (
-                      <input 
-                        type="file" 
+                      <input
+                        type="file"
                         accept="image/*"
                         onChange={(e) => handleSelectFile(e, 'profile')}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -883,16 +881,16 @@ function CoachRegisterPage() {
                   <div className="flex justify-between items-center ml-1">
                     <label className="text-sm font-bold text-slate-700">Group / Action Photo {!formData.isFresher && <span className="text-orange-500">*</span>}</label>
                     <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={formData.isFresher} 
-                        onChange={e => setFormData({ ...formData, isFresher: e.target.checked })} 
+                      <input
+                        type="checkbox"
+                        checked={formData.isFresher}
+                        onChange={e => setFormData({ ...formData, isFresher: e.target.checked })}
                         className="w-4 h-4 text-orange-600 rounded focus:ring-orange-500"
                       />
                       I am a fresher (Skip this)
                     </label>
                   </div>
-                  
+
                   {!formData.isFresher && (
                     <div className="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50 hover:bg-slate-100 transition-colors relative h-48 flex flex-col items-center justify-center">
                       {isUploadingGroup ? (
@@ -903,7 +901,7 @@ function CoachRegisterPage() {
                       ) : formData.groupImageUrl ? (
                         <div className="flex flex-col items-center justify-center gap-2 h-full">
                           <span className="text-green-600 font-bold text-sm">✅ Perfect! Image accepted</span>
-                          <button type="button" onClick={() => setFormData({...formData, groupImageUrl: ''})} className="text-xs text-slate-500 hover:underline relative z-20">Remove</button>
+                          <button type="button" onClick={() => setFormData({ ...formData, groupImageUrl: '' })} className="text-xs text-slate-500 hover:underline relative z-20">Remove</button>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center justify-center px-4">
@@ -912,10 +910,10 @@ function CoachRegisterPage() {
                           <span className="text-[10px] text-slate-400 mt-1 leading-tight">Must contain at least 2 faces (AI Validated)</span>
                         </div>
                       )}
-                      
+
                       {!isUploadingGroup && !formData.groupImageUrl && (
-                        <input 
-                          type="file" 
+                        <input
+                          type="file"
                           accept="image/*"
                           onChange={(e) => handleSelectFile(e, 'group')}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -927,7 +925,7 @@ function CoachRegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">Instagram Handle <span className="text-orange-500">*</span></label>
+                <label className="text-sm font-bold text-slate-700 ml-1">Instagram Handle</label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">@</span>
                   <input
@@ -959,7 +957,7 @@ function CoachRegisterPage() {
                   className="mt-1 w-5 h-5 text-orange-600 rounded focus:ring-orange-500"
                 />
                 <div className="text-sm text-orange-900 leading-tight">
-                  <span className="font-bold">Mandatory Consent:</span> I agree that CoachKonnects may use my profile photo and content from my Instagram account for company marketing and promotional material.
+                  <span className="font-bold">Consent (Optional):</span> I agree that CoachKonnects may use my profile photo and content from my Instagram account for company marketing and promotional material.
                 </div>
               </div>
             </div>
@@ -1018,7 +1016,7 @@ function CoachRegisterPage() {
                 image={cropImageSrc}
                 crop={crop}
                 zoom={zoom}
-                aspect={cropType === 'profile' ? 1 : 16/9}
+                aspect={cropType === 'profile' ? 1 : 16 / 9}
                 onCropChange={setCrop}
                 onCropComplete={onCropComplete}
                 onZoomChange={setZoom}
