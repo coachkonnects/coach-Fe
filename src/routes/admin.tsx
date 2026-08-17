@@ -306,13 +306,15 @@ function AdminDashboard() {
 
   const fetchProfiles = async () => {
     try {
+      const token = localStorage.getItem('adminToken');
+      const authHeaders = { 'Authorization': `Bearer ${token}` };
       const [studentRes, coachRes, categoryRes, enquiryRes, classRes, demandRes] = await Promise.all([
         fetch('/api/profile/student'),
         fetch('/api/profile/coach'),
-        fetch('/api/categories'),
-        fetch('/api/admin/enquiries'),
-        fetch('/api/admin/classes'),
-        fetch('/api/admin/demands')
+        fetch('/api/admin/categories', { headers: authHeaders }),
+        fetch('/api/admin/enquiries', { headers: authHeaders }),
+        fetch('/api/admin/classes', { headers: authHeaders }),
+        fetch('/api/admin/demands', { headers: authHeaders })
       ]);
       if (studentRes.ok) setStudents(await studentRes.json());
       if (coachRes.ok) setCoaches(await coachRes.json());

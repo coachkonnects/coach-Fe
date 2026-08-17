@@ -186,6 +186,11 @@ function RegisterPage() {
     if (nameError || interestsError) return alert("Please remove blocked words before submitting.");
     if (!formData.mobile || formData.mobile.length < 10) return alert("Please enter a valid 10-digit mobile number!");
     if (!formData.dob) return alert("Please enter your Date of Birth!");
+    const dobParts = formData.dob.split('/');
+    if (dobParts.length === 3) {
+      const age = new Date().getFullYear() - parseInt(dobParts[2]);
+      if (age > 100) return alert("Date of Birth cannot be more than 100 years ago!");
+    }
     if (!formData.gender) return alert("Please select your Gender!");
     if (!formData.pincode || formData.pincode.length !== 6 || !formData.district) return alert("Please enter a valid 6-digit Pincode and wait for location to auto-fill!");
     if (!formData.interests) return alert("Please select your Interests/Subjects!");

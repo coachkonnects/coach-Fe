@@ -56,7 +56,7 @@ const steps = [
 ];
 
 const trustPoints = [
-  { title: "Aadhaar‑verified coaches", body: "Not anonymous profiles — every coach confirms their real identity before going live." },
+  // { title: "Aadhaar‑verified coaches", body: "Not anonymous profiles — every coach confirms their real identity before going live." },
   { title: "Admin‑approved, every time", body: "Nobody appears in search until our team has personally reviewed their profile." },
   { title: "Nearby, not just \"available\"", body: "Real GPS‑based matching, not a pincode guess — so \"near you\" actually means near you." },
   { title: "You control the connection", body: "WhatsApp is only shared once both sides confirm — you're never handed to a stranger." },
@@ -81,11 +81,18 @@ function Index() {
 
   // Demands state
   const [demands, setDemands] = useState<any[]>([]);
+  const [showAllDemands, setShowAllDemands] = useState(false);
   const [showDemandModal, setShowDemandModal] = useState(false);
   const [demandForm, setDemandForm] = useState({ skillName: '', location: '', email: '' });
   const [demandStatus, setDemandStatus] = useState('');
+  const [serverCategories, setServerCategories] = useState<any[]>([]);
+  const [showAllCats, setShowAllCats] = useState(false);
 
   useEffect(() => {
+    fetch('/api/categories')
+      .then(res => res.json())
+      .then(data => setServerCategories(data))
+      .catch(err => console.error(err));
     fetch('/api/public/coaches')
       .then(res => res.json())
       .then(data => {
@@ -108,7 +115,8 @@ function Index() {
           }
           return acc;
         }, {});
-        setDemands(Object.values(grouped));
+        const sorted = Object.values(grouped).sort((a: any, b: any) => b.count - a.count);
+        setDemands(sorted);
       })
       .catch(err => console.error(err));
   }, []);
@@ -300,37 +308,39 @@ function Index() {
         {/* CATEGORIES — overlapping hero */}
         <section className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-20 sm:px-8">
           <div className="rounded-[2.5rem] bg-white/70 backdrop-blur-2xl border border-white p-8 shadow-xl sm:p-12 md:p-16">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
-              {categories.map((category) => (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 lg:gap-8 justify-center">
+              {(showAllCats ? serverCategories : serverCategories.slice(0, 3)).map((category) => (
                 <button
-                  key={category.title}
-                  onClick={() => navigate({ to: `/coaches?category=${encodeURIComponent(category.title)}` as any })}
+                  key={category.name}
+                  onClick={() => navigate({ to: `/coaches?category=${encodeURIComponent(category.name)}` as any })}
                   className="group flex cursor-pointer flex-col items-center rounded-2xl border border-slate-100 bg-white/60 p-6 text-center transition-all hover:-translate-y-2 hover:bg-white hover:border-orange-200 hover:shadow-lg"
                 >
                   <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 text-3xl shadow-sm transition-transform group-hover:scale-110 group-hover:bg-orange-200">
-                    {category.icon}
+                    ✨
                   </div>
                   <h3 className="mb-2 text-lg font-bold text-slate-800 transition-colors group-hover:text-orange-600">
-                    {category.title}
+                    {category.name}
                   </h3>
                   <p className="text-sm font-medium leading-relaxed text-slate-500">
-                    {category.desc}
+                    Explore top coaches for {category.name}
                   </p>
                 </button>
               ))}
             </div>
 
-            <div className="mt-16 text-center">
-              <p className="mb-8 text-sm font-medium text-slate-500">
-                And many more hobbies to explore...
-              </p>
-              <a
-                href="#"
-                className="inline-flex items-center justify-center rounded-full bg-orange-600 px-8 py-3 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:bg-orange-700"
-              >
-                View all categories
-              </a>
-            </div>
+            {serverCategories.length > 3 && (
+              <div className="mt-16 text-center">
+                <p className="mb-8 text-sm font-medium text-slate-500">
+                  And many more hobbies to explore...
+                </p>
+                <button
+                  onClick={() => setShowAllCats(!showAllCats)}
+                  className="inline-flex items-center justify-center rounded-full bg-orange-600 px-8 py-3 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:bg-orange-700"
+                >
+                  {showAllCats ? 'Show less' : 'View all categories'}
+                </button>
+              </div>
+            )}
           </div>
         </section>
 
@@ -380,7 +390,7 @@ function Index() {
               ))}
             </div>
           ) : (
-             <div className="text-center py-10 text-slate-500 italic">No specific demands right now. Be the first to request!</div>
+            <div className="text-center py-10 text-slate-500 italic">No specific demands right now. Be the first to request!</div>
           )}
         </div>
       </section>
@@ -397,19 +407,19 @@ function Index() {
             <form onSubmit={handleDemandSubmit} className="p-6 sm:p-8 flex flex-col gap-5">
               <div>
                 <label className="text-sm font-bold text-slate-700 ml-1">Skill Name (e.g. Garba)</label>
-                <input required type="text" value={demandForm.skillName} onChange={e => setDemandForm({...demandForm, skillName: e.target.value})} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
+                <input required type="text" value={demandForm.skillName} onChange={e => setDemandForm({ ...demandForm, skillName: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
               </div>
               <div>
                 <label className="text-sm font-bold text-slate-700 ml-1">Your Location (e.g. Mumbai)</label>
-                <input required type="text" value={demandForm.location} onChange={e => setDemandForm({...demandForm, location: e.target.value})} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
+                <input required type="text" value={demandForm.location} onChange={e => setDemandForm({ ...demandForm, location: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
               </div>
               <div>
                 <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-                <input required type="email" value={demandForm.email} onChange={e => setDemandForm({...demandForm, email: e.target.value})} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
+                <input required type="email" value={demandForm.email} onChange={e => setDemandForm({ ...demandForm, email: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
               </div>
-              
+
               {demandStatus && <div className="text-center text-sm font-bold text-orange-600">{demandStatus}</div>}
-              
+
               <button type="submit" className="mt-2 w-full rounded-full bg-slate-900 py-3.5 text-sm font-bold text-white hover:bg-slate-800 transition-colors">
                 Submit Request
               </button>
@@ -602,29 +612,6 @@ function Index() {
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="w-full px-5 pb-24 sm:px-8">
-        <div className="mx-auto w-full max-w-4xl text-center">
-          <h2 className="font-[var(--font-display)] text-[clamp(1.75rem,5vw,3rem)] font-bold leading-tight tracking-tight text-balance">
-            Stop scrolling group chats. <br />Start finding the right coach.
-          </h2>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-            <Link
-              to="/coaches"
-              className="inline-flex w-full items-center justify-center rounded-full bg-[color:var(--color-brand)] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(242,107,33,0.28)] transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)] sm:w-auto"
-            >
-              🔍 Find Classes Near You
-            </Link>
-            <a
-              href="#"
-              className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-[color:var(--color-ink)] transition-all hover:border-[color:var(--color-brand)] hover:text-[color:var(--color-brand)] sm:w-auto"
-            >
-              ✨ Are You a Coach? Join Free
-            </a>
-          </div>
-        </div>
-      </section>
-
       {/* FOOTER */}
       <footer className="w-full bg-[#fdf5ed] px-5 py-14 text-[color:var(--color-ink)] sm:px-8">
         <div className="mx-auto w-full max-w-7xl">
@@ -660,19 +647,12 @@ function Index() {
               </p>
             </div>
 
-            <div>
-              <h4 className="mb-4 font-semibold">Platform</h4>
-              <ul className="flex flex-col gap-2 text-sm text-[color:var(--color-ink-muted)]">
-                <li><Link to="/coaches" className="hover:text-[color:var(--color-brand)] transition-colors">Find Coaches</Link></li>
-                <li><Link to="/register" className="hover:text-[color:var(--color-brand)] transition-colors">Become a Coach</Link></li>
-              </ul>
-            </div>
+
 
             <div>
               <h4 className="mb-4 font-semibold">Company</h4>
               <ul className="flex flex-col gap-2 text-sm text-[color:var(--color-ink-muted)]">
-                <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Contact</a></li>
+                <li><a href="mailto:support@coachkonnects.com" className="hover:text-[color:var(--color-brand)] transition-colors">support@coachkonnects.com</a></li>
                 <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">FAQ</a></li>
                 <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Terms & Privacy</a></li>
               </ul>

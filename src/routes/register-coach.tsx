@@ -418,6 +418,11 @@ function CoachRegisterPage() {
       if (nameError) return alert(nameError);
       if (!formData.mobile || formData.mobile.length < 10) return alert("Please enter a valid 10-digit mobile number!");
       if (!formData.dob) return alert("Please enter your Date of Birth!");
+      const dobParts = formData.dob.split('/');
+      if (dobParts.length === 3) {
+        const age = new Date().getFullYear() - parseInt(dobParts[2]);
+        if (age > 100) return alert("Date of Birth cannot be more than 100 years ago!");
+      }
       if (!formData.pincode || formData.pincode.length !== 6 || !formData.district) return alert("Please enter a valid 6-digit Pincode and wait for location to auto-fill!");
       setStep(2);
     } else if (step === 2) {
@@ -426,6 +431,7 @@ function CoachRegisterPage() {
       setStep(3);
     } else if (step === 3) {
       if (!formData.classMode || !formData.minPrice || !formData.maxPrice || !formData.targetAudience) return alert("Please fill in all class details!");
+      if (parseInt(formData.maxPrice) <= parseInt(formData.minPrice)) return alert("Max price must be greater than Min price!");
       setStep(4);
     } else if (step === 4) {
       if (formData.availableDays.length === 0 || formData.timeBlocks.length === 0) return alert("Please select your available days and time slots!");
