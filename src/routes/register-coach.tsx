@@ -509,12 +509,12 @@ function CoachRegisterPage() {
               <div key={s} className={`h-2 flex-1 rounded-full ${step >= s ? 'bg-gradient-to-r from-orange-400 to-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]' : 'bg-slate-100'}`}></div>
             ))}
           </div>
-          <div className="flex justify-between text-xs font-bold text-slate-400 mb-8 px-1 hidden sm:flex">
-            <span className={step >= 1 ? "text-orange-600" : ""}>Basics</span>
-            <span className={step >= 2 ? "text-orange-600" : ""}>Expertise</span>
-            <span className={step >= 3 ? "text-orange-600" : ""}>Class Details</span>
-            <span className={step >= 4 ? "text-orange-600" : ""}>Schedule</span>
-            <span className={step >= 5 ? "text-orange-600" : ""}>Media</span>
+          <div className="flex justify-between sm:justify-between gap-4 overflow-x-auto scrollbar-hide text-xs font-bold text-slate-400 mb-8 px-1 pb-2">
+            <span className={`shrink-0 transition-colors ${step >= 1 ? "text-orange-600" : ""}`}>Basics</span>
+            <span className={`shrink-0 transition-colors ${step >= 2 ? "text-orange-600" : ""}`}>Expertise</span>
+            <span className={`shrink-0 transition-colors ${step >= 3 ? "text-orange-600" : ""}`}>Class Details</span>
+            <span className={`shrink-0 transition-colors ${step >= 4 ? "text-orange-600" : ""}`}>Schedule</span>
+            <span className={`shrink-0 transition-colors ${step >= 5 ? "text-orange-600" : ""}`}>Media</span>
           </div>
 
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
@@ -851,6 +851,7 @@ function CoachRegisterPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Profile Headshot <span className="text-orange-500">*</span></label>
+                  <p className="text-xs text-orange-600 font-medium ml-1 mb-2">This helps parents trust that you're a real, verified coach. Add real photos to avoid rejection of profile.</p>
 
                   <div className="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50 hover:bg-slate-100 transition-colors relative h-48 flex flex-col items-center justify-center">
                     {isUploading ? (
