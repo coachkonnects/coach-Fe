@@ -230,11 +230,11 @@ function Index() {
 
       <main className="relative z-10 w-full">
         {/* HERO */}
-        <section className="relative isolate w-full overflow-hidden bg-transparent md:aspect-video md:min-h-[720px] lg:min-h-[760px] xl:min-h-0">
+        <section className="relative isolate w-full overflow-hidden bg-transparent min-h-[75svh] md:min-h-[720px] lg:min-h-[760px] xl:min-h-0 md:aspect-video">
           <picture>
             <source media="(min-width: 768px)" srcSet="/Desktop%20BG.png" />
             <img
-              src="/Mobile%20BG1.png"
+              src="/mobile-bg-new.jpg"
               alt="Hero background"
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 -z-10 h-full w-full select-none object-cover object-bottom md:object-right-bottom"
@@ -243,11 +243,11 @@ function Index() {
           {/* Soft fade for text legibility on the left */}
           <div
             aria-hidden="true"
-            className="absolute inset-0 -z-10 bg-gradient-to-r from-[#fdf5ed] via-[#fdf5ed]/85 to-transparent md:from-[#fdf5ed] md:via-[#fdf5ed]/70 md:to-transparent"
+            className="absolute inset-0 -z-10 hidden md:block bg-gradient-to-r from-[#fdf5ed] via-[#fdf5ed]/85 to-transparent md:from-[#fdf5ed] md:via-[#fdf5ed]/70 md:to-transparent"
           />
           <div
             aria-hidden="true"
-            className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-b from-transparent to-white"
+            className="absolute inset-x-0 bottom-0 -z-10 h-40 hidden md:block bg-gradient-to-b from-transparent to-white"
           />
 
           {/* Header */}
@@ -271,8 +271,10 @@ function Index() {
             </div>
           </header>
 
-          {/* Hero content */}
-          <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-24 pt-8 sm:px-8 sm:pb-32 sm:pt-14 md:pb-40 md:pt-16 lg:pb-48 text-left">
+          {/* Hero content */}{/* Hero content */}
+          <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-10 pt-8 sm:px-8 sm:pb-32 sm:pt-14 md:pb-40 md:pt-16 lg:pb-48 text-left flex flex-col justify-between min-h-[75svh] sm:min-h-[unset] sm:block">
+            
+            {/* TOP SECTION */}
             <div className="w-full min-w-0 max-w-lg lg:max-w-[50%] xl:max-w-2xl">
               <span className="mb-5 inline-block rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-700 shadow-sm backdrop-blur-md">
                 🚀 Launching in Mumbai & India
@@ -294,42 +296,63 @@ function Index() {
                   to="/coaches"
                   className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(249,115,22,0.4)] sm:w-auto"
                 >
-                  📍 Find Classes <span aria-hidden="true">→</span>
+                  📍 Find Classes Near Me <span aria-hidden="true">→</span>
                 </Link>
                 <Link
                   to="/register"
                   className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white/80 px-7 py-3.5 text-sm font-semibold text-slate-800 backdrop-blur-md transition-all hover:border-orange-500 hover:text-orange-600 sm:w-auto shadow-sm"
                 >
-                  👤 Are You A Coach?
+                  👤 Are You A Hobby Coach?
                 </Link>
               </div>
 
-              {/* Trust chips */}
-              <div className="mt-8 hidden sm:flex flex-col gap-4">
-                <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-[color:var(--color-ink)] sm:gap-5 sm:text-[15px]">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              </div>
+
+            {/* BOTTOM SECTION (Pushed down on mobile) */}
+            <div className="w-full min-w-0 max-w-xl mt-auto pt-8 flex flex-col gap-4">
+              
+              {/* Trust chips - white box on mobile, raw on desktop */}
+              <div className="bg-white/90 backdrop-blur-xl sm:bg-transparent sm:backdrop-blur-none rounded-3xl p-4 sm:p-0 shadow-lg sm:shadow-none border border-white sm:border-transparent">
+                <div className="grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm font-semibold text-[color:var(--color-ink)] sm:text-[15px]">
+                  
+                  <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
+                    <svg className="w-6 h-6 sm:w-5 sm:h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    Verified Coaches
+                    <span>Verified<br className="sm:hidden"/> Coaches</span>
                   </div>
-                  <div className="h-5 w-px bg-slate-300"></div>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  
+                  <div className="hidden sm:block h-5 w-px bg-slate-300"></div>
+                  
+                  <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
+                    <svg className="w-6 h-6 sm:w-5 sm:h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span>Background<br className="sm:hidden"/> Checked</span>
+                  </div>
+                  
+                  <div className="hidden sm:block h-5 w-px bg-slate-300"></div>
+                  
+                  <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
+                    <svg className="w-6 h-6 sm:w-5 sm:h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    Online & Offline
+                    <span>Direct Connect<br className="sm:hidden"/> on WhatsApp</span>
                   </div>
-                  <div className="h-5 w-px bg-slate-300"></div>
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  
+                  <div className="hidden sm:block h-5 w-px bg-slate-300"></div>
+                  
+                  <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
+                    <svg className="w-6 h-6 sm:w-5 sm:h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Across India
+                    <span>No Platform<br className="sm:hidden"/> Fees</span>
                   </div>
+
                 </div>
-                <div className="flex items-center gap-3">
+
+                <div className="hidden sm:flex items-center gap-3 mt-4">
                   <div className="flex items-center gap-1">
                     {[...Array(5)].map((_, i) => (
                       <svg key={i} className="w-[18px] h-[18px] text-[color:var(--color-brand)] fill-current" viewBox="0 0 24 24">
@@ -344,23 +367,29 @@ function Index() {
               </div>
 
               {/* Search */}
-              <div className="mt-8 w-full min-w-0 max-w-xl">
-                <form onSubmit={handleSearch} className="flex w-full min-w-0 flex-col gap-2 rounded-2xl border border-black/5 bg-white p-3 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.06)] sm:flex-row sm:items-center sm:gap-0 sm:rounded-full sm:p-1.5 sm:pl-5">
-                  <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 pb-2 text-sm font-medium text-[color:var(--color-ink-muted)] sm:whitespace-nowrap sm:border-b-0 sm:border-r sm:pb-0 sm:pr-4">
+              <div className="w-full">
+                <form onSubmit={handleSearch} className="flex w-full min-w-0 flex-col gap-2 rounded-3xl border border-black/5 bg-white p-2 shadow-xl sm:flex-row sm:items-center sm:gap-0 sm:rounded-full sm:p-1.5 sm:pl-5">
+                  <div className="hidden sm:flex shrink-0 items-center gap-2 border-b border-slate-200 pb-2 text-sm font-medium text-[color:var(--color-ink-muted)] sm:whitespace-nowrap sm:border-b-0 sm:border-r sm:pb-0 sm:pr-4">
                     <span className="shrink-0 text-[color:var(--color-brand)]">📍</span>
+                  </div>
+                  <div className="flex sm:hidden shrink-0 items-center pl-3">
+                    <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
                   </div>
                   <input
                     type="text"
-                    placeholder="Search a skill , hobby or coaches near you😎"
+                    placeholder="Search a skill, hobby or coaches near you😎"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="w-full min-w-0 flex-1 bg-transparent px-1 py-2 text-sm outline-none placeholder:text-slate-400 sm:px-4"
+                    className="w-full min-w-0 flex-1 bg-transparent px-2 py-2 text-sm sm:text-base outline-none placeholder:text-slate-400 sm:px-4"
                   />
-                  <button type="submit" className="shrink-0 whitespace-nowrap rounded-full bg-[color:var(--color-brand)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)]">
+                  <button type="submit" className="shrink-0 w-full sm:w-auto whitespace-nowrap rounded-full bg-[color:var(--color-brand)] px-6 py-3 sm:py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)]">
                     Search
                   </button>
                 </form>
               </div>
+
             </div>
           </div>
         </section>
@@ -408,12 +437,12 @@ function Index() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4 shrink-0 w-full md:w-auto">
-                <button
-                  onClick={() => setShowAllCatsModal(true)}
-                  className="w-full sm:w-auto rounded-full bg-teal-600 px-6 py-3.5 font-semibold text-white shadow-lg transition-transform hover:-translate-y-1 hover:bg-teal-700 flex items-center justify-center text-sm sm:text-base"
-                >
-                  View all skills and hobbies
-                </button>
+              <button
+                onClick={() => setShowAllCatsModal(true)}
+                className="w-full sm:w-auto rounded-full bg-teal-600 px-6 py-3.5 font-semibold text-white shadow-lg transition-transform hover:-translate-y-1 hover:bg-teal-700 flex items-center justify-center text-sm sm:text-base"
+              >
+                View all skills and hobbies
+              </button>
               <button
                 onClick={() => setShowDemandModal(true)}
                 className="w-full sm:w-auto rounded-full bg-[color:var(--color-brand)] px-6 py-3.5 font-semibold text-white shadow-lg shadow-orange-500/20 transition-transform hover:-translate-y-1 flex items-center justify-center text-sm sm:text-base"
@@ -448,7 +477,7 @@ function Index() {
               </div>
               {demands.length > 3 && (
                 <div className="mt-12 text-center">
-                  <button 
+                  <button
                     onClick={() => setShowAllDemands(!showAllDemands)}
                     className="inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-orange-200 text-orange-600 font-bold hover:bg-orange-50 hover:border-orange-300 transition-all active:scale-95"
                   >
@@ -467,7 +496,7 @@ function Index() {
       {/* Modal */}
       {showDemandModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-2xl">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-[2rem] bg-white shadow-2xl">
             <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 sm:p-8 text-center relative">
               <button onClick={() => setShowDemandModal(false)} className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white text-slate-500 hover:bg-slate-100 flex items-center justify-center font-bold">×</button>
               <h3 className="font-[var(--font-display)] text-2xl font-bold text-slate-800">Request a Skill</h3>
@@ -740,7 +769,7 @@ function Index() {
                 <h4 className="mb-4 font-semibold text-slate-900">Company</h4>
                 <ul className="flex flex-col gap-3 text-sm text-[color:var(--color-ink-muted)]">
                   <li><a href="mailto:support@coachkonnects.com" className="hover:text-[color:var(--color-brand)] transition-colors font-medium">support@coachkonnects.com</a></li>
-                  <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors font-medium">FAQ</a></li>
+                  {/* <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors font-medium">FAQ</a></li> */}
                   <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors font-medium">Terms & Privacy</a></li>
                 </ul>
               </div>

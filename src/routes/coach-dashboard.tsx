@@ -1272,7 +1272,7 @@ function CoachDashboard() {
 
       {classModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white/80 backdrop-blur-xl border border-white/50 w-full max-w-xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="bg-white/80 backdrop-blur-xl border border-white/50 w-full max-w-xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh]">
             <div className="p-6 border-b border-white/40 flex justify-between items-center bg-white/40">
               <h2 className="text-2xl font-extrabold text-slate-900">
                 {classForm.type === "WORKSHOP" ? "Create Workshop" : "Create Class"}
