@@ -38,6 +38,7 @@ function StudentDashboard() {
       return;
     }
 
+    let isNewProfile = false;
     try {
       const res = await fetch(`/api/profile/student/me?email=${email}`);
       if (!res.ok) {
@@ -45,6 +46,7 @@ function StudentDashboard() {
         if (res.status === 404 || errorData.error === 'Student profile not found.' || res.status === 400) {
           setProfile(null);
           setEditForm({});
+          isNewProfile = true;
           // Don't throw, let them see the dashboard but with a warning
         } else {
           throw new Error(errorData.error || 'Failed to fetch profile');
@@ -55,12 +57,19 @@ function StudentDashboard() {
         setEditForm(data.profile);
       }
 
-
       try {
         const enqRes = await fetch(`/api/enquiries/student?email=${email}`);
         if (enqRes.ok) {
           const enqData = await enqRes.json();
           setEnquiries(enqData);
+          if (isNewProfile && enqData.length > 0) {
+            const latestEnq = enqData[enqData.length - 1];
+            setEditForm((prev: any) => ({
+              ...prev,
+              fullName: latestEnq.leadName || '',
+              area: latestEnq.leadLocation || ''
+            }));
+          }
         }
       } catch (e) {
         console.error("Failed to fetch enquiries");
