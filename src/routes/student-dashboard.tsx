@@ -55,6 +55,9 @@ function StudentDashboard() {
         const data = await res.json();
         setProfile(data.profile);
         setEditForm(data.profile);
+        if (!data.profile || data.profile.id === null) {
+          isNewProfile = true;
+        }
       }
 
       try {
@@ -62,12 +65,19 @@ function StudentDashboard() {
         if (enqRes.ok) {
           const enqData = await enqRes.json();
           setEnquiries(enqData);
-          if (isNewProfile && enqData.length > 0) {
+          if (enqData.length > 0) {
             const latestEnq = enqData[enqData.length - 1];
             setEditForm((prev: any) => ({
               ...prev,
-              fullName: latestEnq.leadName || '',
-              area: latestEnq.leadLocation || ''
+              fullName: prev?.fullName || latestEnq.leadName || '',
+              area: prev?.area || latestEnq.leadLocation || '',
+              location: prev?.location || latestEnq.leadLocation || ''
+            }));
+            setProfile((prev: any) => ({
+              ...prev,
+              fullName: prev?.fullName || latestEnq.leadName || '',
+              area: prev?.area || latestEnq.leadLocation || '',
+              location: prev?.location || latestEnq.leadLocation || ''
             }));
           }
         }

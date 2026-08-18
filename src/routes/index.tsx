@@ -406,7 +406,7 @@ function Index() {
             <div className="flex flex-col sm:flex-row gap-4 shrink-0">
                 <button
                   onClick={() => setShowAllCatsModal(true)}
-                  className="rounded-full bg-slate-900 px-6 py-3 font-semibold text-white shadow-lg transition-transform hover:-translate-y-1"
+                  className="rounded-full bg-teal-600 px-6 py-3 font-semibold text-white shadow-lg transition-transform hover:-translate-y-1 hover:bg-teal-700"
                 >
                   View all skills and hobbies
                 </button>
