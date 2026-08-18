@@ -144,12 +144,15 @@ function RegisterPage() {
       const res = await fetch('/api/auth/request-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, intendedRole: "STUDENT" })
+        body: JSON.stringify({ email: formData.email, intendedRole: "STUDENT", isRegister: true })
       });
       if (res.ok) {
         setOtpSent(true);
         setCountdown(30);
         alert("OTP sent to your email!");
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || "Failed to send OTP");
       }
     } catch (err) {
       console.error(err);

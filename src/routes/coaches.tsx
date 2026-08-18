@@ -7,6 +7,9 @@ export const Route = createFileRoute('/coaches')({
 });
 
 function CoachesDirectory() {
+  const userRole = typeof window !== 'undefined' ? localStorage.getItem('userRole') : null;
+  const token = typeof window !== 'undefined' ? (localStorage.getItem('token') || localStorage.getItem('adminToken')) : null;
+  const dashboardLink = typeof window !== 'undefined' && localStorage.getItem('adminToken') ? '/admin' : (userRole ? `/${userRole}-dashboard` : '/login');
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(window.location.search);
   
@@ -66,9 +69,15 @@ function CoachesDirectory() {
              <span className="text-xl font-black text-slate-800 tracking-tight hidden sm:block">CoachKonnects</span>
           </div>
           <div className="flex items-center gap-6">
-            <Link to="/login" className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-sm transition-colors border border-slate-200/50">
-              Log In
-            </Link>
+            {token ? (
+              <Link to={dashboardLink} className="px-5 py-2.5 bg-teal-500 hover:bg-teal-600 text-white rounded-xl font-bold text-sm transition-colors border border-transparent">
+                Dashboard
+              </Link>
+            ) : (
+              <Link to="/login" className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-sm transition-colors border border-slate-200/50">
+                Log In
+              </Link>
+            )}
           </div>
         </div>
       </nav>
