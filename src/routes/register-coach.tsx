@@ -968,20 +968,20 @@ function CoachRegisterPage() {
             </div>
           )}
 
-          <div className="flex justify-between items-center pt-8 mt-4 border-t border-slate-100">
+          <div className="flex flex-col-reverse sm:flex-row justify-between items-center gap-4 pt-8 mt-4 border-t border-slate-100">
             {step > 1 ? (
-              <button type="button" onClick={() => setStep(step - 1)} className="px-8 py-4 bg-white border border-slate-200 rounded-2xl text-slate-500 font-bold hover:text-slate-900 shadow-sm">
+              <button type="button" onClick={() => setStep(step - 1)} className="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200 rounded-2xl text-slate-500 font-bold hover:text-slate-900 shadow-sm">
                 ← Back
               </button>
             ) : (
-              <div></div>
+              <div className="hidden sm:block"></div>
             )}
 
             {step < 5 ? (
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="px-10 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-2xl font-bold shadow-md transition-all active:scale-[0.98]"
+                className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-2xl font-bold shadow-md transition-all active:scale-[0.98]"
               >
                 Next Step →
               </button>
@@ -990,7 +990,7 @@ function CoachRegisterPage() {
                 type="button"
                 onClick={handleSubmitProfile}
                 disabled={!formData.profileImageUrl || (!formData.isFresher && !formData.groupImageUrl)}
-                className={`px-10 py-4 text-white rounded-2xl font-bold transition-all shadow-[0_8px_20px_rgba(20,184,166,0.3)] active:scale-[0.98] ${!formData.profileImageUrl || (!formData.isFresher && !formData.groupImageUrl) ? 'bg-slate-300 cursor-not-allowed' : 'bg-gradient-to-r from-teal-500 to-emerald-500'}`}
+                className={`w-full sm:w-auto px-10 py-4 text-white rounded-2xl font-bold transition-all shadow-[0_8px_20px_rgba(20,184,166,0.3)] active:scale-[0.98] ${!formData.profileImageUrl || (!formData.isFresher && !formData.groupImageUrl) ? 'bg-slate-300 cursor-not-allowed' : 'bg-gradient-to-r from-teal-500 to-emerald-500'}`}
               >
                 {isEditMode ? 'Save Changes' : 'Submit Coach Profile'}
               </button>

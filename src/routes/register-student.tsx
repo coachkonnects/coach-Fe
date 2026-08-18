@@ -296,7 +296,7 @@ function RegisterPage() {
           {otpSent && !emailVerified && (
             <div className="space-y-3 p-5 bg-orange-50 border border-orange-100 rounded-2xl animate-in fade-in slide-in-from-top-2">
               <label className="text-sm font-bold text-orange-900">Enter the 6-digit code sent to your email</label>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
                   maxLength={6}
@@ -309,7 +309,7 @@ function RegisterPage() {
                   type="button"
                   onClick={handleVerifyOtp}
                   disabled={isVerifying || otpCode.length !== 6}
-                  className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl font-bold shadow-md disabled:opacity-50 transition-all"
+                  className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl font-bold shadow-md disabled:opacity-50 transition-all shrink-0"
                 >
                   Confirm
                 </button>
@@ -547,14 +547,14 @@ function RegisterPage() {
 
 
 
-          <div className="flex justify-between items-center pt-8 mt-4 border-t border-slate-100">
-            <button type="button" onClick={handleResetForm} className="px-8 py-4 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl text-slate-500 font-bold hover:text-slate-900 hover:border-slate-300 shadow-sm transition-colors">
+          <div className="flex flex-col-reverse sm:flex-row justify-between items-center gap-4 pt-8 mt-4 border-t border-slate-100">
+            <button type="button" onClick={handleResetForm} className="w-full sm:w-auto px-8 py-4 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl text-slate-500 font-bold hover:text-slate-900 hover:border-slate-300 shadow-sm transition-colors">
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSubmitProfile}
-              className="px-10 py-4 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white rounded-2xl font-bold shadow-md transition-all flex items-center gap-2 group active:scale-[0.98]"
+              className="w-full sm:w-auto justify-center px-10 py-4 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white rounded-2xl font-bold shadow-md transition-all flex items-center gap-2 group active:scale-[0.98]"
             >
               Submit Student Profile
               <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
