@@ -10,6 +10,7 @@ export const Route = createFileRoute('/admin')({
 });
 
 function AdminDashboard() {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>(() => localStorage.getItem('adminActiveTab') || 'students');
@@ -733,11 +734,7 @@ function AdminDashboard() {
         </div>
         <div className="p-4 border-t border-teal-800">
           <button
-            onClick={() => {
-              localStorage.removeItem('adminToken');
-              localStorage.removeItem('adminEmail');
-              navigate({ to: '/admin-login' });
-            }}
+            onClick={() => setShowLogoutModal(true)}
             className="w-full px-4 py-2 text-sm text-teal-200 hover:text-white hover:bg-teal-800 rounded-xl transition-colors text-left flex items-center gap-3"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
@@ -970,12 +967,44 @@ function AdminDashboard() {
                                     ) : (
                                       <span className="font-medium">{value as string}</span>
                                     )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          );
-                        } catch (e) {
+                              
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </div>
+            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Abandoning Ship?</h3>
+            <p className="text-center text-slate-500 mb-8">Who's going to approve all these profiles if you leave? Just kidding, you deserve a break. Sure you want to log out?</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Stay</button>
+              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all">Yes, Bye!</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+})}
+                        
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </div>
+            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Abandoning Ship?</h3>
+            <p className="text-center text-slate-500 mb-8">Who's going to approve all these profiles if you leave? Just kidding, you deserve a break. Sure you want to log out?</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Stay</button>
+              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all">Yes, Bye!</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+} catch (e) {
                           return <div className="font-mono">{selectedCoach.pendingChanges}</div>;
                         }
                       })()}
@@ -1836,6 +1865,22 @@ function AdminDashboard() {
               >
                 Leave
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </div>
+            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Abandoning Ship?</h3>
+            <p className="text-center text-slate-500 mb-8">Who's going to approve all these profiles if you leave? Just kidding, you deserve a break. Sure you want to log out?</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Stay</button>
+              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all">Yes, Bye!</button>
             </div>
           </div>
         </div>

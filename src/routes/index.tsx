@@ -75,9 +75,7 @@ function Logo({ className = "" }: { className?: string }) {
 }
 
 function Index() {
-  const userRole = typeof window !== 'undefined' ? localStorage.getItem('userRole') : null;
-  const token = typeof window !== 'undefined' ? (localStorage.getItem('token') || localStorage.getItem('adminToken')) : null;
-  const dashboardLink = typeof window !== 'undefined' && localStorage.getItem('adminToken') ? '/admin' : (userRole ? `/${userRole}-dashboard` : '/login');
+
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [featuredCoaches, setFeaturedCoaches] = useState<any[]>([]);
@@ -257,29 +255,18 @@ function Index() {
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
               <Logo />
               <nav className="flex shrink-0 items-center gap-3 sm:gap-5">
-                {token ? (
-                  <Link
-                    to={dashboardLink}
-                    className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[color:var(--color-brand)] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)] sm:px-6 sm:py-2.5"
-                  >
-                    Dashboard
-                  </Link>
-                ) : (
-                  <>
-                    <Link
-                      to="/login"
-                      className="hidden text-sm font-semibold text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-brand)] sm:inline"
-                    >
-                      Sign in
-                    </Link>
-                    <Link
-                      to="/register"
-                      className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[color:var(--color-brand)] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)] sm:px-6 sm:py-2.5"
-                    >
-                      Get Started
-                    </Link>
-                  </>
-                )}
+                <Link
+                  to="/login"
+                  className="hidden text-sm font-semibold text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-brand)] sm:inline"
+                >
+                  Log In
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[color:var(--color-brand)] px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)] sm:px-6 sm:py-2.5"
+                >
+                  Get Started
+                </Link>
               </nav>
             </div>
           </header>

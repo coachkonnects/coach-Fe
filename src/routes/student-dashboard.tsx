@@ -8,6 +8,7 @@ export const Route = createFileRoute('/student-dashboard')({
 });
 
 function StudentDashboard() {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [enquiries, setEnquiries] = useState<any[]>([]);
@@ -102,9 +103,7 @@ function StudentDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userRole');
-    navigate({ to: '/login' });
+    setShowLogoutModal(true);
   };
 
   const handleSetupPasskey = async () => {
@@ -234,9 +233,25 @@ function StudentDashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-orange-50/30 flex items-center justify-center">
         <div className="animate-spin w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
+  
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+            <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </div>
+            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Homework Done?</h3>
+            <p className="text-center text-slate-500 mb-8">Finished learning for the day, or just procrastinating? Are you sure you want to log out?</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Back to Learning</button>
+              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">Yes, Log out</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
   if (error) {
     return (
@@ -249,9 +264,25 @@ function StudentDashboard() {
             Back to Login
           </button>
         </div>
-      </div>
-    );
-  }
+  
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+            <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </div>
+            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Homework Done?</h3>
+            <p className="text-center text-slate-500 mb-8">Finished learning for the day, or just procrastinating? Are you sure you want to log out?</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Back to Learning</button>
+              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">Yes, Log out</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 
 
@@ -317,9 +348,25 @@ function StudentDashboard() {
               <h3 className="text-lg font-black text-blue-900 mb-1">Profile Under Review</h3>
               <p className="text-sm font-medium">We are reviewing your profile. We'll notify you once it's approved.</p>
             </div>
+      
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+            <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </div>
+            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Homework Done?</h3>
+            <p className="text-center text-slate-500 mb-8">Finished learning for the day, or just procrastinating? Are you sure you want to log out?</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Back to Learning</button>
+              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">Yes, Log out</button>
+            </div>
           </div>
-        );
-    }
+        </div>
+      )}
+    </div>
+  );
+}
   };
 
   return (
@@ -811,6 +858,22 @@ function StudentDashboard() {
         </div>
       )}
 
+
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+            <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </div>
+            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Homework Done?</h3>
+            <p className="text-center text-slate-500 mb-8">Finished learning for the day, or just procrastinating? Are you sure you want to log out?</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Back to Learning</button>
+              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">Yes, Log out</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

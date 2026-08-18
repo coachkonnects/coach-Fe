@@ -9,6 +9,7 @@ export const Route = createFileRoute("/coach-dashboard")({
 });
 
 function CoachDashboard() {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [flags, setFlags] = useState<any[]>([]);
@@ -28,7 +29,7 @@ function CoachDashboard() {
   const [isUploadingGroup, setIsUploadingGroup] = useState(false);
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
-  const [cropType, setCropType] = useState<"profile" | "group">("profile");
+  const [cropType, setCropType] = useState<"profile" | "group" | "workshop">("profile");
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
@@ -45,7 +46,7 @@ function CoachDashboard() {
     imageUrl: "",
   });
   const [isUploadingWorkshopImage, setIsUploadingWorkshopImage] = useState(false);
-  
+
   const [passkeyStatus, setPasskeyStatus] = useState<"SUCCESS" | "ERROR" | null>(
     localStorage.getItem("hasPasskeyRegistered") === "true" ? "SUCCESS" : null
   );
@@ -56,22 +57,15 @@ function CoachDashboard() {
   const handleWorkshopImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setIsUploadingWorkshopImage(true);
-    const form = new FormData();
-    form.append("file", file, file.name);
-    try {
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      if (res.ok) {
-        const data = await res.json();
-        setClassForm({ ...classForm, imageUrl: data.url });
-      } else {
-        alert("Upload failed");
-      }
-    } catch (err) {
-      alert("Error uploading image");
-    } finally {
-      setIsUploadingWorkshopImage(false);
-    }
+    if (file.size > 10 * 1024 * 1024)
+      return alert("❌ Error: File is too large. Please upload an image smaller than 10MB.");
+
+    const url = URL.createObjectURL(file);
+    setCropImageSrc(url);
+    setCropType("workshop");
+    setCropModalOpen(true);
+    setZoom(1);
+    e.target.value = "";
   };
 
   const handleCreateClassSubmit = async (e: React.FormEvent) => {
@@ -82,10 +76,10 @@ function CoachDashboard() {
     }
     try {
       const isEdit = !!classForm.id;
-      const url = isEdit 
+      const url = isEdit
         ? `/api/classes/${classForm.id}?email=${localStorage.getItem("userEmail")}`
         : `/api/classes?email=${localStorage.getItem("userEmail")}`;
-        
+
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -241,27 +235,31 @@ function CoachDashboard() {
     setCropModalOpen(false);
 
     const isGroup = cropType === "group";
-    const setIsUploadingTarget = isGroup ? setIsUploadingGroup : setIsUploading;
+    const isWorkshop = cropType === "workshop";
+    const setIsUploadingTarget = isWorkshop ? setIsUploadingWorkshopImage : (isGroup ? setIsUploadingGroup : setIsUploading);
     setIsUploadingTarget(true);
 
     try {
       const croppedCanvas = await getCroppedImg(cropImageSrc, croppedAreaPixels);
-      const detections = await faceapi.detectAllFaces(
-        croppedCanvas as any,
-        new faceapi.TinyFaceDetectorOptions(),
-      );
 
-      // The face-api check is often too strict for stylized avatars.
-      // We will allow the upload to proceed even if it doesn't confidently detect a face.
-      if (isGroup) {
-        if (detections.length < 2) {
-          alert("❌ Error: Please upload an image with multiple people for the group/cover photo.");
-          setIsUploadingTarget(false);
-          return;
-        }
-      } else {
-        if (detections.length === 0) {
-          console.warn("Face-API: No face detected, but allowing upload for avatars/logos.");
+      if (!isWorkshop) {
+        const detections = await faceapi.detectAllFaces(
+          croppedCanvas as any,
+          new faceapi.TinyFaceDetectorOptions(),
+        );
+
+        // The face-api check is often too strict for stylized avatars.
+        // We will allow the upload to proceed even if it doesn't confidently detect a face.
+        if (isGroup) {
+          if (detections.length < 2) {
+            alert("❌ Error: Please upload an image with multiple people for the group/cover photo.");
+            setIsUploadingTarget(false);
+            return;
+          }
+        } else {
+          if (detections.length === 0) {
+            console.warn("Face-API: No face detected, but allowing upload for avatars/logos.");
+          }
         }
       }
 
@@ -299,10 +297,14 @@ function CoachDashboard() {
             if (res.ok) {
               const data = await res.json();
               const fileUrl = data.url;
-              setEditForm((prev: any) => ({
-                ...prev,
-                [isGroup ? "groupImageUrl" : "profileImageUrl"]: fileUrl,
-              }));
+              if (isWorkshop) {
+                setClassForm((prev: any) => ({ ...prev, imageUrl: fileUrl }));
+              } else {
+                setEditForm((prev: any) => ({
+                  ...prev,
+                  [isGroup ? "groupImageUrl" : "profileImageUrl"]: fileUrl,
+                }));
+              }
               alert("✅ Perfect! Image accepted and optimized.");
             } else {
               alert("Failed to upload image to server.");
@@ -448,6 +450,22 @@ function CoachDashboard() {
             Your profile is currently hidden from the public directory. Students cannot find or book
             you right now.
           </p>
+
+          {showLogoutModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+              <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                </div>
+                <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Done Coaching?</h3>
+                <p className="text-center text-slate-500 mb-8">Taking a breather from shaping minds and changing lives? We get it. Are you sure you want to log out?</p>
+                <div className="flex gap-4">
+                  <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Keep Coaching</button>
+                  <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-all">Yes, Log out</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
@@ -540,10 +558,7 @@ function CoachDashboard() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Coach Dashboard</h1>
           <button
-            onClick={() => {
-              localStorage.clear();
-              navigate({ to: "/login" });
-            }}
+            onClick={() => setShowLogoutModal(true)}
             className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-slate-900 font-bold shadow-sm transition-all hover:border-slate-300"
           >
             Logout
@@ -879,26 +894,24 @@ function CoachDashboard() {
                         </div>
                         <button
                           onClick={handleSetupPasskey}
-                          className={`px-4 py-2 font-bold rounded-xl shadow-sm transition-colors text-sm ${
-                            passkeyStatus === "SUCCESS"
+                          className={`px-4 py-2 font-bold rounded-xl shadow-sm transition-colors text-sm ${passkeyStatus === "SUCCESS"
                               ? "bg-emerald-500 hover:bg-emerald-600 text-white"
                               : passkeyStatus === "ERROR"
-                              ? "bg-red-500 hover:bg-red-600 text-white"
-                              : "bg-slate-900 hover:bg-slate-800 text-white"
-                          }`}
+                                ? "bg-red-500 hover:bg-red-600 text-white"
+                                : "bg-slate-900 hover:bg-slate-800 text-white"
+                            }`}
                         >
                           {passkeyStatus === "SUCCESS"
                             ? "✓ Registered"
                             : passkeyStatus === "ERROR"
-                            ? "Try Again"
-                            : "Register Passkey"}
+                              ? "Try Again"
+                              : "Register Passkey"}
                         </button>
                       </div>
                       {passkeyMessage && (
                         <p
-                          className={`mt-3 text-sm font-bold ${
-                            passkeyStatus === "SUCCESS" ? "text-emerald-600" : "text-red-600"
-                          }`}
+                          className={`mt-3 text-sm font-bold ${passkeyStatus === "SUCCESS" ? "text-emerald-600" : "text-red-600"
+                            }`}
                         >
                           {passkeyMessage}
                         </p>
@@ -960,7 +973,7 @@ function CoachDashboard() {
                           </span>
                         </div>
                         <p className="text-slate-600 mb-4 line-clamp-2">{c.description}</p>
-                        
+
                         <div className="space-y-2 mb-6">
                           <div className="flex items-center gap-2 text-sm text-slate-600 font-medium">
                             <span>🕒</span> {c.schedule}
@@ -1105,6 +1118,22 @@ function CoachDashboard() {
                             Unavailable
                           </div>
                         )}
+
+                        {showLogoutModal && (
+                          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+                            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+                              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                              </div>
+                              <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Done Coaching?</h3>
+                              <p className="text-center text-slate-500 mb-8">Taking a breather from shaping minds and changing lives? We get it. Are you sure you want to log out?</p>
+                              <div className="flex gap-4">
+                                <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Keep Coaching</button>
+                                <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-all">Yes, Log out</button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -1204,7 +1233,7 @@ function CoachDashboard() {
       </div>
 
       {cropModalOpen && cropImageSrc && (
-        <div className="fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/90 z-[60] flex items-center justify-center p-4">
           <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] border border-white w-full max-w-2xl overflow-hidden flex flex-col shadow-2xl">
             <div className="p-6 border-b">
               <h3 className="text-xl font-bold">Crop Image</h3>
@@ -1335,7 +1364,8 @@ function CoachDashboard() {
 
                 {classForm.type === "WORKSHOP" && (
                   <div className="p-5 rounded-2xl bg-orange-50 border border-orange-100">
-                    <label className="block text-sm font-bold text-orange-900 mb-2">Workshop Banner Image (Mandatory)</label>
+                    <label className="block text-sm font-bold text-orange-900 mb-1">Workshop Banner Image (Mandatory)</label>
+                    <p className="text-xs text-orange-700/80 font-medium mb-3">Upload a cool banner, your logo, or even a picture of a potato (though students might prefer knowing what the workshop is actually about 🥔).</p>
                     {classForm.imageUrl ? (
                       <div className="relative rounded-xl overflow-hidden aspect-video bg-black/5 group">
                         <img src={classForm.imageUrl} alt="Workshop Banner" className="w-full h-full object-cover" />
@@ -1379,6 +1409,22 @@ function CoachDashboard() {
               >
                 {classForm.type === "WORKSHOP" ? "Publish Workshop" : "Create Class"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            </div>
+            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Done Coaching?</h3>
+            <p className="text-center text-slate-500 mb-8">Taking a breather from shaping minds and changing lives? We get it. Are you sure you want to log out?</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Keep Coaching</button>
+              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-all">Yes, Log out</button>
             </div>
           </div>
         </div>
