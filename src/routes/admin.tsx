@@ -15,6 +15,7 @@ function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<string>(() => localStorage.getItem('adminActiveTab') || 'students');
   const [coaches, setCoaches] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [categorySearchQuery, setCategorySearchQuery] = useState('');
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryExpertises, setNewCategoryExpertises] = useState('');
   const [editingCategory, setEditingCategory] = useState<any | null>(null);
@@ -1198,27 +1199,14 @@ function AdminDashboard() {
                     <h2 className="text-2xl font-bold text-slate-900">Manage Categories & Expertises</h2>
                     <p className="text-sm text-slate-500 mt-1">Add, edit, or approve categories requested by coaches.</p>
                   </div>
-                  <div className="flex gap-2 w-full md:w-auto">
+                  <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
                     <input
                       type="text"
-                      value={newCategoryName}
-                      onChange={e => setNewCategoryName(e.target.value)}
-                      placeholder="Category Name"
-                      className="px-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#f26b21] text-sm flex-1 md:w-48"
+                      value={categorySearchQuery}
+                      onChange={e => setCategorySearchQuery(e.target.value)}
+                      placeholder="🔍 Search categories..."
+                      className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#f26b21] focus:bg-white text-sm w-full md:w-64"
                     />
-                    <input
-                      type="text"
-                      value={newCategoryExpertises}
-                      onChange={e => setNewCategoryExpertises(e.target.value)}
-                      placeholder="Expertises (comma separated)"
-                      className="px-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-[#f26b21] text-sm flex-1 md:w-64"
-                    />
-                    <button
-                      onClick={handleAddCategory}
-                      className="px-4 py-2 bg-[#f26b21] text-white rounded-xl font-bold hover:bg-[#d95d1c] shadow-sm text-sm whitespace-nowrap"
-                    >
-                      + Add
-                    </button>
                   </div>
                 </div>
 
@@ -1233,7 +1221,10 @@ function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-sm">
-                      {categories.map((cat: any) => (
+                      {categories.filter((cat: any) => 
+                        (cat.name && cat.name.toLowerCase().includes(categorySearchQuery.toLowerCase())) || 
+                        (cat.expertises && cat.expertises.toLowerCase().includes(categorySearchQuery.toLowerCase()))
+                      ).map((cat: any) => (
                         <tr key={cat.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 font-semibold text-slate-800">
                             {editingCategory === cat.id ? (

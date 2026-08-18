@@ -86,7 +86,7 @@ function Index() {
   const [demandForm, setDemandForm] = useState({ skillName: '', location: '', email: '', mobileNumber: '', pincode: '' });
   const [demandStatus, setDemandStatus] = useState('');
   const [serverCategories, setServerCategories] = useState<any[]>([]);
-  const [showAllCats, setShowAllCats] = useState(false);
+  const [showAllCatsModal, setShowAllCatsModal] = useState(false);
 
   useEffect(() => {
     fetch('/api/categories')
@@ -134,9 +134,51 @@ function Index() {
     if (query) params.set("q", query);
     navigate({ to: `/coaches?${params.toString()}` as any });
   };
+  const handleDemandPincodeChange = async (pincode: string) => {
+    setDemandForm(prev => ({ ...prev, pincode }));
+    if (pincode.length === 6) {
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+        const data = await res.json();
+        if (data && data[0].Status === "Success") {
+          const po = data[0].PostOffice[0];
+          setDemandForm(prev => ({
+            ...prev,
+            location: `${po.Name}, ${po.District}, ${po.State}`
+          }));
+        } else {
+          alert("Invalid Pincode! Please enter a valid 6-digit Indian pincode.");
+          setDemandForm(prev => ({ ...prev, pincode: '', location: '' }));
+        }
+      } catch (e) {
+        console.error("Pincode fetch failed", e);
+      }
+    }
+  };
 
   const handleDemandSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!demandForm.mobileNumber || demandForm.mobileNumber.length !== 10) {
+      setDemandStatus('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+    if (!demandForm.pincode || demandForm.pincode.length !== 6) {
+      setDemandStatus('Please enter a 6-digit pincode.');
+      return;
+    }
+    setDemandStatus('Verifying pincode...');
+    try {
+      const pinRes = await fetch(`https://api.postalpincode.in/pincode/${demandForm.pincode}`);
+      const pinData = await pinRes.json();
+      if (!pinData || pinData[0].Status !== "Success") {
+        setDemandStatus('Invalid Pincode! Please enter a valid Indian pincode.');
+        return;
+      }
+    } catch (e) {
+      setDemandStatus('Error verifying pincode. Please try again.');
+      return;
+    }
+
     setDemandStatus('Sending...');
     try {
       const res = await fetch('/api/public/demands', {
@@ -323,7 +365,7 @@ function Index() {
         <section className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-20 sm:px-8">
           <div className="rounded-[2.5rem] bg-white/70 backdrop-blur-2xl border border-white p-8 shadow-xl sm:p-12 md:p-16">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 lg:gap-8 justify-center">
-              {(showAllCats ? serverCategories : serverCategories.slice(0, 3)).map((category) => (
+              {serverCategories.slice(0, 3).map((category) => (
                 <button
                   key={category.name}
                   onClick={() => navigate({ to: `/coaches?category=${encodeURIComponent(category.name)}` as any })}
@@ -342,19 +384,7 @@ function Index() {
               ))}
             </div>
 
-            {serverCategories.length > 3 && (
-              <div className="mt-16 text-center">
-                <p className="mb-8 text-sm font-medium text-slate-500">
-                  And many more hobbies to explore...
-                </p>
-                <button
-                  onClick={() => setShowAllCats(!showAllCats)}
-                  className="inline-flex items-center justify-center rounded-full bg-orange-600 px-8 py-3 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:bg-orange-700"
-                >
-                  {showAllCats ? 'Show less' : 'View all categories'}
-                </button>
-              </div>
-            )}
+
           </div>
         </section>
 
@@ -373,12 +403,20 @@ function Index() {
                 Can't find the exact skill you're looking for? Students across India are requesting these classes right now. Are you a coach who can teach them?
               </p>
             </div>
-            <button
-              onClick={() => setShowDemandModal(true)}
-              className="shrink-0 rounded-full bg-[color:var(--color-brand)] px-6 py-3 font-semibold text-white shadow-lg shadow-orange-500/20 transition-transform hover:-translate-y-1"
-            >
-              ✋ Request a Skill
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 shrink-0">
+                <button
+                  onClick={() => setShowAllCatsModal(true)}
+                  className="rounded-full bg-slate-900 px-6 py-3 font-semibold text-white shadow-lg transition-transform hover:-translate-y-1"
+                >
+                  View all skills and hobbies
+                </button>
+              <button
+                onClick={() => setShowDemandModal(true)}
+                className="rounded-full bg-[color:var(--color-brand)] px-6 py-3 font-semibold text-white shadow-lg shadow-orange-500/20 transition-transform hover:-translate-y-1"
+              >
+                ✋ Request a Skill
+              </button>
+            </div>
           </div>
 
           {demands.length > 0 ? (
@@ -437,12 +475,20 @@ function Index() {
                 <input required type="text" value={demandForm.skillName} onChange={e => setDemandForm({ ...demandForm, skillName: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
               </div>
               <div>
-                <label className="text-sm font-bold text-slate-700 ml-1">Your Location (e.g. Mumbai)</label>
-                <input required type="text" value={demandForm.location} onChange={e => setDemandForm({ ...demandForm, location: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
-              </div>
-              <div>
                 <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
                 <input required type="email" pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}" title="Please enter a valid email address (e.g. name@example.com)" value={demandForm.email} onChange={e => setDemandForm({ ...demandForm, email: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
+              </div>
+              <div>
+                <label className="text-sm font-bold text-slate-700 ml-1">Mobile Number</label>
+                <input required type="tel" maxLength={10} pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" value={demandForm.mobileNumber} onChange={e => setDemandForm({ ...demandForm, mobileNumber: e.target.value.replace(/\D/g, '') })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" placeholder="10-digit mobile number" />
+              </div>
+              <div>
+                <label className="text-sm font-bold text-slate-700 ml-1">Pincode</label>
+                <input required type="text" maxLength={6} pattern="[0-9]{6}" title="Please enter a valid 6-digit pincode" value={demandForm.pincode} onChange={e => handleDemandPincodeChange(e.target.value.replace(/\D/g, ''))} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" placeholder="6-digit pincode" />
+              </div>
+              <div>
+                <label className="text-sm font-bold text-slate-700 ml-1">Your Location (e.g. Mumbai)</label>
+                <input required type="text" value={demandForm.location} onChange={e => setDemandForm({ ...demandForm, location: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
               </div>
 
               {demandStatus && <div className="text-center text-sm font-bold text-orange-600">{demandStatus}</div>}
@@ -700,6 +746,32 @@ function Index() {
           </div>
         </div>
       </footer>
+      {showAllCatsModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-[2rem] bg-white shadow-2xl flex flex-col">
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 p-6 sm:p-8 text-center relative shrink-0">
+              <button onClick={() => setShowAllCatsModal(false)} className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white text-slate-500 hover:bg-slate-100 flex items-center justify-center font-bold">×</button>
+              <h3 className="font-[var(--font-display)] text-2xl font-bold text-slate-800">All Skills & Hobbies</h3>
+              <p className="mt-2 text-sm text-slate-600">Discover everything our coaches have to offer.</p>
+            </div>
+            <div className="p-6 sm:p-8 overflow-y-auto bg-slate-50 flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {serverCategories.map((category) => (
+                  <div key={category.name} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 transition-shadow hover:shadow-md">
+                    <h4 className="font-bold text-slate-800 text-lg mb-1">{category.name}</h4>
+                    {category.expertises ? (
+                      <p className="text-sm text-orange-600 font-medium leading-relaxed">{category.expertises}</p>
+                    ) : (
+                      <p className="text-sm text-slate-400 italic">General coaching available</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
