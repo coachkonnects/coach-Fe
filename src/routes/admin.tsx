@@ -764,6 +764,7 @@ function AdminDashboard() {
                     <th className="p-4 font-medium cursor-pointer" onClick={() => handleSort('fullName')}>Name {sortConfig?.key === 'fullName' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
                     <th className="p-4 font-medium cursor-pointer" onClick={() => handleSort('location')}>Location {sortConfig?.key === 'location' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
                     <th className="p-4 font-medium cursor-pointer" onClick={() => handleSort('email')}>Email Address {sortConfig?.key === 'email' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : ''}</th>
+                    <th className="p-4 font-medium">Mobile</th>
                     <th className="p-4 font-medium">Status</th>
                     <th className="p-4 font-medium text-right">Action</th>
                   </tr>
@@ -840,6 +841,7 @@ function AdminDashboard() {
                   <div>
                     <h1 className="text-3xl font-bold mb-2">{selectedCoach.fullName}</h1>
                     <p className="text-gray-500">{selectedCoach.user.email}</p>
+                    <p className="text-gray-500 text-sm mt-1 flex items-center gap-2"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>{selectedCoach.user.phoneNumber || 'No mobile number'}</p>
                   </div>
                   <span className={`px-4 py-2 rounded-xl text-sm font-bold ${selectedCoach.status === 'PENDING_APPROVAL' ? 'bg-amber-50 text-amber-600' :
                     selectedCoach.status === 'APPROVED' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
@@ -1053,6 +1055,7 @@ function AdminDashboard() {
                     <th className="p-4 font-medium cursor-pointer hover:text-gray-800 select-none" onClick={() => handleStudentSort('fullName')}>Name {studentSortConfig?.key === 'fullName' ? (studentSortConfig.direction === 'asc' ? '↑' : '↓') : <span className="opacity-30">↕</span>}</th>
                     <th className="p-4 font-medium cursor-pointer hover:text-gray-800 select-none" onClick={() => handleStudentSort('location')}>Location {studentSortConfig?.key === 'location' ? (studentSortConfig.direction === 'asc' ? '↑' : '↓') : <span className="opacity-30">↕</span>}</th>
                     <th className="p-4 font-medium cursor-pointer hover:text-gray-800 select-none" onClick={() => handleStudentSort('email')}>Email {studentSortConfig?.key === 'email' ? (studentSortConfig.direction === 'asc' ? '↑' : '↓') : <span className="opacity-30">↕</span>}</th>
+                    <th className="p-4 font-medium">Mobile</th>
                     <th className="p-4 font-medium">Status</th>
                     <th className="p-4 font-medium text-right">Action</th>
                   </tr>
@@ -1067,6 +1070,7 @@ function AdminDashboard() {
                         {student.pincode ? ` - ${student.pincode}` : ''}
                       </td>
                       <td className="p-4 text-gray-600">{student.user?.email || 'N/A'}</td>
+                      <td className="p-4 text-gray-600">{student.user?.phoneNumber || 'N/A'}</td>
                       <td className="p-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${student.status === 'PENDING_APPROVAL' ? 'bg-amber-50 text-amber-600 border border-amber-200' :
                           student.status === 'APPROVED' ? 'bg-green-50 text-green-600 border border-green-200' :
