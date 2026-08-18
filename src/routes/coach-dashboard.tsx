@@ -135,12 +135,30 @@ function CoachDashboard() {
     }
 
     Promise.all([
-      fetch(`/api/profile/coach/me?email=${email}`).then((r) => (r.ok ? r.json() : null)),
-      fetch(`/api/enquiries/coach?email=${email}`).then((r) => (r.ok ? r.json() : [])),
-      fetch(`/api/classes?email=${email}`).then((r) => (r.ok ? r.json() : [])),
-      fetch(`/api/availability?email=${email}`).then((r) => (r.ok ? r.json() : [])),
+      fetch(`/api/profile/coach/me?email=${email}`),
+      fetch(`/api/enquiries/coach?email=${email}`),
+      fetch(`/api/classes?email=${email}`),
+      fetch(`/api/availability?email=${email}`),
     ])
-      .then(([data, enquiriesData, classesData, availData]) => {
+      .then(async (responses) => {
+        if (responses.some(r => r.status === 401 || r.status === 403)) {
+          localStorage.removeItem("userEmail");
+          localStorage.removeItem("userRole");
+          localStorage.removeItem("token");
+          localStorage.removeItem("coachToken");
+          navigate({ to: "/login" });
+          return null;
+        }
+        return Promise.all([
+          responses[0].ok ? responses[0].json() : null,
+          responses[1].ok ? responses[1].json() : [],
+          responses[2].ok ? responses[2].json() : [],
+          responses[3].ok ? responses[3].json() : [],
+        ]);
+      })
+      .then((results) => {
+        if (!results) return;
+        const [data, enquiriesData, classesData, availData] = results;
         if (data && data.profile) {
           setProfile(data.profile);
           setFlags(data.flags || []);

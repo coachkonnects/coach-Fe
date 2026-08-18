@@ -321,6 +321,15 @@ function AdminDashboard() {
         fetch('/api/admin/classes', { headers: authHeaders }),
         fetch('/api/admin/demands', { headers: authHeaders })
       ]);
+
+      const isUnauthorized = [categoryRes, enquiryRes, classRes, demandRes].some(res => res.status === 401 || res.status === 403);
+      if (isUnauthorized) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminEmail');
+        navigate({ to: '/admin-login' });
+        return;
+      }
+
       if (studentRes.ok) setStudents(await studentRes.json());
       if (coachRes.ok) setCoaches(await coachRes.json());
       if (categoryRes.ok) setCategories(await categoryRes.json());
@@ -1221,17 +1230,17 @@ function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-sm">
-                      {categories.filter((cat: any) => 
-                        (cat.name && cat.name.toLowerCase().includes(categorySearchQuery.toLowerCase())) || 
+                      {categories.filter((cat: any) =>
+                        (cat.name && cat.name.toLowerCase().includes(categorySearchQuery.toLowerCase())) ||
                         (cat.expertises && cat.expertises.toLowerCase().includes(categorySearchQuery.toLowerCase()))
                       ).map((cat: any) => (
                         <tr key={cat.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="p-4 font-semibold text-slate-800">
                             {editingCategory === cat.id ? (
-                              <input 
-                                type="text" 
-                                value={editingCategoryName} 
-                                onChange={e => setEditingCategoryName(e.target.value)} 
+                              <input
+                                type="text"
+                                value={editingCategoryName}
+                                onChange={e => setEditingCategoryName(e.target.value)}
                                 className="px-3 py-1 border rounded w-full"
                               />
                             ) : (
@@ -1240,12 +1249,12 @@ function AdminDashboard() {
                           </td>
                           <td className="p-4 text-slate-600">
                             {editingCategory === cat.id ? (
-                              <input 
-                                type="text" 
-                                value={editingCategoryExpertises} 
-                                onChange={e => setEditingCategoryExpertises(e.target.value)} 
+                              <input
+                                type="text"
+                                value={editingCategoryExpertises}
+                                onChange={e => setEditingCategoryExpertises(e.target.value)}
                                 className="px-3 py-1 border rounded w-full"
-                                placeholder="comma separated"
+                                placeholder="Search"
                               />
                             ) : (
                               cat.expertises || <span className="text-slate-400 italic">None</span>
@@ -1305,7 +1314,7 @@ function AdminDashboard() {
                       type="text"
                       value={newBlockedWord}
                       onChange={e => setNewBlockedWord(e.target.value)}
-                      placeholder="Enter word to block..."
+                      placeholder="Enter words to block (comma separated)..."
                       className="flex-1 rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-500 outline-none"
                     />
                     <select
@@ -1315,7 +1324,7 @@ function AdminDashboard() {
                     >
                       <option value="CUSTOM">Custom</option>
                       <option value="PROFANITY">Profanity / Bad Word</option>
-                      
+
                     </select>
                     <button type="submit" className="bg-orange-500 text-white font-bold px-6 py-2 rounded-xl hover:bg-orange-600 transition-colors">Add</button>
                   </form>
@@ -1422,11 +1431,10 @@ function AdminDashboard() {
                             </div>
                           </td>
                           <td className="p-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
-                              admin.role === 'SUPER_ADMIN'
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${admin.role === 'SUPER_ADMIN'
                                 ? 'bg-purple-50 text-purple-700 border-purple-200'
                                 : 'bg-blue-50 text-blue-600 border-blue-200'
-                            }`}>
+                              }`}>
                               {admin.role || 'ADMIN'}
                             </span>
                           </td>
