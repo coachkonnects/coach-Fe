@@ -26,6 +26,16 @@ function StudentDashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
+  const isProfileIncomplete = profile && (!profile.dateOfBirth || !profile.interests || !profile.district);
+  
+  const handleFindCoachClick = () => {
+    if (isProfileIncomplete) {
+      alert("Please complete your profile details (DOB, Interests, Location) before finding a coach.");
+      setIsEditing(true);
+    } else {
+      navigate({ to: '/coaches' });
+    }
+  };
 
   useEffect(() => {
     fetchProfile();
@@ -325,7 +335,7 @@ function StudentDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate({ to: '/coaches' })}
+              onClick={handleFindCoachClick}
               className="hidden sm:flex px-4 py-2 bg-teal-50 text-teal-700 hover:bg-teal-100 rounded-xl font-bold text-sm transition-colors items-center gap-2"
             >
               <BookOpen className="w-4 h-4" /> Browse Coaches
@@ -358,7 +368,7 @@ function StudentDashboard() {
           </div>
 
           <button
-            onClick={() => navigate({ to: '/coaches' })}
+            onClick={handleFindCoachClick}
             className="px-6 py-3.5 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white rounded-2xl font-bold shadow-md transition-all flex items-center gap-2 group active:scale-[0.98] sm:hidden w-full justify-center"
           >
             Find a Coach <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -367,6 +377,15 @@ function StudentDashboard() {
 
         {/* Status Alert */}
         <div className="mb-10">
+          {isProfileIncomplete && !isEditing && (
+            <div className="mb-4 bg-orange-100 border border-orange-300 text-orange-800 px-6 py-4 rounded-2xl flex items-center justify-between shadow-sm">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-6 h-6 text-orange-500 flex-shrink-0" />
+                <span className="font-medium text-sm sm:text-base">Your profile is incomplete. Please fill in your DOB, Interests, and Location before you can contact coaches.</span>
+              </div>
+              <button onClick={() => setIsEditing(true)} className="ml-4 whitespace-nowrap bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors shadow-sm">Complete Now</button>
+            </div>
+          )}
           {profile && getStatusDisplay(profile.status, profile.rejectReason)}
           
           {profile?.parentalConsent && (
@@ -519,7 +538,7 @@ function StudentDashboard() {
                 <h3 className="text-2xl font-black text-slate-800 flex items-center gap-2"><BookOpen className="w-6 h-6 text-teal-500" /> My Classes & Enquiries</h3>
                 {enquiries.length > 0 && (
                   <button
-                    onClick={() => navigate({ to: '/coaches' })}
+                    onClick={handleFindCoachClick}
                     className="px-4 py-2 bg-teal-50 text-teal-600 hover:bg-teal-100 rounded-xl font-bold text-sm transition-colors flex items-center gap-1"
                   >
                     Find More <ChevronRight className="w-4 h-4" />
@@ -537,7 +556,7 @@ function StudentDashboard() {
                     You haven't enrolled or enquired about any classes yet. Browse our coaches to get started!
                   </p>
                   <button
-                    onClick={() => navigate({ to: '/coaches' })}
+                    onClick={handleFindCoachClick}
                     className="px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold shadow-xl shadow-slate-900/20 transition-all flex items-center gap-2 group hover:-translate-y-1"
                   >
                     Browse Coaches Directory <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

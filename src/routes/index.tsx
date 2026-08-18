@@ -86,7 +86,7 @@ function Index() {
   const [demands, setDemands] = useState<any[]>([]);
   const [showAllDemands, setShowAllDemands] = useState(false);
   const [showDemandModal, setShowDemandModal] = useState(false);
-  const [demandForm, setDemandForm] = useState({ skillName: '', location: '', email: '', mobileNumber: '', pincode: '' });
+  const [demandForm, setDemandForm] = useState({ skillName: '', location: '', email: '', mobileNumber: '', pincode: '', area: '', district: '', state: '' });
   const [demandStatus, setDemandStatus] = useState('');
   const [serverCategories, setServerCategories] = useState<any[]>([]);
   const [showAllCatsModal, setShowAllCatsModal] = useState(false);
@@ -147,11 +147,14 @@ function Index() {
           const po = data[0].PostOffice[0];
           setDemandForm(prev => ({
             ...prev,
+            area: po.Name,
+            district: po.District,
+            state: po.State,
             location: `${po.Name}, ${po.District}, ${po.State}`
           }));
         } else {
           alert("Invalid Pincode! Please enter a valid 6-digit Indian pincode.");
-          setDemandForm(prev => ({ ...prev, pincode: '', location: '' }));
+          setDemandForm(prev => ({ ...prev, pincode: '', location: '', area: '', district: '', state: '' }));
         }
       } catch (e) {
         console.error("Pincode fetch failed", e);
@@ -191,7 +194,7 @@ function Index() {
       });
       if (res.ok) {
         setDemandStatus('Success! We will notify you when a coach joins.');
-        setTimeout(() => { setShowDemandModal(false); setDemandStatus(''); setDemandForm({ skillName: '', location: '', email: '', mobileNumber: '', pincode: '' }); }, 2000);
+        setTimeout(() => { setShowDemandModal(false); setDemandStatus(''); setDemandForm({ skillName: '', location: '', email: '', mobileNumber: '', pincode: '', area: '', district: '', state: '' }); }, 2000);
         // Refresh demands
         fetch('/api/public/demands').then(r => r.json()).then(data => {
           const grouped = data.reduce((acc: any, curr: any) => {
@@ -500,10 +503,22 @@ function Index() {
                 <label className="text-sm font-bold text-slate-700 ml-1">Pincode</label>
                 <input required type="text" maxLength={6} pattern="[0-9]{6}" title="Please enter a valid 6-digit pincode" value={demandForm.pincode} onChange={e => handleDemandPincodeChange(e.target.value.replace(/\D/g, ''))} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" placeholder="6-digit pincode" />
               </div>
-              <div>
-                <label className="text-sm font-bold text-slate-700 ml-1">Your Location (e.g. Mumbai)</label>
-                <input required type="text" value={demandForm.location} onChange={e => setDemandForm({ ...demandForm, location: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
-              </div>
+              {demandForm.pincode.length === 6 && demandForm.location && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-bold text-slate-700 ml-1">Area</label>
+                    <input readOnly type="text" value={demandForm.area} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 outline-none text-slate-500" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-slate-700 ml-1">District</label>
+                    <input readOnly type="text" value={demandForm.district} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 outline-none text-slate-500" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-slate-700 ml-1">State</label>
+                    <input readOnly type="text" value={demandForm.state} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 outline-none text-slate-500" />
+                  </div>
+                </div>
+              )}
 
               {demandStatus && <div className="text-center text-sm font-bold text-orange-600">{demandStatus}</div>}
 

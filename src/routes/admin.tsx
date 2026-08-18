@@ -446,8 +446,11 @@ function AdminDashboard() {
     } catch (e) { }
   };
 
-  const handleReject = async (id: string) => {
-    if (!confirm("Are you sure you want to completely reject this coach profile?")) return;
+  const handleReject = async (id: string, isEdit: boolean = false) => {
+    const msg = isEdit 
+      ? "Are you sure you want to reject these profile changes? The original profile will remain active."
+      : "Are you sure you want to completely reject this coach profile?";
+    if (!confirm(msg)) return;
     try {
       const res = await fetch(`/api/admin/coaches/${id}/reject`, { method: 'POST' });
       if (res.ok) {
@@ -1029,7 +1032,7 @@ function AdminDashboard() {
                       ! Flag
                     </button>
                     <button
-                      onClick={() => handleReject(selectedCoach.id)}
+                      onClick={() => handleReject(selectedCoach.id, !!selectedCoach.pendingChanges)}
                       disabled={selectedCoach.status === 'REJECTED'}
                       className="flex-1 py-4 bg-red-50 text-red-600 hover:bg-red-100 font-bold rounded-2xl transition-all disabled:opacity-50"
                     >
