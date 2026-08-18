@@ -301,7 +301,7 @@ function Index() {
               </div>
 
               {/* Trust chips */}
-              <div className="mt-8 flex flex-col gap-4">
+              <div className="mt-8 hidden sm:flex flex-col gap-4">
                 <div className="flex flex-wrap items-center gap-4 text-sm font-semibold text-[color:var(--color-ink)] sm:gap-5 sm:text-[15px]">
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -403,16 +403,16 @@ function Index() {
                 Can't find the exact skill you're looking for? Students across India are requesting these classes right now. Are you a coach who can teach them?
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4 shrink-0">
+            <div className="flex flex-col sm:flex-row gap-4 shrink-0 w-full md:w-auto">
                 <button
                   onClick={() => setShowAllCatsModal(true)}
-                  className="rounded-full bg-teal-600 px-6 py-3 font-semibold text-white shadow-lg transition-transform hover:-translate-y-1 hover:bg-teal-700"
+                  className="w-full sm:w-auto rounded-full bg-teal-600 px-6 py-3.5 font-semibold text-white shadow-lg transition-transform hover:-translate-y-1 hover:bg-teal-700 flex items-center justify-center text-sm sm:text-base"
                 >
                   View all skills and hobbies
                 </button>
               <button
                 onClick={() => setShowDemandModal(true)}
-                className="rounded-full bg-[color:var(--color-brand)] px-6 py-3 font-semibold text-white shadow-lg shadow-orange-500/20 transition-transform hover:-translate-y-1"
+                className="w-full sm:w-auto rounded-full bg-[color:var(--color-brand)] px-6 py-3.5 font-semibold text-white shadow-lg shadow-orange-500/20 transition-transform hover:-translate-y-1 flex items-center justify-center text-sm sm:text-base"
               >
                 ✋ Request a Skill
               </button>
@@ -540,7 +540,7 @@ function Index() {
                   src={c.src}
                   alt={c.alt}
                   loading="lazy"
-                  className="absolute inset-0 h-full w-full object-contain p-2"
+                  className="absolute inset-0 h-full w-full object-contain p-2 scale-[0.67] sm:scale-[0.75] transition-transform"
                 />
               </div>
             ))}
@@ -597,12 +597,12 @@ function Index() {
               <Link
                 to="/coach/$slug" params={{ slug: c.id }}
                 key={c.id}
-                className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(242,107,33,0.15)] relative"
+                className="flex flex-col h-full overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(242,107,33,0.15)] relative"
               >
                 {c.isFeatured && (
                   <div className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-black px-2 py-1 rounded-lg shadow-md z-10">FEATURED</div>
                 )}
-                <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-amber-50 to-orange-100">
+                <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-amber-50 to-orange-100 shrink-0">
                   <img
                     src={c.profileImageUrl || c.profilePhotoUrl || '/homelogo.png'}
                     alt={c.fullName}
@@ -610,7 +610,7 @@ function Index() {
                     className="absolute inset-0 h-full w-full object-cover"
                   />
                 </div>
-                <div className="p-5">
+                <div className="p-5 flex flex-col flex-1">
                   <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.05em] text-[color:var(--color-brand-dark)] flex justify-between">
                     <span>{c.category || c.expertise || 'Expert Coach'}</span>
                     <span className="text-orange-500 font-black">🎯 {c.studentCount || 0}</span>
@@ -666,12 +666,12 @@ function Index() {
                 students to you — pre‑interested and ready to connect once you confirm
                 the fit. No cost to join. No commission today.
               </p>
-              <a
-                href="#"
+              <Link
+                to="/register-coach"
                 className="mt-8 inline-flex items-center justify-center rounded-full bg-[color:var(--color-brand)] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(242,107,33,0.35)] transition-all hover:-translate-y-0.5 hover:bg-[color:var(--color-brand-dark)]"
               >
                 ✨ Start Teaching
-              </a>
+              </Link>
             </div>
             <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-white shadow-sm border border-slate-100 sm:aspect-square">
               <img
@@ -712,31 +712,22 @@ function Index() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 gap-8 border-t border-slate-200/60 pt-10 text-left md:grid-cols-4">
-            <div className="md:col-span-1">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 border-t border-slate-200/60 pt-10 text-left">
+            <div className="lg:col-span-2">
               <Logo className="mb-4" />
-              <p className="text-sm text-[color:var(--color-ink-muted)] mt-4">
+              <p className="text-sm text-[color:var(--color-ink-muted)] mt-4 max-w-sm">
                 The premium marketplace where ambitious learners meet world-class coaches. Find your edge.
               </p>
             </div>
-
-
-
-            <div>
-              <h4 className="mb-4 font-semibold">Company</h4>
-              <ul className="flex flex-col gap-2 text-sm text-[color:var(--color-ink-muted)]">
-                <li><a href="mailto:support@coachkonnects.com" className="hover:text-[color:var(--color-brand)] transition-colors">support@coachkonnects.com</a></li>
-                <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Terms & Privacy</a></li>
-              </ul>
-            </div>
-
-            <div>
-              {/* <h4 className="mb-4 font-semibold">Dashboards</h4> */}
-              {/* <ul className="flex flex-col gap-2 text-sm text-[color:var(--color-ink-muted)]"> */}
-              {/* <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Student</a></li> */}
-              {/* <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors">Coach</a></li> */}
-              {/* </ul> */}
+            <div className="flex flex-col lg:items-end">
+              <div>
+                <h4 className="mb-4 font-semibold text-slate-900">Company</h4>
+                <ul className="flex flex-col gap-3 text-sm text-[color:var(--color-ink-muted)]">
+                  <li><a href="mailto:support@coachkonnects.com" className="hover:text-[color:var(--color-brand)] transition-colors font-medium">support@coachkonnects.com</a></li>
+                  <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors font-medium">FAQ</a></li>
+                  <li><a href="#" className="hover:text-[color:var(--color-brand)] transition-colors font-medium">Terms & Privacy</a></li>
+                </ul>
+              </div>
             </div>
           </div>
 
