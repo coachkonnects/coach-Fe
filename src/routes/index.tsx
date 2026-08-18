@@ -107,15 +107,22 @@ function Index() {
       .then(res => res.json())
       .then(data => {
         const grouped = data.reduce((acc: any, curr: any) => {
-          const key = `${curr.skillName.trim().toLowerCase()}-${curr.location.trim().toLowerCase()}`;
+          const key = curr.skillName.trim().toLowerCase();
           if (!acc[key]) {
-            acc[key] = { ...curr, count: 1 };
+            acc[key] = { ...curr, count: 1, locations: [curr.location.trim()] };
           } else {
             acc[key].count += 1;
+            if (!acc[key].locations.includes(curr.location.trim())) {
+              acc[key].locations.push(curr.location.trim());
+            }
           }
           return acc;
         }, {});
         const sorted = Object.values(grouped).sort((a: any, b: any) => b.count - a.count);
+        // format location strings
+        sorted.forEach((d: any) => {
+          d.location = d.locations.length > 1 ? 'Multiple Locations' : d.locations[0];
+        });
         setDemands(sorted);
       })
       .catch(err => console.error(err));
@@ -143,15 +150,22 @@ function Index() {
         // Refresh demands
         fetch('/api/public/demands').then(r => r.json()).then(data => {
           const grouped = data.reduce((acc: any, curr: any) => {
-            const key = `${curr.skillName.trim().toLowerCase()}-${curr.location.trim().toLowerCase()}`;
+            const key = curr.skillName.trim().toLowerCase();
             if (!acc[key]) {
-              acc[key] = { ...curr, count: 1 };
+              acc[key] = { ...curr, count: 1, locations: [curr.location.trim()] };
             } else {
               acc[key].count += 1;
+              if (!acc[key].locations.includes(curr.location.trim())) {
+                acc[key].locations.push(curr.location.trim());
+              }
             }
             return acc;
           }, {});
-          setDemands(Object.values(grouped));
+          const sorted = Object.values(grouped).sort((a: any, b: any) => b.count - a.count);
+          sorted.forEach((d: any) => {
+            d.location = d.locations.length > 1 ? 'Multiple Locations' : d.locations[0];
+          });
+          setDemands(sorted);
         });
       } else {
         setDemandStatus('Error submitting request.');
@@ -368,27 +382,40 @@ function Index() {
           </div>
 
           {demands.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {demands.map((d: any) => (
-                <div key={d.id} className="group relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl">
-                  <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-orange-50 opacity-50 transition-transform group-hover:scale-150"></div>
-                  <div className="relative z-10">
-                    <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-orange-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-orange-600">
-                      <span className="relative flex h-2 w-2">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75"></span>
-                        <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500"></span>
-                      </span>
-                      {d.count > 1 ? `🔥 ${d.count} Students Waiting` : 'High Demand'}
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {(showAllDemands ? demands : demands.slice(0, 3)).map((d: any) => (
+                  <div key={d.id} className="group relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm border border-slate-100 transition-all hover:-translate-y-1 hover:shadow-xl">
+                    <div className="absolute top-0 right-0 -mr-4 -mt-4 h-24 w-24 rounded-full bg-orange-50 opacity-50 transition-transform group-hover:scale-150"></div>
+                    <div className="relative z-10">
+                      <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-orange-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-orange-600">
+                        <span className="relative flex h-2 w-2">
+                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75"></span>
+                          <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500"></span>
+                        </span>
+                        {d.count > 1 ? `🔥 ${d.count} Students Waiting` : 'High Demand'}
+                      </div>
+                      <h3 className="mb-1 font-[var(--font-display)] text-xl font-bold text-slate-800">{d.skillName}</h3>
+                      <p className="text-sm font-medium text-slate-500">📍 {d.location}</p>
+                      <Link to={`/register-coach?demandId=${d.id}` as any} className="mt-6 inline-flex items-center font-bold text-[color:var(--color-brand)] hover:text-orange-700 transition-colors">
+                        I can teach this <span className="ml-2 text-lg">→</span>
+                      </Link>
                     </div>
-                    <h3 className="mb-1 font-[var(--font-display)] text-xl font-bold text-slate-800">{d.skillName}</h3>
-                    <p className="text-sm font-medium text-slate-500">📍 {d.location}</p>
-                    <Link to={`/register-coach?demandId=${d.id}` as any} className="mt-6 inline-flex items-center font-bold text-[color:var(--color-brand)] hover:text-orange-700 transition-colors">
-                      I can teach this <span className="ml-2 text-lg">→</span>
-                    </Link>
                   </div>
+                ))}
+              </div>
+              {demands.length > 3 && (
+                <div className="mt-12 text-center">
+                  <button 
+                    onClick={() => setShowAllDemands(!showAllDemands)}
+                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-orange-200 text-orange-600 font-bold hover:bg-orange-50 hover:border-orange-300 transition-all active:scale-95"
+                  >
+                    {showAllDemands ? 'View Less' : `View ${demands.length - 3} More Demands`}
+                    <span className={`transform transition-transform ${showAllDemands ? 'rotate-180' : ''}`}>↓</span>
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-10 text-slate-500 italic">No specific demands right now. Be the first to request!</div>
           )}
@@ -415,7 +442,7 @@ function Index() {
               </div>
               <div>
                 <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-                <input required type="email" value={demandForm.email} onChange={e => setDemandForm({ ...demandForm, email: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
+                <input required type="email" pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}" title="Please enter a valid email address (e.g. name@example.com)" value={demandForm.email} onChange={e => setDemandForm({ ...demandForm, email: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
               </div>
 
               {demandStatus && <div className="text-center text-sm font-bold text-orange-600">{demandStatus}</div>}

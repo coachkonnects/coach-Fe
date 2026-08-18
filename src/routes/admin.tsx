@@ -556,6 +556,33 @@ function AdminDashboard() {
     } catch (e) { console.error(e); }
   };
 
+  const handleApproveDemand = async (id: number) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`/api/admin/demands/${id}/approve`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const updatedDemand = await res.json();
+        setDemands(demands.map(d => d.id === id ? updatedDemand : d));
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleDeleteDemand = async (id: number) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`/api/admin/demands/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setDemands(demands.filter(d => d.id !== id));
+      }
+    } catch (e) { console.error(e); }
+  };
+
   const handleDeleteCategory = async (id: number) => {
     try {
       const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
@@ -1604,6 +1631,8 @@ function AdminDashboard() {
                           <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Location</th>
                           <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Student Email</th>
                           <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Date requested</th>
+                          <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -1627,6 +1656,17 @@ function AdminDashboard() {
                               <div className="text-sm text-gray-500 font-medium">
                                 {new Date(d.createdAt).toLocaleDateString()}
                               </div>
+                            </td>
+                            <td className="py-4 px-6">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${d.approved ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                                {d.approved ? 'Approved' : 'Pending'}
+                              </span>
+                            </td>
+                            <td className="py-4 px-6 text-right space-x-2 whitespace-nowrap">
+                              {!d.approved && (
+                                <button onClick={() => handleApproveDemand(d.id)} className="text-indigo-600 hover:text-indigo-800 font-bold px-2">Approve</button>
+                              )}
+                              <button onClick={() => handleDeleteDemand(d.id)} className="text-red-600 hover:text-red-800 font-bold px-2">Delete</button>
                             </td>
                           </tr>
                         ))}
