@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') {
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     let url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
     
-    if (url.startsWith('/api/admin') || url.startsWith('/api/profile') || url.startsWith('/api/upload')) {
+    if (url.startsWith('/api/')) {
         const token = localStorage.getItem('adminToken') || localStorage.getItem('session_token') || localStorage.getItem('token');
         if (token) {
             init = init || {};

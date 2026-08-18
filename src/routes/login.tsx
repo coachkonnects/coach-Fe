@@ -65,7 +65,9 @@ function LoginPage() {
 
       if (!verifyRes.ok) throw new Error("Passkey login failed. Invalid passcode.");
       
-      localStorage.setItem('userEmail', email);
+      const data = await verifyRes.json();
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userEmail', data.email || email);
       localStorage.setItem('userRole', roleStr);
       navigate({ to: `/${roleStr}-dashboard` });
     } catch (err: any) {
@@ -129,8 +131,10 @@ function LoginPage() {
         }
       }
       
+      const data = await res.json();
       setSuccess('Successfully logged in!');
       
+      localStorage.setItem('token', data.token);
       localStorage.setItem('userEmail', email);
       localStorage.setItem('userRole', activePath as string);
 
