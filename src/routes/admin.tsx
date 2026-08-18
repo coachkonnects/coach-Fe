@@ -462,10 +462,10 @@ function AdminDashboard() {
     } catch (e) { }
   };
 
-  const handleDeleteCoach = async (id: string) => {
-    if (!confirm("🚨 WARNING: Are you sure you want to completely DELETE this coach profile and user account? This cannot be undone!")) return;
+  const handleDeleteCoach = async (id: string, ban: boolean = false) => {
+    if (!confirm(`🚨 WARNING: Are you sure you want to completely DELETE this coach profile and user account? ${ban ? 'THEIR EMAIL WILL BE PERMANENTLY BANNED!' : ''} This cannot be undone!`)) return;
     try {
-      const res = await fetch(`/api/admin/coaches/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/coaches/${id}?ban=${ban}`, { method: 'DELETE' });
       if (res.ok) {
         alert("Coach profile deleted.");
         fetchCoaches();
@@ -606,10 +606,10 @@ function AdminDashboard() {
     } catch (e) { console.error(e); }
   };
 
-  const handleDeleteStudent = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this student?")) return;
+  const handleDeleteStudent = async (id: number, ban: boolean = false) => {
+    if (!window.confirm(`Are you sure you want to completely delete this student? ${ban ? 'THEIR EMAIL WILL BE PERMANENTLY BANNED!' : ''}`)) return;
     try {
-      const res = await fetch(`/api/profile/student/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/students/${id}?ban=${ban}`, { method: 'DELETE' });
       if (res.ok) {
         setStudents(students.filter((s: any) => s.id !== id));
       } else {
@@ -807,6 +807,13 @@ function AdminDashboard() {
                             title="Delete Coach"
                           >
                             🗑️
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCoach(coach.id, true)}
+                            className="text-white hover:text-white font-medium text-sm border border-red-600 bg-red-600 px-3 py-1.5 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+                            title="Ban & Delete User"
+                          >
+                            Ban & Delete
                           </button>
                         </div>
                       </td>
@@ -1122,6 +1129,12 @@ function AdminDashboard() {
                             className="px-4 py-1.5 bg-red-100 text-red-600 text-sm font-bold rounded-lg hover:bg-red-200 transition-colors"
                           >
                             Delete
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteStudent(student.id, true); }}
+                            className="px-4 py-1.5 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+                          >
+                            Ban & Delete
                           </button>
                         </div>
                       </td>

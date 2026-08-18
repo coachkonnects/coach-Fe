@@ -812,7 +812,7 @@ function StudentDashboard() {
                     </label>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-8">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pl-8">
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-slate-700 ml-1">Parent / Guardian Name</label>
                       <input
@@ -829,7 +829,17 @@ function StudentDashboard() {
                         type="text"
                         value={editForm.parentContact || ''}
                         onChange={e => setEditForm({ ...editForm, parentContact: e.target.value })}
-                        placeholder="Email or Phone"
+                        placeholder="Mobile Number"
+                        className="w-full px-5 py-3 bg-white/60 border border-slate-200/50 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-700 ml-1">Parent / Guardian Email</label>
+                      <input
+                        type="email"
+                        value={editForm.parentEmail || ''}
+                        onChange={e => setEditForm({ ...editForm, parentEmail: e.target.value })}
+                        placeholder="Email Address"
                         className="w-full px-5 py-3 bg-white/60 border border-slate-200/50 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
                       />
                     </div>
