@@ -828,16 +828,16 @@ function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10">
-        <header className="h-20 bg-white/60 backdrop-blur-xl border-b border-white flex items-center px-4 md:px-8 justify-between shrink-0 shadow-sm gap-4">
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10 pt-16 md:pt-0">
+        <header className="min-h-[5rem] py-4 md:py-0 bg-white/60 backdrop-blur-xl border-b border-white flex flex-col md:flex-row items-center px-4 md:px-8 justify-between shrink-0 shadow-sm gap-4">
           <h2 className="text-lg font-bold capitalize text-gray-900 hidden lg:block whitespace-nowrap">{activeTab} Review</h2>
-          <div className="flex-1 max-w-2xl flex flex-col md:flex-row items-center gap-2">
-            <div className="relative flex-1 w-full">
+          <div className="flex-1 w-full max-w-2xl flex flex-row items-center gap-2 md:gap-3">
+            <div className="relative w-full flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input type="search" placeholder={`Search ${activeTab}...`} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-9 pr-4 py-2 bg-white/60 border border-gray-200/50 rounded-xl focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 text-sm shadow-sm transition-all" />
+              <input type="search" placeholder={`Search...`} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-9 pr-2 py-2 bg-white border border-gray-200/50 rounded-xl focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 text-sm shadow-sm transition-all" />
             </div>
             {['coaches', 'students', 'leads', 'demands', 'classes'].includes(activeTab) && (
-              <select value={filterValue} onChange={e => setFilterValue(e.target.value)} className="w-full md:w-auto bg-white/60 border border-gray-200/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 shadow-sm font-medium text-gray-600 transition-all cursor-pointer">
+              <select value={filterValue} onChange={e => setFilterValue(e.target.value)} className="w-auto shrink-0 max-w-[110px] md:max-w-none bg-white/60 border border-gray-200/50 rounded-xl px-2 md:px-3 py-2 text-sm focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 shadow-sm font-medium text-gray-600 transition-all cursor-pointer">
                 <option value="ALL">All Status</option>
                 {activeTab === 'classes' ? (
                   <>
@@ -1528,41 +1528,7 @@ function AdminDashboard() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-2xl">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-orange-50 p-3 rounded-xl text-orange-500">
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                      </svg>
-                    </div>
-                    <div className="w-full">
-                      <h3 className="font-bold text-gray-900 text-lg">Change Password</h3>
-                      <p className="text-gray-500 mt-1 mb-4 text-sm">Update your temporary password to a secure one.</p>
 
-                      <form onSubmit={handleChangePassword} className="space-y-3">
-                        <input
-                          type="password"
-                          placeholder="Current Password"
-                          value={oldPassword}
-                          onChange={e => setOldPassword(e.target.value)}
-                          required
-                          className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:border-orange-500"
-                        />
-                        <input
-                          type="password"
-                          placeholder="New Password"
-                          value={newPassword}
-                          onChange={e => setNewPassword(e.target.value)}
-                          required
-                          className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:border-orange-500"
-                        />
-                        <button type="submit" className="w-full bg-gray-900 text-white font-medium px-4 py-2 rounded-lg hover:bg-orange-500 transition-colors">
-                          Update Password
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
 
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 w-full lg:col-span-2">
                   <h3 className="font-bold text-gray-900 text-lg mb-4">Banned Accounts</h3>

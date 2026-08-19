@@ -114,7 +114,7 @@ function CoachesDirectory() {
         {/* Results Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredCoaches.map((coach: any) => {
-             const coachClasses = classes.filter(cls => cls.coachId === coach.user?.id && (cls.status === 'APPROVED' || !cls.status));
+             const coachClasses = classes.filter(cls => cls.coachId === coach.user?.id);
              const rating = 4.5; // placeholder
              const reviews = 12; // placeholder
 
@@ -175,7 +175,7 @@ function CoachesDirectory() {
                    
                    <div className="pt-6 border-t border-slate-100 flex items-center justify-between mt-auto">
                      <span className="text-sm font-bold text-slate-500">
-                       {coachClasses.length} Active Classes
+                       {coachClasses.length} Active Classes & Workshops
                      </span>
                      <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center group-hover:bg-orange-500 group-hover:text-white text-orange-500 transition-colors">
                        <ArrowRight className="w-5 h-5" />

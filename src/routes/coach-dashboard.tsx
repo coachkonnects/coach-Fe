@@ -593,16 +593,16 @@ function CoachDashboard() {
         {getStatusBanner()}
 
         <div className="bg-white/80 backdrop-blur-2xl rounded-[3rem] shadow-xl border border-white overflow-hidden relative">
-          <div className="flex flex-col sm:flex-row border-b border-slate-200 bg-slate-50">
+          <div className="flex overflow-x-auto no-scrollbar border-b border-slate-200 bg-slate-50 w-full">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`flex-1 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${activeTab === "overview" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
+              className={`flex-1 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap ${activeTab === "overview" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
             >
               Profile Overview
             </button>
             <button
               onClick={() => setActiveTab("classes")}
-              className={`flex-1 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${activeTab === "classes" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
+              className={`flex-1 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap flex items-center justify-center gap-2 ${activeTab === "classes" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
             >
               Classes
               <span
@@ -613,13 +613,13 @@ function CoachDashboard() {
             </button>
             <button
               onClick={() => setActiveTab("calendar")}
-              className={`flex-1 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors ${activeTab === "calendar" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
+              className={`flex-1 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap ${activeTab === "calendar" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
             >
               Calendar
             </button>
             <button
               onClick={() => setActiveTab("enquiries")}
-              className={`flex-1 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors flex items-center justify-center gap-2 ${activeTab === "enquiries" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
+              className={`flex-1 min-w-[180px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap flex items-center justify-center gap-2 ${activeTab === "enquiries" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
             >
               Leads / Enquiries
               {enquiries.filter((e: any) => e.status === 'PENDING_COACH_APPROVAL').length > 0 && (
@@ -633,9 +633,9 @@ function CoachDashboard() {
           <div className="p-8">
             {activeTab === "overview" && (
               <div>
-                <div className="relative mb-16">
+                <div className="relative mb-24 sm:mb-16">
                   {/* Cover Photo */}
-                  <div className="h-48 w-full bg-slate-200 overflow-hidden relative">
+                  <div className="h-32 sm:h-48 w-full bg-slate-200 overflow-hidden relative">
                     <img
                       src={
                         profile?.groupImageUrl ||
@@ -648,25 +648,25 @@ function CoachDashboard() {
                   </div>
 
                   {/* Profile Info Overlay */}
-                  <div className="absolute -bottom-12 left-8 flex items-end gap-6 w-full">
+                  <div className="absolute -bottom-20 sm:-bottom-12 left-4 sm:left-8 flex flex-col sm:flex-row items-start sm:items-end gap-2 sm:gap-6 w-[calc(100%-2rem)] sm:w-auto">
                     <img
                       src={profile?.profileImageUrl || "/placeholder.png"}
                       alt="Profile"
-                      className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl bg-white"
+                      className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-white shadow-xl bg-white"
                     />
-                    <div className="pb-2 bg-white/40 backdrop-blur-md px-4 py-2 rounded-xl shadow-sm border border-white/50">
-                      <h2 className="text-3xl font-extrabold text-slate-900 drop-shadow-sm">
+                    <div className="pb-1 sm:pb-2 bg-white/60 sm:bg-white/40 backdrop-blur-md px-3 sm:px-4 py-1 sm:py-2 rounded-xl shadow-sm border border-white/50 mb-1 sm:mb-0">
+                      <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 drop-shadow-sm line-clamp-1">
                         {profile?.fullName}
                       </h2>
-                      <p className="text-slate-800 font-bold text-lg mt-1 drop-shadow-sm">
+                      <p className="text-slate-800 font-bold text-sm sm:text-lg mt-0.5 sm:mt-1 drop-shadow-sm line-clamp-1">
                         {profile?.expertise} {profile?.location ? `• ${profile.location}` : ""}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-8 px-8 pb-8">
-                  <div className="flex justify-between items-start mb-6">
+                <div className="mt-8 px-4 sm:px-8 pb-8">
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
                     <div>
                       <h1 className="text-2xl font-extrabold text-slate-900">Dashboard</h1>
                       <p className="text-slate-500">Manage your coaching profile and status.</p>
@@ -704,7 +704,7 @@ function CoachDashboard() {
                   </div>
 
                   {isEditing ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10 bg-white/60 backdrop-blur-md p-6 rounded-3xl shadow-sm border border-white">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 relative z-10 bg-white/60 backdrop-blur-md p-4 sm:p-6 rounded-3xl shadow-sm border border-white">
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">
                           Full Name
@@ -988,8 +988,8 @@ function CoachDashboard() {
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                   <div>
-                    <h2 className="text-2xl font-extrabold text-slate-900">Your Classes</h2>
-                    <p className="text-slate-500 mt-1">
+                    <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">Your Classes</h2>
+                    <p className="text-sm sm:text-base text-slate-500 mt-1">
                       Create specific classes, workshops, or batches for students to join.
                     </p>
                   </div>
@@ -1088,25 +1088,25 @@ function CoachDashboard() {
 
             {activeTab === "calendar" && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                   <div>
-                    <h2 className="text-2xl font-extrabold text-slate-900">
+                    <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
                       Availability Calendar
                     </h2>
-                    <p className="text-slate-500">
+                    <p className="text-sm sm:text-base text-slate-500">
                       Set the hours you are available for coaching each day.
                     </p>
                   </div>
                   <button
                     onClick={handleSaveAvailability}
                     disabled={isSaving}
-                    className="bg-teal-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover:bg-teal-700 transition-colors disabled:opacity-50"
+                    className="w-full sm:w-auto bg-teal-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover:bg-teal-700 transition-colors disabled:opacity-50"
                   >
                     {isSaving ? "Saving..." : "Save Schedule"}
                   </button>
                 </div>
 
-                <div className="bg-white/70 backdrop-blur-md border border-white rounded-[2rem] overflow-hidden shadow-sm">
+                <div className="bg-white/70 backdrop-blur-md border border-white rounded-[1rem] sm:rounded-[2rem] overflow-hidden shadow-sm">
                   {[
                     "MONDAY",
                     "TUESDAY",
@@ -1122,9 +1122,9 @@ function CoachDashboard() {
                     return (
                       <div
                         key={day}
-                        className="flex items-center justify-between p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors last:border-b-0"
+                        className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors last:border-b-0 gap-3 sm:gap-0"
                       >
-                        <div className="flex items-center gap-4 w-1/3">
+                        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-1/3">
                           <input
                             type="checkbox"
                             checked={isAvailable}
@@ -1148,7 +1148,7 @@ function CoachDashboard() {
                         </div>
 
                         {isAvailable ? (
-                          <div className="flex items-center gap-4 flex-1 justify-end">
+                          <div className="flex items-center gap-2 sm:gap-4 w-full sm:flex-1 justify-start sm:justify-end pl-8 sm:pl-0">
                             <input
                               type="time"
                               value={avail.startTime}
@@ -1159,9 +1159,9 @@ function CoachDashboard() {
                                   ),
                                 )
                               }
-                              className="px-3 py-1.5 border rounded-lg text-sm font-medium"
+                              className="px-2 py-1 sm:px-3 sm:py-1.5 border rounded-lg text-xs sm:text-sm font-medium w-[100px] sm:w-auto"
                             />
-                            <span className="text-slate-400">to</span>
+                            <span className="text-slate-400 text-xs sm:text-sm">to</span>
                             <input
                               type="time"
                               value={avail.endTime}
@@ -1172,11 +1172,11 @@ function CoachDashboard() {
                                   ),
                                 )
                               }
-                              className="px-3 py-1.5 border rounded-lg text-sm font-medium"
+                              className="px-2 py-1 sm:px-3 sm:py-1.5 border rounded-lg text-xs sm:text-sm font-medium w-[100px] sm:w-auto"
                             />
                           </div>
                         ) : (
-                          <div className="flex-1 text-right text-slate-400 font-medium italic text-sm">
+                          <div className="w-full sm:flex-1 text-left sm:text-right pl-8 sm:pl-0 text-slate-400 font-medium italic text-xs sm:text-sm">
                             Unavailable
                           </div>
                         )}
@@ -1219,33 +1219,50 @@ function CoachDashboard() {
                         key={enquiry.id}
                         className="bg-white/70 backdrop-blur-md border border-white p-6 rounded-[2rem] shadow-sm hover:shadow-xl transition-all"
                       >
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
+                        <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0 mb-4">
+                          <div className="flex justify-between items-center w-full sm:w-auto">
                             <h3 className="font-bold text-lg text-slate-900">
                               {enquiry.leadName || enquiry.student?.fullName || "Visitor"}
                             </h3>
-                            {enquiry.status === "APPROVED" && (
-                              <div className="mt-2 space-y-1">
-                                <p className="text-teal-600 font-medium text-sm flex items-center gap-1">
-                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                  {enquiry.leadEmail || enquiry.student?.user?.email}
-                                </p>
-                                {(enquiry.leadPhone || enquiry.student?.user?.phoneNumber) && (
-                                  <p className="text-teal-600 font-medium text-sm flex items-center gap-1">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                                    {enquiry.leadPhone || enquiry.student?.user?.phoneNumber}
-                                  </p>
-                                )}
-                                {(enquiry.leadLocation || enquiry.student?.location) && (
-                                  <p className="text-slate-500 font-medium text-sm flex items-center gap-1">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                    {enquiry.leadLocation || enquiry.student?.location}
-                                  </p>
-                                )}
-                              </div>
-                            )}
+                            <div className="block sm:hidden">
+                              {enquiry.status === "PENDING_COACH_APPROVAL" && (
+                                <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-[10px] font-bold uppercase">
+                                  Pending
+                                </span>
+                              )}
+                              {enquiry.status === "APPROVED" && (
+                                <span className="bg-teal-100 text-teal-800 px-2 py-1 rounded-full text-[10px] font-bold uppercase">
+                                  Accepted
+                                </span>
+                              )}
+                              {enquiry.status === "REJECTED" && (
+                                <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-full text-[10px] font-bold uppercase">
+                                  Declined
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div>
+                          {enquiry.status === "APPROVED" && (
+                            <div className="mt-1 sm:mt-2 space-y-1 w-full sm:w-auto">
+                              <p className="text-teal-600 font-medium text-sm flex items-center gap-1 break-all">
+                                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                {enquiry.leadEmail || enquiry.student?.user?.email}
+                              </p>
+                              {(enquiry.leadPhone || enquiry.student?.user?.phoneNumber) && (
+                                <p className="text-teal-600 font-medium text-sm flex items-center gap-1">
+                                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                                  {enquiry.leadPhone || enquiry.student?.user?.phoneNumber}
+                                </p>
+                              )}
+                              {(enquiry.leadLocation || enquiry.student?.location) && (
+                                <p className="text-slate-500 font-medium text-sm flex items-center gap-1">
+                                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                  {enquiry.leadLocation || enquiry.student?.location}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                          <div className="hidden sm:block">
                             {enquiry.status === "PENDING_COACH_APPROVAL" && (
                               <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-bold uppercase">
                                 Pending
