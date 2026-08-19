@@ -235,11 +235,21 @@ function LoginPage() {
           </div>
         </div>
 
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none hidden md:block">
-          <div className="w-32 h-32 bg-white rounded-full p-3 shadow-2xl flex items-center justify-center">
-            <Link to="/" className="w-full h-full bg-[#FFF8F0] rounded-full border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden hover:opacity-90 transition-opacity">
-              <img src="/homelogo.png" alt="Logo" className="w-20 h-auto object-contain" />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-auto">
+          <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full p-2 md:p-3 shadow-2xl flex items-center justify-center hover:scale-105 transition-transform">
+            <Link to="/" className="w-full h-full bg-[#FFF8F0] rounded-full border-[4px] md:border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden hover:opacity-90 transition-opacity">
+              <img src="/homelogo.png" alt="Logo" className="w-16 md:w-20 h-auto object-contain" />
             </Link>
+          </div>
+        </div>
+
+        {/* Register link */}
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30 w-[90%] max-w-sm">
+          <div className="bg-white/95 backdrop-blur-md px-6 py-3.5 rounded-2xl shadow-2xl border border-white/50 text-sm md:text-base font-bold text-[#2C1810] text-center w-full">
+            Don't have an account?{' '}
+            <a href="/register" className="text-[#FF6B35] hover:text-[#B85C38] transition-colors ml-1 inline-block">
+              Register
+            </a>
           </div>
         </div>
       </div>

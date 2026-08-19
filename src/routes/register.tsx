@@ -71,19 +71,19 @@ function RegisterSelectionPage() {
       </div>
       
       {/* Center Logo Overlay */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none hidden md:block">
-        <div className="w-32 h-32 bg-white rounded-full p-3 shadow-2xl flex items-center justify-center">
-          <div className="w-full h-full bg-[#FFF8F0] rounded-full border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden">
-             <img src="/homelogo.png" alt="Logo" className="w-20 h-auto" />
-          </div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-auto">
+        <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full p-2 md:p-3 shadow-2xl flex items-center justify-center hover:scale-105 transition-transform">
+          <a href="/" className="w-full h-full bg-[#FFF8F0] rounded-full border-[4px] md:border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden">
+             <img src="/homelogo.png" alt="Logo" className="w-16 md:w-20 h-auto object-contain hover:opacity-90 transition-opacity" />
+          </a>
         </div>
       </div>
 
       {/* Login link */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20">
-        <div className="bg-white/90 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-white/50 text-sm font-bold text-[#2C1810]">
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30 w-[90%] max-w-sm">
+        <div className="bg-white/95 backdrop-blur-md px-6 py-3.5 rounded-2xl shadow-2xl border border-white/50 text-sm md:text-base font-bold text-[#2C1810] text-center w-full">
           Already have an account?{' '}
-          <a href="/login" className="text-[#FF6B35] hover:text-[#B85C38] transition-colors ml-1">
+          <a href="/login" className="text-[#FF6B35] hover:text-[#B85C38] transition-colors ml-1 inline-block">
             Sign in
           </a>
         </div>

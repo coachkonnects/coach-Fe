@@ -99,6 +99,7 @@ function CoachRegisterPage() {
     fullName: '',
     mobile: '',
     dob: '',
+    gender: '',
     district: '',
     state: '',
     pincode: '',
@@ -441,6 +442,7 @@ function CoachRegisterPage() {
       if (nameError) return alert(nameError);
       if (!formData.mobile || formData.mobile.length < 10 || !/^[6-9]/.test(formData.mobile)) return alert("Mobile number must be 10 digits and start with 6, 7, 8, or 9!");
       if (!formData.dob || formData.dob.length !== 10) return alert("Please enter a complete Date of Birth (DD/MM/YYYY)!");
+      if (!formData.gender) return alert("Please select your Gender!");
       const dobParts = formData.dob.split('/');
       if (dobParts.length !== 3) return alert("Please enter a valid Date of Birth (DD/MM/YYYY)!");
       const year = parseInt(dobParts[2], 10);
@@ -657,6 +659,23 @@ function CoachRegisterPage() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 ml-1">Gender <span className="text-orange-500">*</span></label>
+                  <select
+                    value={formData.gender}
+                    onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                    className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Pincode <span className="text-orange-500">*</span></label>
                   <input
                     type="text"
@@ -667,9 +686,6 @@ function CoachRegisterPage() {
                     className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm font-mono"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Area / Location Name</label>
                   <input
@@ -680,11 +696,24 @@ function CoachRegisterPage() {
                     className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">District / City</label>
                   <input
                     type="text"
                     value={formData.district}
+                    readOnly
+                    placeholder="Auto-filled"
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none text-slate-500 shadow-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 ml-1">State</label>
+                  <input
+                    type="text"
+                    value={formData.state}
                     readOnly
                     placeholder="Auto-filled"
                     className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none text-slate-500 shadow-sm"

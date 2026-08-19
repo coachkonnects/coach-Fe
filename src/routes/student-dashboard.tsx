@@ -219,6 +219,9 @@ function StudentDashboard() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (editForm.mobile && (!/^[6-9]/.test(editForm.mobile) || editForm.mobile.length !== 10)) {
+      return alert("Mobile number must be exactly 10 digits and start with 6, 7, 8, or 9!");
+    }
     if (editForm.interests && editForm.interests.trim().split(/\s+/).length > 250) {
       return alert("Interests section must not exceed 250 words!");
     }
@@ -510,7 +513,7 @@ function StudentDashboard() {
                 <AlertCircle className="w-6 h-6 text-orange-500 flex-shrink-0" />
                 <span className="font-medium text-sm sm:text-base">Your profile is incomplete. Please fill in your DOB, Interests, and Location before you can contact coaches.</span>
               </div>
-              <button onClick={() => setIsEditing(true)} className="ml-4 whitespace-nowrap bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors shadow-sm">Complete Now</button>
+              <button onClick={() => { setEditForm({ ...profile, mobile: profile?.user?.phoneNumber || profile?.mobile }); setIsEditing(true); }} className="ml-4 whitespace-nowrap bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors shadow-sm">Complete Now</button>
             </div>
           )}
           {profile && getStatusDisplay(profile.status, profile.rejectReason)}
@@ -540,7 +543,7 @@ function StudentDashboard() {
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-xl font-black text-slate-800">My Profile</h2>
                 <button
-                  onClick={() => setIsEditing(true)}
+                  onClick={() => { setEditForm({ ...profile, mobile: profile?.user?.phoneNumber || profile?.mobile }); setIsEditing(true); }}
                   className="p-2 bg-slate-50 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-colors cursor-pointer"
                   title="Edit Profile"
                 >
@@ -566,6 +569,16 @@ function StudentDashboard() {
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Email</p>
                     <p className="text-slate-800 font-bold">{profile?.user?.email || localStorage.getItem('userEmail')}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mobile Number</p>
+                    <p className="text-slate-800 font-bold">{profile?.user?.phoneNumber || profile?.mobile || 'Not provided'}</p>
                   </div>
                 </div>
 
@@ -790,6 +803,21 @@ function StudentDashboard() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 ml-1">Mobile Number</label>
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    value={editForm.mobile || editForm.user?.phoneNumber || ''}
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      if (val.length <= 10) setEditForm({ ...editForm, mobile: val });
+                    }}
+                    placeholder="e.g. 9876543210"
+                    className="w-full px-5 py-3.5 bg-white/60 border border-slate-200/50 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Gender</label>
                   <select
                     value={editForm.gender || ''}
@@ -898,7 +926,7 @@ function StudentDashboard() {
                     <div className="space-y-2">
                       <label className="text-sm font-bold text-slate-700 ml-1">Contact Number</label>
                       <input
-                        type="text"
+                        type="tel"
                         maxLength={10}
                         value={editForm.parentContact || ''}
                         onChange={e => setEditForm({ ...editForm, parentContact: e.target.value.replace(/\D/g, '').substring(0, 10) })}
