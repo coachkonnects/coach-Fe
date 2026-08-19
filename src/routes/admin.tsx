@@ -692,6 +692,54 @@ function AdminDashboard() {
     } catch (e) { console.error(e); }
   };
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterValue, setFilterValue] = useState('ALL');
+
+  const filteredCoaches = coaches.filter(c => {
+    const s = searchQuery.toLowerCase();
+    const matchesSearch = !s || (c.fullName?.toLowerCase().includes(s) || c.user?.email?.toLowerCase().includes(s) || c.user?.phoneNumber?.toLowerCase().includes(s) || c.category?.toLowerCase().includes(s) || c.district?.toLowerCase().includes(s));
+    const matchesFilter = filterValue === 'ALL' || c.status === filterValue;
+    return matchesSearch && matchesFilter;
+  });
+
+  const filteredStudents = students.filter(s => {
+    const s_q = searchQuery.toLowerCase();
+    const matchesSearch = !s_q || (s.fullName?.toLowerCase().includes(s_q) || s.user?.email?.toLowerCase().includes(s_q) || s.district?.toLowerCase().includes(s_q));
+    const matchesFilter = filterValue === 'ALL' || s.status === filterValue;
+    return matchesSearch && matchesFilter;
+  });
+
+  const filteredClasses = classesList.filter(c => {
+    const s = searchQuery.toLowerCase();
+    const matchesSearch = !s || (c.title?.toLowerCase().includes(s) || c.coachEmail?.toLowerCase().includes(s));
+    const matchesFilter = filterValue === 'ALL' || (filterValue === 'WORKSHOP' ? c.type === 'WORKSHOP' : (filterValue === 'REGULAR' ? c.type !== 'WORKSHOP' : true));
+    return matchesSearch && matchesFilter;
+  });
+  
+  const filteredDemands = demands.filter(d => {
+    const s = searchQuery.toLowerCase();
+    const matchesSearch = !s || (d.skillName?.toLowerCase().includes(s) || d.email?.toLowerCase().includes(s) || d.location?.toLowerCase().includes(s));
+    const matchesFilter = filterValue === 'ALL' || (filterValue === 'APPROVED' ? d.approved : (filterValue === 'PENDING' ? !d.approved : true));
+    return matchesSearch && matchesFilter;
+  });
+  
+  const filteredEnquiries = enquiries.filter(l => {
+    const s = searchQuery.toLowerCase();
+    const matchesSearch = !s || (l.leadName?.toLowerCase().includes(s) || l.leadEmail?.toLowerCase().includes(s) || l.leadPhone?.toLowerCase().includes(s));
+    const matchesFilter = filterValue === 'ALL' || l.status === filterValue;
+    return matchesSearch && matchesFilter;
+  });
+  
+  const filteredCategories = categories.filter(c => !searchQuery || c.name?.toLowerCase().includes(searchQuery.toLowerCase()) || (c.expertises && c.expertises.toLowerCase().includes(searchQuery.toLowerCase())));
+  const filteredAdmins = adminsList.filter(a => !searchQuery || a.email?.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredBanned = bannedUsers.filter(b => !searchQuery || b.email?.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  // Reset filter when changing tabs
+  useEffect(() => {
+    setFilterValue('ALL');
+    setSearchQuery('');
+  }, [activeTab]);
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-50 via-teal-50/50 to-orange-50/30 font-sans text-gray-900 overflow-hidden relative">
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-teal-400/10 rounded-full blur-[150px] -z-10 mix-blend-multiply"></div>
@@ -737,7 +785,7 @@ function AdminDashboard() {
             const isActive = activeTab === module.name.toLowerCase();
             return (
               <button
-                key={module.name}
+                key={module.name === 'Leads' ? 'Leads / Enquiries' : module.name}
                 onClick={() => { setActiveTab(module.name.toLowerCase() as any); setIsSidebarOpen(false); }}
                 className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex justify-between items-center ${isActive
                   ? 'bg-[#f26b21] text-white shadow-md'
@@ -746,7 +794,7 @@ function AdminDashboard() {
               >
                 <div className="flex items-center gap-3">
                   <module.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-teal-300'}`} />
-                  {module.name}
+                  {module.name === 'Leads' ? 'Leads / Enquiries' : module.name}
                 </div>
                 {module.name === 'Coaches' && coaches.filter(c => c.status === 'PENDING_APPROVAL').length > 0 && (
                   <span className="bg-white/20 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
@@ -763,11 +811,7 @@ function AdminDashboard() {
                     {classesList.length}
                   </span>
                 )}
-                {module.name === 'Leads' && enquiries.filter(e => e.status === 'PENDING_ADMIN_APPROVAL').length > 0 && (
-                  <span className="bg-white/20 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
-                    {enquiries.filter(e => e.status === 'PENDING_ADMIN_APPROVAL').length}
-                  </span>
-                )}
+
               </button>
             );
           })}
@@ -785,9 +829,44 @@ function AdminDashboard() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden relative z-10">
-        <header className="h-20 bg-white/60 backdrop-blur-xl border-b border-white flex items-center px-8 justify-between shrink-0 shadow-sm">
-          <h2 className="text-lg font-bold capitalize text-gray-900">{activeTab} Review</h2>
-          <div className="flex items-center gap-4">
+        <header className="h-20 bg-white/60 backdrop-blur-xl border-b border-white flex items-center px-4 md:px-8 justify-between shrink-0 shadow-sm gap-4">
+          <h2 className="text-lg font-bold capitalize text-gray-900 hidden lg:block whitespace-nowrap">{activeTab} Review</h2>
+          <div className="flex-1 max-w-2xl flex flex-col md:flex-row items-center gap-2">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input type="search" placeholder={`Search ${activeTab}...`} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-9 pr-4 py-2 bg-white/60 border border-gray-200/50 rounded-xl focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 text-sm shadow-sm transition-all" />
+            </div>
+            {['coaches', 'students', 'leads', 'demands', 'classes'].includes(activeTab) && (
+              <select value={filterValue} onChange={e => setFilterValue(e.target.value)} className="w-full md:w-auto bg-white/60 border border-gray-200/50 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 shadow-sm font-medium text-gray-600 transition-all cursor-pointer">
+                <option value="ALL">All Status</option>
+                {activeTab === 'classes' ? (
+                  <>
+                    <option value="REGULAR">Regular</option>
+                    <option value="WORKSHOP">Workshop</option>
+                  </>
+                ) : activeTab === 'demands' ? (
+                  <>
+                    <option value="APPROVED">Approved</option>
+                    <option value="PENDING">Pending</option>
+                  </>
+                ) : activeTab === 'leads' ? (
+                  <>
+                    <option value="NEW">New</option>
+                    <option value="CONTACTED">Contacted</option>
+                    <option value="CONVERTED">Converted</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="APPROVED">Approved</option>
+                    <option value="PENDING_APPROVAL">Pending</option>
+                    <option value="BANNED">Banned</option>
+                    <option value="REJECTED">Rejected</option>
+                  </>
+                )}
+              </select>
+            )}
+          </div>
+          <div className="flex items-center gap-4 shrink-0 hidden sm:flex">
             <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-bold shadow-sm border border-gray-200 text-[#f26b21]">SA</div>
           </div>
         </header>
@@ -807,7 +886,7 @@ function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {getSortedData(coaches, sortConfig).map((coach: any) => (
+                  {getSortedData(filteredCoaches, sortConfig).map((coach: any) => (
                     <tr key={coach.id} className="hover:bg-gray-50 transition-colors">
                       <td className="p-4 font-bold">{coach.fullName}</td>
                       <td className="p-4 text-gray-600">
@@ -859,7 +938,7 @@ function AdminDashboard() {
                       </td>
                     </tr>
                   ))}
-                  {coaches.length === 0 && (
+                  {filteredCoaches.length === 0 && (
                     <tr>
                       <td colSpan={5} className="p-8 text-center text-gray-500">No coaches found.</td>
                     </tr>
@@ -880,8 +959,8 @@ function AdminDashboard() {
                 Back to Coaches
               </button>
 
-              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-                <div className="flex justify-between items-start mb-8 border-b pb-6">
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
+                <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-8 border-b pb-6">
                   <div>
                     <h1 className="text-3xl font-bold mb-2">{selectedCoach.fullName}</h1>
                     <p className="text-gray-500">{selectedCoach.user.email}</p>
@@ -894,7 +973,7 @@ function AdminDashboard() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-8 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-8">
                   <div>
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Date of Birth</h3>
                     <p className="font-medium text-lg">{selectedCoach.dateOfBirth}</p>
@@ -921,7 +1000,7 @@ function AdminDashboard() {
                       className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base font-medium bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
                     >
                       <option value="">-- Select Category --</option>
-                      {categories.map((cat: any) => (
+                      {filteredCategories.map((cat: any) => (
                         <option key={cat.id} value={cat.name}>{cat.name}</option>
                       ))}
                     </select>
@@ -1137,7 +1216,7 @@ function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {getSortedData(students, studentSortConfig).map((student: any) => (
+                  {getSortedData(filteredStudents, studentSortConfig).map((student: any) => (
                     <tr key={student.id} className="hover:bg-gray-50 transition-colors">
                       <td className="p-4 font-bold">{student.fullName}</td>
                       <td className="p-4 text-gray-600">
@@ -1180,7 +1259,7 @@ function AdminDashboard() {
                       </td>
                     </tr>
                   ))}
-                  {students.length === 0 && (
+                  {filteredStudents.length === 0 && (
                     <tr>
                       <td colSpan={5} className="p-8 text-center text-gray-500">No students found.</td>
                     </tr>
@@ -1201,8 +1280,8 @@ function AdminDashboard() {
                 Back to Students
               </button>
 
-              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-                <div className="flex justify-between items-start mb-8 border-b pb-6">
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 md:p-8">
+                <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-8 border-b pb-6">
                   <div>
                     <h1 className="text-3xl font-bold mb-2">{selectedStudent.fullName}</h1>
                     <p className="text-gray-500">{selectedStudent.user?.email || "No Email"}</p>
@@ -1214,7 +1293,7 @@ function AdminDashboard() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-8 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 mb-8">
                   <div>
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Date of Birth</h3>
                     <p className="font-medium text-lg">{selectedStudent.dateOfBirth}</p>
@@ -1376,7 +1455,7 @@ function AdminDashboard() {
                           </td>
                         </tr>
                       ))}
-                      {categories.length === 0 && (
+                      {filteredCategories.length === 0 && (
                         <tr>
                           <td colSpan={4} className="p-8 text-center text-slate-500 font-medium">No categories found.</td>
                         </tr>
@@ -1498,7 +1577,7 @@ function AdminDashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 bg-white">
-                        {bannedUsers.map((bu, idx) => (
+                        {filteredBanned.map((bu, idx) => (
                           <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                             <td className="px-6 py-4 text-sm font-medium text-gray-900">{bu.name || 'Unknown'}</td>
                             <td className="px-6 py-4 text-sm font-medium text-gray-500 truncate max-w-[200px]">{bu.email}</td>
@@ -1512,7 +1591,7 @@ function AdminDashboard() {
                             </td>
                           </tr>
                         ))}
-                        {bannedUsers.length === 0 && (
+                        {filteredBanned.length === 0 && (
                           <tr>
                             <td colSpan={3} className="px-6 py-12 text-center text-gray-500">
                               No banned users found.
@@ -1546,7 +1625,7 @@ function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {adminsList.map((admin: any) => (
+                      {filteredAdmins.map((admin: any) => (
                         <tr key={admin.id} className="hover:bg-gray-50 transition-colors">
                           <td className="p-4">
                             <div className="flex items-center gap-3">
@@ -1582,7 +1661,7 @@ function AdminDashboard() {
                           </td>
                         </tr>
                       ))}
-                      {adminsList.length === 0 && (
+                      {filteredAdmins.length === 0 && (
                         <tr>
                           <td colSpan={4} className="p-10 text-center">
                             <div className="text-gray-400 text-sm">No admins found. Add one using the form →</div>
@@ -1658,19 +1737,17 @@ function AdminDashboard() {
                   <h2 className="text-2xl font-bold text-gray-900">Leads / Enquiries</h2>
                   <p className="text-sm text-gray-500 mt-1">Review and manage all incoming leads from the public coach profiles.</p>
                 </div>
-                <span className="bg-orange-100 text-orange-700 font-bold text-sm px-3 py-1 rounded-full">
-                  {enquiries.filter(e => e.status === 'PENDING_ADMIN_APPROVAL').length} Pending
-                </span>
+
               </div>
 
-              {enquiries.length === 0 ? (
+              {filteredEnquiries.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
                   <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                   <p className="text-gray-500 font-medium">No leads yet. They will appear here when visitors contact coaches.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {enquiries.map((enq) => (
+                  {filteredEnquiries.map((enq) => (
                     <div key={enq.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                         <div className="flex-1">
@@ -1743,7 +1820,7 @@ function AdminDashboard() {
                 </span>
               </div>
 
-              {demands.length === 0 ? (
+              {filteredDemands.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
                   <div className="text-gray-400 mb-3 text-4xl">📥</div>
                   <h3 className="text-lg font-bold text-gray-900">No demands yet</h3>
@@ -1752,7 +1829,7 @@ function AdminDashboard() {
               ) : (
                 <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse min-w-[800px]">
                       <thead>
                         <tr className="bg-gray-50/50 border-b border-gray-100">
                           <th className="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider">Requested Skill</th>
@@ -1764,7 +1841,7 @@ function AdminDashboard() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {demands.map((d: any) => (
+                        {filteredDemands.map((d: any) => (
                           <tr key={d.id} className="hover:bg-gray-50/50 transition-colors">
                             <td className="py-4 px-6">
                               <span className="inline-flex items-center gap-2 font-bold text-gray-900">
@@ -1818,14 +1895,14 @@ function AdminDashboard() {
                 </span>
               </div>
 
-              {classesList.length === 0 ? (
+              {filteredClasses.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
                   <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                   <p className="text-gray-500 font-medium">No classes have been created yet.</p>
                 </div>
               ) : (
                 <div className="bg-white/80 backdrop-blur-2xl md:rounded-[2rem] rounded-xl shadow-xl border border-white overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead>
                       <tr className="bg-gray-50 border-b text-sm text-gray-500">
                         <th className="p-4 font-medium">Class Name</th>
@@ -1836,7 +1913,7 @@ function AdminDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {classesList.map(cls => (
+                      {filteredClasses.map(cls => (
                         <tr key={cls.id} className="hover:bg-gray-50 transition-colors">
                           <td className="p-4 font-bold text-gray-900">{cls.title}</td>
                           <td className="p-4 text-gray-500">{cls.coachEmail}</td>
