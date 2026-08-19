@@ -104,7 +104,7 @@ function AdminDashboard() {
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
     if (!token) {
-      navigate({ to: "/admin-login" });
+      navigate({ to: "/SAMRAHUL-login" });
     }
   }, [navigate]);
 
@@ -352,7 +352,7 @@ function AdminDashboard() {
       if (isUnauthorized) {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminEmail');
-        navigate({ to: '/admin-login' });
+        navigate({ to: '/SAMRAHUL-login' });
         return;
       }
 
@@ -2032,7 +2032,7 @@ function AdminDashboard() {
                 Stay
               </button>
               <button
-                onClick={() => { setShowLeaveWarning(false); navigate({ to: '/admin-login' }); }}
+                onClick={() => { setShowLeaveWarning(false); navigate({ to: '/SAMRAHUL-login' }); }}
                 className="flex-1 py-3 px-4 rounded-2xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-all shadow-md shadow-red-200"
               >
                 Leave

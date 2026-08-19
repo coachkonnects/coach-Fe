@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SAMRAHULRouteImport } from './routes/SAMRAHUL'
-import { Route as AdminLoginRouteImport } from './routes/admin-login'
+import { Route as SAMRAHULLoginRouteImport } from './routes/SAMRAHUL-login'
 import { Route as CoachDashboardRouteImport } from './routes/coach-dashboard'
 import { Route as CoachesRouteImport } from './routes/coaches'
 import { Route as LoginRouteImport } from './routes/login'
@@ -31,9 +31,9 @@ const SAMRAHULRoute = SAMRAHULRouteImport.update({
   path: '/SAMRAHUL',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin-login',
-  path: '/admin-login',
+const SAMRAHULLoginRoute = SAMRAHULLoginRouteImport.update({
+  id: '/SAMRAHUL-login',
+  path: '/SAMRAHUL-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachDashboardRoute = CoachDashboardRouteImport.update({
@@ -80,7 +80,7 @@ const CoachSlugRoute = CoachSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/SAMRAHUL': typeof SAMRAHULRoute
-  '/admin-login': typeof AdminLoginRoute
+  '/SAMRAHUL-login': typeof SAMRAHULLoginRoute
   '/coach-dashboard': typeof CoachDashboardRoute
   '/coaches': typeof CoachesRoute
   '/login': typeof LoginRoute
@@ -93,7 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/SAMRAHUL': typeof SAMRAHULRoute
-  '/admin-login': typeof AdminLoginRoute
+  '/SAMRAHUL-login': typeof SAMRAHULLoginRoute
   '/coach-dashboard': typeof CoachDashboardRoute
   '/coaches': typeof CoachesRoute
   '/login': typeof LoginRoute
@@ -107,7 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/SAMRAHUL': typeof SAMRAHULRoute
-  '/admin-login': typeof AdminLoginRoute
+  '/SAMRAHUL-login': typeof SAMRAHULLoginRoute
   '/coach-dashboard': typeof CoachDashboardRoute
   '/coaches': typeof CoachesRoute
   '/login': typeof LoginRoute
@@ -122,7 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/SAMRAHUL'
-    | '/admin-login'
+    | '/SAMRAHUL-login'
     | '/coach-dashboard'
     | '/coaches'
     | '/login'
@@ -135,7 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/SAMRAHUL'
-    | '/admin-login'
+    | '/SAMRAHUL-login'
     | '/coach-dashboard'
     | '/coaches'
     | '/login'
@@ -148,7 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/SAMRAHUL'
-    | '/admin-login'
+    | '/SAMRAHUL-login'
     | '/coach-dashboard'
     | '/coaches'
     | '/login'
@@ -162,7 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SAMRAHULRoute: typeof SAMRAHULRoute
-  AdminLoginRoute: typeof AdminLoginRoute
+  SAMRAHULLoginRoute: typeof SAMRAHULLoginRoute
   CoachDashboardRoute: typeof CoachDashboardRoute
   CoachesRoute: typeof CoachesRoute
   LoginRoute: typeof LoginRoute
@@ -189,11 +189,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SAMRAHULRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin-login': {
-      id: '/admin-login'
-      path: '/admin-login'
-      fullPath: '/admin-login'
-      preLoaderRoute: typeof AdminLoginRouteImport
+    '/SAMRAHUL-login': {
+      id: '/SAMRAHUL-login'
+      path: '/SAMRAHUL-login'
+      fullPath: '/SAMRAHUL-login'
+      preLoaderRoute: typeof SAMRAHULLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach-dashboard': {
@@ -258,7 +258,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SAMRAHULRoute: SAMRAHULRoute,
-  AdminLoginRoute: AdminLoginRoute,
+  SAMRAHULLoginRoute: SAMRAHULLoginRoute,
   CoachDashboardRoute: CoachDashboardRoute,
   CoachesRoute: CoachesRoute,
   LoginRoute: LoginRoute,

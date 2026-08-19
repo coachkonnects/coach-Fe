@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
 
-export const Route = createFileRoute("/admin-login")({
+export const Route = createFileRoute("/SAMRAHUL-login")({
   component: AdminLogin,
 });
 
