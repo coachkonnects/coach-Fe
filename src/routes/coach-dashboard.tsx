@@ -376,7 +376,37 @@ function CoachDashboard() {
     setEditForm({ ...editForm, dob: val, dateOfBirth: val });
   };
 
+
+  const handlePincodeChange = async (pincode: string) => {
+    setEditForm((prev: any) => ({ ...prev, pincode }));
+    if (pincode.length === 6) {
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
+        const data = await res.json();
+        if (data && data[0].Status === "Success") {
+          const po = data[0].PostOffice[0];
+          setEditForm((prev: any) => ({
+            ...prev,
+            area: po.Name,
+            district: po.District,
+            state: po.State
+          }));
+        } else {
+          alert("Invalid Pincode! Please enter a valid 6-digit Indian pincode.");
+          setEditForm((prev: any) => ({ ...prev, area: '', district: '', state: '' }));
+        }
+      } catch (e) {
+        console.error("Pincode fetch failed", e);
+        setEditForm((prev: any) => ({ ...prev, area: '', district: '', state: '' }));
+      }
+    }
+  };
+
   const handleSaveProfile = async () => {
+    if (!editForm.pincode || editForm.pincode.length !== 6) {
+      return alert("Please enter a valid 6-digit Pincode!");
+    }
+
     if (editForm.mobile && (!/^[6-9]/.test(editForm.mobile) || editForm.mobile.length !== 10)) {
       return alert("Mobile number must be 10 digits and start with 6, 7, 8, or 9!");
     }
@@ -805,6 +835,37 @@ function CoachDashboard() {
                           <option value="All Ages & Levels">All Ages & Levels</option>
                         </select>
                       </div>
+
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Gender</label>
+                        <select value={editForm.gender || ""} onChange={e => setEditForm({ ...editForm, gender: e.target.value })} className="w-full px-4 py-2 border rounded-xl">
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                          <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Pincode</label>
+                        <input type="text" maxLength={6} value={editForm.pincode || ""} onChange={(e) => handlePincodeChange(e.target.value.replace(/\D/g, ''))} className="w-full px-4 py-2 border rounded-xl" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Area / Location Name</label>
+                        <input type="text" value={editForm.area || ""} readOnly className="w-full px-4 py-2 border rounded-xl bg-slate-50" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">District / City</label>
+                        <input type="text" value={editForm.district || ""} readOnly className="w-full px-4 py-2 border rounded-xl bg-slate-50" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">State</label>
+                        <input type="text" value={editForm.state || ""} readOnly className="w-full px-4 py-2 border rounded-xl bg-slate-50" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Detailed Address</label>
+                        <input type="text" value={editForm.address || ""} onChange={e => setEditForm({ ...editForm, address: e.target.value })} className="w-full px-4 py-2 border rounded-xl" />
+                      </div>
                       <div className="col-span-1 sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
                           <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -916,28 +977,31 @@ function CoachDashboard() {
                       </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 relative z-10">
-                      <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                          Pricing
-                        </h3>
-                        <p className="font-bold text-slate-800 text-lg">{profile?.pricing}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
+                      {[
+                        { label: 'Date of Birth', value: profile?.dob || profile?.dateOfBirth },
+                        { label: 'Gender', value: profile?.gender },
+                        { label: 'Mobile Number', value: profile?.user?.phoneNumber || profile?.mobile },
+                        { label: 'Category', value: profile?.category },
+                        { label: 'Class Mode', value: profile?.classMode },
+                        { label: 'Pricing', value: profile?.pricing },
+                        { label: 'Target Audience', value: profile?.targetAudience },
+                        { label: 'Pincode', value: profile?.pincode },
+                        { label: 'Area / District', value: `${profile?.area || ''} ${profile?.district ? ', ' + profile.district : ''}` },
+                        { label: 'State', value: profile?.state },
+                      ].map((item, i) => (
+                        <div key={i} className="bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{item.label}</h3>
+                          <p className="font-bold text-slate-800 text-sm text-right">{item.value || '-'}</p>
+                        </div>
+                      ))}
+                      <div className="col-span-1 sm:col-span-2 bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Address</h3>
+                        <p className="font-bold text-slate-800 text-sm">{profile?.address || '-'}</p>
                       </div>
-                      <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                          Target Audience
-                        </h3>
-                        <p className="font-bold text-slate-800 text-lg">
-                          {profile?.targetAudience}
-                        </p>
-                      </div>
-                      <div className="col-span-1 sm:col-span-2 bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                          Description
-                        </h3>
-                        <p className="font-medium text-slate-700 leading-relaxed">
-                          {profile?.description}
-                        </p>
+                      <div className="col-span-1 sm:col-span-2 bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description / Bio</h3>
+                        <p className="font-medium text-slate-700 leading-relaxed text-sm whitespace-pre-wrap">{profile?.description || '-'}</p>
                       </div>
                     </div>
                   )}
