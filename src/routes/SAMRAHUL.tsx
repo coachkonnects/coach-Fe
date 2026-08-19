@@ -5,7 +5,7 @@ import { Search, MapPin, Filter, Mail, Phone, Calendar, User, CheckCircle2, File
 import * as XLSX from 'xlsx';
 import { LayoutDashboard, Users, UserCheck, MessageSquare, Target, Star, ShieldAlert, Lock, Grid } from 'lucide-react';
 
-export const Route = createFileRoute('/admin')({
+export const Route = createFileRoute('/SAMRAHUL')({
   component: AdminDashboard,
 });
 

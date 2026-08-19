@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminRouteImport } from './routes/admin'
+import { Route as SAMRAHULRouteImport } from './routes/SAMRAHUL'
 import { Route as AdminLoginRouteImport } from './routes/admin-login'
 import { Route as CoachDashboardRouteImport } from './routes/coach-dashboard'
 import { Route as CoachesRouteImport } from './routes/coaches'
@@ -26,9 +26,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const SAMRAHULRoute = SAMRAHULRouteImport.update({
+  id: '/SAMRAHUL',
+  path: '/SAMRAHUL',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -79,7 +79,7 @@ const CoachSlugRoute = CoachSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/SAMRAHUL': typeof SAMRAHULRoute
   '/admin-login': typeof AdminLoginRoute
   '/coach-dashboard': typeof CoachDashboardRoute
   '/coaches': typeof CoachesRoute
@@ -92,7 +92,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/SAMRAHUL': typeof SAMRAHULRoute
   '/admin-login': typeof AdminLoginRoute
   '/coach-dashboard': typeof CoachDashboardRoute
   '/coaches': typeof CoachesRoute
@@ -106,7 +106,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/SAMRAHUL': typeof SAMRAHULRoute
   '/admin-login': typeof AdminLoginRoute
   '/coach-dashboard': typeof CoachDashboardRoute
   '/coaches': typeof CoachesRoute
@@ -121,7 +121,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
+    | '/SAMRAHUL'
     | '/admin-login'
     | '/coach-dashboard'
     | '/coaches'
@@ -134,7 +134,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
+    | '/SAMRAHUL'
     | '/admin-login'
     | '/coach-dashboard'
     | '/coaches'
@@ -147,7 +147,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/admin'
+    | '/SAMRAHUL'
     | '/admin-login'
     | '/coach-dashboard'
     | '/coaches'
@@ -161,7 +161,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  SAMRAHULRoute: typeof SAMRAHULRoute
   AdminLoginRoute: typeof AdminLoginRoute
   CoachDashboardRoute: typeof CoachDashboardRoute
   CoachesRoute: typeof CoachesRoute
@@ -182,11 +182,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/SAMRAHUL': {
+      id: '/SAMRAHUL'
+      path: '/SAMRAHUL'
+      fullPath: '/SAMRAHUL'
+      preLoaderRoute: typeof SAMRAHULRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin-login': {
@@ -257,7 +257,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  SAMRAHULRoute: SAMRAHULRoute,
   AdminLoginRoute: AdminLoginRoute,
   CoachDashboardRoute: CoachDashboardRoute,
   CoachesRoute: CoachesRoute,
@@ -271,13 +271,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
