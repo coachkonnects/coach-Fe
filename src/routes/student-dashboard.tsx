@@ -27,8 +27,20 @@ function StudentDashboard() {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
+  const [showParentOtpModal, setShowParentOtpModal] = useState(false);
+  const [parentOtp, setParentOtp] = useState("");
+  const [isVerifyingParentOtp, setIsVerifyingParentOtp] = useState(false);
+  const [parentResendCountdown, setParentResendCountdown] = useState(30);
+
+  useEffect(() => {
+    let timer: any;
+    if (showParentOtpModal && parentResendCountdown > 0) {
+      timer = setInterval(() => setParentResendCountdown(c => c - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [showParentOtpModal, parentResendCountdown]);
   const isProfileIncomplete = profile && (!profile.dateOfBirth || !profile.interests || !profile.district);
-  
+
   const handleFindCoachClick = () => {
     if (isProfileIncomplete) {
       alert("Please complete your profile details (DOB, Interests, Location) before finding a coach.");
@@ -207,9 +219,24 @@ function StudentDashboard() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isUnder18 && (!editForm.parentalConsent || !editForm.parentName || !editForm.parentContact)) {
-      alert("Parental consent and details are required for students under 18.");
-      return;
+    if (isUnder18) {
+      if (!editForm.parentalConsent || !editForm.parentName || !editForm.parentContact || !editForm.parentEmail) {
+        alert("Parental consent and all parent details (Name, Contact, Email) are required for students under 18.");
+        return;
+      }
+      if (editForm.parentContact.length !== 10) {
+        alert("Parent contact number must be exactly 10 digits.");
+        return;
+      }
+      const validDomains = ['@gmail.com', '@yahoo.com', '@outlook.com', '@hotmail.com', '@icloud.com'];
+      if (!validDomains.some((domain: string) => editForm.parentEmail.toLowerCase().endsWith(domain))) {
+        alert("Please use a valid popular email provider (gmail, yahoo, outlook, etc.) for the parent's email.");
+        return;
+      }
+      if (editForm.parentEmail.toLowerCase() === localStorage.getItem('userEmail')?.toLowerCase()) {
+        alert("Student and parent cannot use the same email address.");
+        return;
+      }
     }
     setIsSaving(true);
     try {
@@ -220,8 +247,15 @@ function StudentDashboard() {
         body: JSON.stringify(editForm)
       });
       if (!res.ok) throw new Error("Failed to update profile");
+      
       await fetchProfile();
       setIsEditing(false);
+      
+      if (isUnder18) {
+        setShowParentOtpModal(true);
+      } else {
+        alert("Profile updated successfully!");
+      }
     } catch (err) {
       alert("Error saving profile");
     } finally {
@@ -229,29 +263,72 @@ function StudentDashboard() {
     }
   };
 
+  const handleResendParentOtp = async () => {
+    try {
+      const res = await fetch('/api/profile/resend-parent-otp', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` }
+      });
+      if (res.ok) {
+        setParentResendCountdown(30);
+        alert("OTP resent successfully!");
+      } else {
+        alert("Failed to resend OTP.");
+      }
+    } catch (e) {
+      alert("Error resending OTP.");
+    }
+  };
+
+  const handleVerifyParentOtp = async () => {
+    if (!parentOtp) return alert("Please enter the OTP.");
+    setIsVerifyingParentOtp(true);
+    try {
+      const res = await fetch('/api/profile/verify-parent-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+        },
+        body: JSON.stringify({ otp: parentOtp })
+      });
+      if (res.ok) {
+        alert("Parental consent verified!");
+        setShowParentOtpModal(false);
+        await fetchProfile();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Invalid OTP!");
+      }
+    } catch (e) {
+      alert("Error verifying OTP.");
+    }
+    setIsVerifyingParentOtp(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-orange-50/30 flex items-center justify-center">
         <div className="animate-spin w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full"></div>
-  
-      {showLogoutModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
-            <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            </div>
-            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Homework Done?</h3>
-            <p className="text-center text-slate-500 mb-8">Finished learning for the day, or just procrastinating? Are you sure you want to log out?</p>
-            <div className="flex gap-4">
-              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Back to Learning</button>
-              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">Yes, Log out</button>
+
+        {showLogoutModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              </div>
+              <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Homework Done?</h3>
+              <p className="text-center text-slate-500 mb-8">Finished learning for the day, or just procrastinating? Are you sure you want to log out?</p>
+              <div className="flex gap-4">
+                <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Back to Learning</button>
+                <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">Yes, Log out</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        )}
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -264,25 +341,25 @@ function StudentDashboard() {
             Back to Login
           </button>
         </div>
-  
-      {showLogoutModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
-            <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            </div>
-            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Homework Done?</h3>
-            <p className="text-center text-slate-500 mb-8">Finished learning for the day, or just procrastinating? Are you sure you want to log out?</p>
-            <div className="flex gap-4">
-              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Back to Learning</button>
-              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">Yes, Log out</button>
+
+        {showLogoutModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              </div>
+              <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Homework Done?</h3>
+              <p className="text-center text-slate-500 mb-8">Finished learning for the day, or just procrastinating? Are you sure you want to log out?</p>
+              <div className="flex gap-4">
+                <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Back to Learning</button>
+                <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">Yes, Log out</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        )}
+      </div>
+    );
+  }
 
 
 
@@ -348,25 +425,25 @@ function StudentDashboard() {
               <h3 className="text-lg font-black text-blue-900 mb-1">Profile Under Review</h3>
               <p className="text-sm font-medium">We are reviewing your profile. We'll notify you once it's approved.</p>
             </div>
-      
-      {showLogoutModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
-            <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            </div>
-            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Homework Done?</h3>
-            <p className="text-center text-slate-500 mb-8">Finished learning for the day, or just procrastinating? Are you sure you want to log out?</p>
-            <div className="flex gap-4">
-              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Back to Learning</button>
-              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">Yes, Log out</button>
-            </div>
+
+            {showLogoutModal && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+                  <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-8 h-8 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                  </div>
+                  <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Homework Done?</h3>
+                  <p className="text-center text-slate-500 mb-8">Finished learning for the day, or just procrastinating? Are you sure you want to log out?</p>
+                  <div className="flex gap-4">
+                    <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Back to Learning</button>
+                    <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">Yes, Log out</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
+        );
+    }
   };
 
   return (
@@ -434,13 +511,12 @@ function StudentDashboard() {
             </div>
           )}
           {profile && getStatusDisplay(profile.status, profile.rejectReason)}
-          
+
           {profile?.parentalConsent && (
-            <div className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-bold shadow-sm ${
-              profile.parentConsentVerified 
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+            <div className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-bold shadow-sm ${profile.parentConsentVerified
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                 : 'bg-amber-50 text-amber-700 border-amber-200'
-            }`}>
+              }`}>
               {profile.parentConsentVerified ? (
                 <><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Parental Consent: Verified</>
               ) : (
@@ -572,8 +648,8 @@ function StudentDashboard() {
                 onClick={handleSetupPasskey}
                 disabled={passkeyStatus === 'SUCCESS'}
                 className={`px-6 py-3 rounded-xl font-bold shadow-lg transition-all active:scale-95 shrink-0 ${passkeyStatus === 'SUCCESS'
-                    ? 'bg-white/20 text-white cursor-default'
-                    : 'bg-white text-blue-600 hover:bg-blue-50 cursor-pointer hover:shadow-xl'
+                  ? 'bg-white/20 text-white cursor-default'
+                  : 'bg-white text-blue-600 hover:bg-blue-50 cursor-pointer hover:shadow-xl'
                   }`}
               >
                 {passkeyStatus === 'SUCCESS' ? 'Active' : 'Register Passkey'}
@@ -620,8 +696,8 @@ function StudentDashboard() {
                         <div className="flex flex-col gap-3 mt-3">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs font-bold px-2 py-1 rounded-md ${enq.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' :
-                                enq.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                                  'bg-orange-100 text-orange-700'
+                              enq.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                                'bg-orange-100 text-orange-700'
                               }`}>
                               {enq.status.replace(/_/g, ' ')}
                             </span>
@@ -797,7 +873,49 @@ function StudentDashboard() {
               {/* Age Gate: Parental Consent */}
               {isUnder18 && (
                 <div className="p-6 bg-orange-50/50 border border-orange-200/50 rounded-2xl space-y-6">
-                  <div className="flex gap-3">
+                  <div className="mb-2">
+                    <h3 className="font-bold text-slate-800 flex items-center gap-2 text-lg">
+                      <svg className="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                      Parent / Guardian Information
+                    </h3>
+                    <p className="text-slate-500 text-sm mt-1 ml-7">Looks like someone is still under 18! Time to bring in the adults (😎).</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ml-7 mb-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-700 ml-1">Name</label>
+                      <input
+                        type="text"
+                        value={editForm.parentName || ''}
+                        onChange={e => setEditForm({ ...editForm, parentName: e.target.value })}
+                        placeholder="Full Name"
+                        className="w-full px-5 py-3 bg-white/60 border border-slate-200/50 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-700 ml-1">Contact Number</label>
+                      <input
+                        type="text"
+                        maxLength={10}
+                        value={editForm.parentContact || ''}
+                        onChange={e => setEditForm({ ...editForm, parentContact: e.target.value.replace(/\D/g, '').substring(0, 10) })}
+                        placeholder="Mobile Number"
+                        className="w-full px-5 py-3 bg-white/60 border border-slate-200/50 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
+                      <input
+                        type="email"
+                        value={editForm.parentEmail || ''}
+                        onChange={e => setEditForm({ ...editForm, parentEmail: e.target.value })}
+                        placeholder="Email Address"
+                        className="w-full px-5 py-3 bg-white/60 border border-slate-200/50 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 ml-7">
                     <div className="mt-1">
                       <input
                         type="checkbox"
@@ -808,41 +926,8 @@ function StudentDashboard() {
                       />
                     </div>
                     <label htmlFor="parentalConsent" className="text-sm font-bold text-slate-700 leading-relaxed">
-                      I am the parent/guardian of {editForm.fullName || 'this student'} and I consent to their registration on CoachKonnects. (Mandatory)
+                      I am the parent/guardian of {editForm.fullName || 'this student'} and I consent to their registration on CoachKonnects.
                     </label>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pl-8">
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 ml-1">Parent / Guardian Name</label>
-                      <input
-                        type="text"
-                        value={editForm.parentName || ''}
-                        onChange={e => setEditForm({ ...editForm, parentName: e.target.value })}
-                        placeholder="Full Name"
-                        className="w-full px-5 py-3 bg-white/60 border border-slate-200/50 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 ml-1">Parent / Guardian Contact</label>
-                      <input
-                        type="text"
-                        value={editForm.parentContact || ''}
-                        onChange={e => setEditForm({ ...editForm, parentContact: e.target.value })}
-                        placeholder="Mobile Number"
-                        className="w-full px-5 py-3 bg-white/60 border border-slate-200/50 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 ml-1">Parent / Guardian Email</label>
-                      <input
-                        type="email"
-                        value={editForm.parentEmail || ''}
-                        onChange={e => setEditForm({ ...editForm, parentEmail: e.target.value })}
-                        placeholder="Email Address"
-                        className="w-full px-5 py-3 bg-white/60 border border-slate-200/50 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all shadow-sm"
-                      />
-                    </div>
                   </div>
                 </div>
               )}
@@ -881,6 +966,47 @@ function StudentDashboard() {
               <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Back to Learning</button>
               <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-teal-500 rounded-xl hover:bg-teal-600 transition-all">Yes, Log out</button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Parent OTP Modal */}
+      {showParentOtpModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Parental Consent Required</h3>
+            <p className="text-center text-slate-500 mb-6">We just sent a 6-digit OTP to your parent's email address. Please enter it below to verify their consent.</p>
+            <input
+              type="text"
+              maxLength={6}
+              value={parentOtp}
+              onChange={(e) => setParentOtp(e.target.value.replace(/\D/g, ''))}
+              placeholder="Enter 6-digit OTP"
+              className="w-full text-center text-2xl tracking-[0.5em] px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all mb-6 font-mono font-bold"
+            />
+            <button
+              onClick={handleVerifyParentOtp}
+              disabled={isVerifyingParentOtp || parentOtp.length !== 6}
+              className="w-full py-4 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+            >
+              {isVerifyingParentOtp ? (
+                <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Verifying...</>
+              ) : 'Verify & Complete'}
+            </button>
+            <div className="mt-4 text-center">
+              {parentResendCountdown > 0 ? (
+                <span className="text-sm text-slate-500 font-medium">Resend OTP in {parentResendCountdown}s</span>
+              ) : (
+                <button onClick={handleResendParentOtp} className="text-sm text-amber-600 font-bold hover:underline">
+                  Resend OTP
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => setShowParentOtpModal(false)}
+              className="mt-4 w-full py-3 text-slate-500 font-bold rounded-xl hover:bg-slate-100 transition-colors"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

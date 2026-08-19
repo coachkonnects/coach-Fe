@@ -201,9 +201,20 @@ function RegisterPage() {
     if (!formData.interests) return alert("Please select your Interests/Subjects!");
     if (!formData.preference) return alert("Please select your Learning Preference!");
 
-    if (isUnder18 && (!formData.parentalConsent || !formData.parentName || !formData.parentContact || !formData.parentEmail)) {
-      alert("Parental consent and all parent details (Name, Contact, Email) are required for students under 18.");
-      return;
+    if (isUnder18) {
+      if (!formData.parentalConsent || !formData.parentName || !formData.parentContact || !formData.parentEmail) {
+        return alert("Parental consent and all parent details (Name, Contact, Email) are required for students under 18.");
+      }
+      if (formData.parentContact.length !== 10) {
+        return alert("Parent contact number must be exactly 10 digits.");
+      }
+      const validDomains = ['@gmail.com', '@yahoo.com', '@outlook.com', '@hotmail.com', '@icloud.com'];
+      if (!validDomains.some(domain => formData.parentEmail.toLowerCase().endsWith(domain))) {
+        return alert("Please use a valid popular email provider (gmail, yahoo, outlook, etc.) for the parent's email.");
+      }
+      if (formData.parentEmail.toLowerCase() === formData.email.toLowerCase()) {
+        return alert("Student and parent cannot use the same email address.");
+      }
     }
 
     if (!termsAccepted) {
@@ -221,8 +232,12 @@ function RegisterPage() {
         body: JSON.stringify(formData)
       });
       if (res.ok) {
-        alert(`Success! Your Student profile has been submitted`);
-        navigate({ to: '/' });
+        if (isUnder18) {
+          setShowParentOtpModal(true);
+        } else {
+          alert(`Success! Your Student profile has been submitted`);
+          navigate({ to: '/' });
+        }
       } else {
         const err = await res.text();
         alert("Failed to save: " + err);
@@ -231,6 +246,49 @@ function RegisterPage() {
       console.error(e);
       alert("Error connecting to server");
     }
+  };
+
+  const handleResendParentOtp = async () => {
+    try {
+      const res = await fetch('/api/profile/resend-parent-otp', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${authToken || localStorage.getItem('token') || ''}` }
+      });
+      if (res.ok) {
+        setParentResendCountdown(30);
+        alert("OTP resent successfully!");
+      } else {
+        alert("Failed to resend OTP.");
+      }
+    } catch (e) {
+      alert("Error resending OTP.");
+    }
+  };
+
+  const handleVerifyParentOtp = async () => {
+    if (!parentOtp) return alert("Please enter the OTP.");
+    setIsVerifyingParentOtp(true);
+    try {
+      const res = await fetch('/api/profile/verify-parent-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken || localStorage.getItem('token') || ''}`
+        },
+        body: JSON.stringify({ otp: parentOtp })
+      });
+      if (res.ok) {
+        alert("Parental consent verified! Profile registration complete.");
+        setShowParentOtpModal(false);
+        navigate({ to: '/' });
+      } else {
+        const err = await res.json();
+        alert(err.error || "Invalid OTP!");
+      }
+    } catch (e) {
+      alert("Error verifying OTP.");
+    }
+    setIsVerifyingParentOtp(false);
   };
 
   const handleResetForm = () => {
@@ -504,21 +562,24 @@ function RegisterPage() {
 
           {isUnder18 && (
             <div className="md:col-span-2 bg-gradient-to-r from-amber-50 to-orange-50 p-6 rounded-2xl border border-amber-200 shadow-sm mt-8">
-              <h3 className="font-bold text-amber-900 mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                Parental Consent Required (Under 18)
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="mb-6">
+                <h3 className="font-bold text-amber-900 flex items-center gap-2 text-lg">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                  Parent / Guardian Information
+                </h3>
+                <p className="text-amber-700/80 text-sm mt-1">Looks like someone is under 18! Time to bring in the adults (don't worry, we won't tell them about your search history).</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm font-semibold text-amber-900 mb-2">Parent/Guardian Name</label>
+                  <label className="block text-sm font-semibold text-amber-900 mb-2">Name</label>
                   <input type="text" className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all shadow-sm" placeholder="Full Name" value={formData.parentName} onChange={e => setFormData({ ...formData, parentName: e.target.value })} />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-amber-900 mb-2">Parent/Guardian Contact</label>
-                  <input type="text" className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all shadow-sm" placeholder="Mobile Number" value={formData.parentContact} onChange={e => setFormData({ ...formData, parentContact: e.target.value.replace(/\D/g, '').substring(0, 10) })} />
+                  <label className="block text-sm font-semibold text-amber-900 mb-2">Contact Number</label>
+                  <input type="text" maxLength={10} className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all shadow-sm" placeholder="Mobile Number" value={formData.parentContact} onChange={e => setFormData({ ...formData, parentContact: e.target.value.replace(/\D/g, '').substring(0, 10) })} />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-amber-900 mb-2">Parent/Guardian Email</label>
+                  <label className="block text-sm font-semibold text-amber-900 mb-2">Email Address</label>
                   <input type="email" className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all shadow-sm" placeholder="Email Address" value={formData.parentEmail} onChange={e => setFormData({ ...formData, parentEmail: e.target.value })} />
                 </div>
               </div>
@@ -572,6 +633,41 @@ function RegisterPage() {
           </div>
         </div>
       </div>
+      {/* Parent OTP Modal */}
+      {showParentOtpModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Parental Consent Required</h3>
+            <p className="text-center text-slate-500 mb-6">We just sent a 6-digit OTP to your parent's email address. Please enter it below to verify their consent.</p>
+            <input
+              type="text"
+              maxLength={6}
+              value={parentOtp}
+              onChange={(e) => setParentOtp(e.target.value.replace(/\D/g, ''))}
+              placeholder="Enter 6-digit OTP"
+              className="w-full text-center text-2xl tracking-[0.5em] px-4 py-4 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 outline-none transition-all mb-6 font-mono font-bold"
+            />
+            <button
+              onClick={handleVerifyParentOtp}
+              disabled={isVerifyingParentOtp || parentOtp.length !== 6}
+              className="w-full py-4 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 active:scale-[0.98] transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+            >
+              {isVerifyingParentOtp ? (
+                <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Verifying...</>
+              ) : 'Verify & Complete'}
+            </button>
+            <div className="mt-4 text-center">
+              {parentResendCountdown > 0 ? (
+                <span className="text-sm text-slate-500 font-medium">Resend OTP in {parentResendCountdown}s</span>
+              ) : (
+                <button onClick={handleResendParentOtp} className="text-sm text-amber-600 font-bold hover:underline">
+                  Resend OTP
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

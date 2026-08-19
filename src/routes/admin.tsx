@@ -24,6 +24,8 @@ function AdminDashboard() {
   const [editingCategoryExpertises, setEditingCategoryExpertises] = useState('');
   const [selectedCoach, setSelectedCoach] = useState<any | null>(null);
   const [students, setStudents] = useState<any[]>([]);
+  const [bannedUsers, setBannedUsers] = useState<any[]>([]);
+  const [banConfirm, setBanConfirm] = useState<{type: 'student'|'coach', id: any} | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const [studentSortConfig, setStudentSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
@@ -263,7 +265,30 @@ function AdminDashboard() {
     if (activeTab === 'admins') {
       fetchAdmins();
     }
+    if (activeTab === 'security') {
+      fetchBannedUsers();
+    }
   }, [activeTab]);
+
+  const fetchBannedUsers = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch('/api/admin/banned-users', { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) setBannedUsers(await res.json());
+    } catch (e) { console.error(e); }
+  };
+
+  const handleUnbanUser = async (email: string) => {
+    if (!confirm(`Are you sure you want to unban ${email}?`)) return;
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`/api/admin/banned-users/${email}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) {
+        alert("User unbanned successfully.");
+        fetchBannedUsers();
+      }
+    } catch (e) { console.error(e); }
+  };
 
   const fetchBlockedWords = async () => {
     try {
@@ -618,6 +643,21 @@ function AdminDashboard() {
     } catch (e) { console.error(e); }
   };
 
+  const confirmBan = async () => {
+    if (!banConfirm) return;
+    const { type, id } = banConfirm;
+    setBanConfirm(null);
+    try {
+      const res = await fetch(`/api/admin/${type === 'coach' ? 'coaches' : 'students'}/${id}?ban=true`, { method: 'DELETE' });
+      if (res.ok) {
+        if (type === 'coach') fetchCoaches();
+        else setStudents(students.filter((s: any) => s.id !== id));
+      } else {
+        alert("Failed to ban " + type);
+      }
+    } catch (e) { console.error(e); }
+  };
+
   const handleApproveClass = async (id: number) => {
     try {
       const res = await fetch(`/api/admin/classes/${id}/approve`, { method: 'POST' });
@@ -809,11 +849,11 @@ function AdminDashboard() {
                             🗑️
                           </button>
                           <button
-                            onClick={() => handleDeleteCoach(coach.id, true)}
+                            onClick={() => setBanConfirm({ type: 'coach', id: coach.id })}
                             className="text-white hover:text-white font-medium text-sm border border-red-600 bg-red-600 px-3 py-1.5 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
-                            title="Ban & Delete User"
+                            title="Ban User"
                           >
-                            Ban & Delete
+                            Ban
                           </button>
                         </div>
                       </td>
@@ -1131,10 +1171,10 @@ function AdminDashboard() {
                             Delete
                           </button>
                           <button
-                            onClick={(e) => { e.stopPropagation(); handleDeleteStudent(student.id, true); }}
+                            onClick={(e) => { e.stopPropagation(); setBanConfirm({ type: 'student', id: student.id }); }}
                             className="px-4 py-1.5 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm"
                           >
-                            Ban & Delete
+                            Ban
                           </button>
                         </div>
                       </td>
@@ -1444,6 +1484,46 @@ function AdminDashboard() {
                     </div>
                   </div>
                 </div>
+
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 w-full lg:col-span-2">
+                  <h3 className="font-bold text-gray-900 text-lg mb-4">Banned Accounts</h3>
+                  <p className="text-gray-500 text-sm mb-6">These users are permanently blocked from registering or logging in.</p>
+                  <div className="overflow-x-auto border border-gray-100 rounded-xl">
+                    <table className="w-full text-left min-w-[300px]">
+                      <thead className="bg-gray-50/50 border-b border-gray-100">
+                        <tr>
+                          <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">User Name</th>
+                          <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Banned Email</th>
+                          <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 bg-white">
+                        {bannedUsers.map((bu, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="px-6 py-4 text-sm font-medium text-gray-900">{bu.name || 'Unknown'}</td>
+                            <td className="px-6 py-4 text-sm font-medium text-gray-500 truncate max-w-[200px]">{bu.email}</td>
+                            <td className="px-6 py-4 text-right">
+                              <button
+                                onClick={() => handleUnbanUser(bu.email)}
+                                className="px-4 py-1.5 bg-green-100 text-green-700 text-sm font-bold rounded-lg hover:bg-green-200 transition-colors"
+                              >
+                                Unban
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {bannedUsers.length === 0 && (
+                          <tr>
+                            <td colSpan={3} className="px-6 py-12 text-center text-gray-500">
+                              No banned users found.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
               </div>
             </div>
           )}
@@ -1849,6 +1929,8 @@ function AdminDashboard() {
             </div>
           )}
 
+
+
         </main>
       </div>
 
@@ -1877,6 +1959,34 @@ function AdminDashboard() {
                 className="flex-1 py-3 px-4 rounded-2xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-all shadow-md shadow-red-200"
               >
                 Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {banConfirm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center transform animate-scale-in">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5 border-4 border-red-100">
+              <ShieldAlert className="w-10 h-10 text-red-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Ban User?</h2>
+            <p className="text-gray-500 text-sm leading-relaxed mb-8">
+              Are you sure you want to ban this user? Their email will be permanently blocked from registering again.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setBanConfirm(null)}
+                className="flex-1 py-3 px-4 rounded-2xl border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-300 transition-all"
+              >
+                No
+              </button>
+              <button
+                onClick={confirmBan}
+                className="flex-1 py-3 px-4 rounded-2xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-all shadow-md shadow-red-200"
+              >
+                Yes, Ban
               </button>
             </div>
           </div>
