@@ -157,6 +157,7 @@ function AdminDashboard() {
   const [blockedWords, setBlockedWords] = useState<any[]>([]);
   const [newBlockedWord, setNewBlockedWord] = useState('');
   const [newBlockedWordCategory, setNewBlockedWordCategory] = useState('CUSTOM');
+  const [blockedWordSearch, setBlockedWordSearch] = useState('');
 
   const exportToCSV = (data: any[], filename: string) => {
     if (!data || data.length === 0) {
@@ -1477,7 +1478,7 @@ function AdminDashboard() {
                   <h3 className="font-bold text-gray-900 text-lg mb-4">Blocked Words Filter</h3>
                   <p className="text-sm text-gray-500 mb-6">These words will be blocked in real-time across the entire application (e.g. bios, descriptions). Prevents bad words and restricted subjects.</p>
 
-                  <form onSubmit={handleAddBlockedWord} className="flex gap-3 mb-6">
+                  <form onSubmit={handleAddBlockedWord} className="flex flex-col sm:flex-row gap-3 mb-6">
                     <input
                       type="text"
                       value={newBlockedWord}
@@ -1497,9 +1498,18 @@ function AdminDashboard() {
                     <button type="submit" className="bg-orange-500 text-white font-bold px-6 py-2 rounded-xl hover:bg-orange-600 transition-colors">Add</button>
                   </form>
 
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      value={blockedWordSearch}
+                      onChange={e => setBlockedWordSearch(e.target.value)}
+                      placeholder="Search added words..."
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-orange-500 outline-none"
+                    />
+                  </div>
                   <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto p-2 border border-gray-100 rounded-xl bg-slate-50">
                     {blockedWords.length === 0 && <span className="text-gray-400 text-sm">No blocked words.</span>}
-                    {blockedWords.map(bw => (
+                    {blockedWords.filter(bw => bw.word.toLowerCase().includes(blockedWordSearch.toLowerCase())).map(bw => (
                       <div key={bw.id} className="flex items-center gap-2 bg-white border border-gray-200 px-3 py-1.5 rounded-full text-sm font-medium shadow-sm">
                         <span>{bw.word}</span>
                         <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{bw.category}</span>

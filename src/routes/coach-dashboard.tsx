@@ -593,16 +593,16 @@ function CoachDashboard() {
         {getStatusBanner()}
 
         <div className="bg-white/80 backdrop-blur-2xl rounded-[3rem] shadow-xl border border-white overflow-hidden relative">
-          <div className="flex overflow-x-auto no-scrollbar border-b border-slate-200 bg-slate-50 w-full">
+          <div className="flex overflow-x-auto border-b border-slate-200 bg-slate-50 w-full [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full pb-1">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`flex-1 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap ${activeTab === "overview" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
+              className={`shrink-0 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap ${activeTab === "overview" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
             >
               Profile Overview
             </button>
             <button
               onClick={() => setActiveTab("classes")}
-              className={`flex-1 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap flex items-center justify-center gap-2 ${activeTab === "classes" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
+              className={`shrink-0 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap flex items-center justify-center gap-2 ${activeTab === "classes" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
             >
               Classes
               <span
@@ -613,13 +613,13 @@ function CoachDashboard() {
             </button>
             <button
               onClick={() => setActiveTab("calendar")}
-              className={`flex-1 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap ${activeTab === "calendar" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
+              className={`shrink-0 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap ${activeTab === "calendar" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
             >
               Calendar
             </button>
             <button
               onClick={() => setActiveTab("enquiries")}
-              className={`flex-1 min-w-[180px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap flex items-center justify-center gap-2 ${activeTab === "enquiries" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
+              className={`shrink-0 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap flex items-center justify-center gap-2 ${activeTab === "enquiries" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
             >
               Leads / Enquiries
               {enquiries.filter((e: any) => e.status === 'PENDING_COACH_APPROVAL').length > 0 && (
@@ -1394,14 +1394,59 @@ function CoachDashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-1">Schedule</label>
-                    <input
-                      required
-                      type="text"
-                      value={classForm.schedule}
-                      onChange={(e) => setClassForm({ ...classForm, schedule: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all"
-                      placeholder="e.g. Saturdays 10:00 AM"
-                    />
+                    <div className="flex gap-2 items-center">
+                      <select
+                        required
+                        value={classForm.schedule.split(' ')[0] || ''}
+                        onChange={(e) => {
+                          const parts = classForm.schedule.split(' ');
+                          const start = parts[1] || '';
+                          const end = parts[3] || '';
+                          const newSched = `${e.target.value} ${start} - ${end}`.trim().replace(/(^\s*-\s*$|^\s*-\s*|\s*-\s*$)/, '');
+                          setClassForm({ ...classForm, schedule: newSched })
+                        }}
+                        className="flex-1 px-3 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm"
+                      >
+                        <option value="">Day</option>
+                        <option value="Mondays">Mondays</option>
+                        <option value="Tuesdays">Tuesdays</option>
+                        <option value="Wednesdays">Wednesdays</option>
+                        <option value="Thursdays">Thursdays</option>
+                        <option value="Fridays">Fridays</option>
+                        <option value="Saturdays">Saturdays</option>
+                        <option value="Sundays">Sundays</option>
+                        <option value="Weekends">Weekends</option>
+                        <option value="Daily">Daily</option>
+                      </select>
+                      <input
+                        required
+                        type="time"
+                        value={classForm.schedule.split(' ')[1] || ''}
+                        onChange={(e) => {
+                          const parts = classForm.schedule.split(' ');
+                          const day = parts[0] || '';
+                          const end = parts[3] || '';
+                          const newSched = `${day} ${e.target.value} - ${end}`.trim().replace(/(^\s*-\s*$|^\s*-\s*|\s*-\s*$)/, '');
+                          setClassForm({ ...classForm, schedule: newSched })
+                        }}
+                        className="flex-1 px-2 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm"
+                      />
+                      <span className="text-slate-400 font-bold">-</span>
+                      <input
+                        required
+                        type="time"
+                        value={classForm.schedule.split(' ')[3] || ''}
+                        onChange={(e) => {
+                          const parts = classForm.schedule.split(' ');
+                          const day = parts[0] || '';
+                          const start = parts[1] || '';
+                          let newSched = `${day} ${start} - ${e.target.value}`.trim();
+                          if (newSched === '-') newSched = '';
+                          setClassForm({ ...classForm, schedule: newSched })
+                        }}
+                        className="flex-1 px-2 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm"
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-1">Price (₹)</label>
@@ -1411,6 +1456,11 @@ function CoachDashboard() {
                       min="0"
                       step="0.01"
                       value={classForm.price}
+                      onKeyDown={(e) => {
+                        if (['e', 'E', '+', '-'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       onChange={(e) => setClassForm({ ...classForm, price: e.target.value })}
                       className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all"
                       placeholder="0.00 for free"
