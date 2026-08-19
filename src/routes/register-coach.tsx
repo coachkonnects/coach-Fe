@@ -492,7 +492,7 @@ function CoachRegisterPage() {
       });
       if (res.ok) {
         alert(isEditMode ? `Success! Your Coach profile has been updated and sent for Review!` : `Success! Your Coach profile has been submitted and is Pending Admin Approval!`);
-        navigate({ to: isEditMode ? '/coach-dashboard' : '/login' });
+        navigate({ to: isEditMode ? '/coach-dashboard' : '/' });
       } else {
         const err = await res.text();
         alert("Failed to save: " + err);

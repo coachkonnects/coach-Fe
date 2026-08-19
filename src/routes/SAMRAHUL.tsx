@@ -986,7 +986,7 @@ function AdminDashboard() {
                       {selectedCoach.pincode ? ` - ${selectedCoach.pincode}` : ''}
                     </p>
                   </div>
-                  <div className="col-span-2">
+                  <div className="md:col-span-2">
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">SEO URL</h3>
                     <p className="font-mono text-sm text-[#f26b21] bg-orange-50 p-2 rounded-lg break-all">
                       coachkonnects.com/coaches/{selectedCoach.slug}
@@ -1016,7 +1016,7 @@ function AdminDashboard() {
                     />
                     <p className="text-xs text-gray-400 mt-1">Click away to save</p>
                   </div>
-                  <div className="col-span-2">
+                  <div className="md:col-span-2">
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">About / Description</h3>
                     <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-1 whitespace-pre-line text-gray-700">
                       {selectedCoach.description || 'No description provided.'}
@@ -1038,7 +1038,7 @@ function AdminDashboard() {
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Schedule</h3>
                     <p className="font-medium text-sm">{selectedCoach.availableDays || 'No days'} • {selectedCoach.timeSlots || 'No slots'}</p>
                   </div>
-                  <div className="col-span-2">
+                  <div className="md:col-span-2">
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Media</h3>
                     <div className="flex gap-4">
                       {selectedCoach.profileImageUrl && (
