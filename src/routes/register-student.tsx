@@ -83,6 +83,18 @@ function RegisterPage() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [blockedWords, setBlockedWords] = useState<string[]>([]);
   const [nameError, setNameError] = useState('');
+  const [showParentOtpModal, setShowParentOtpModal] = useState(false);
+  const [parentOtp, setParentOtp] = useState("");
+  const [isVerifyingParentOtp, setIsVerifyingParentOtp] = useState(false);
+  const [parentResendCountdown, setParentResendCountdown] = useState(30);
+
+  useEffect(() => {
+    let timer: any;
+    if (showParentOtpModal && parentResendCountdown > 0) {
+      timer = setInterval(() => setParentResendCountdown(c => c - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [showParentOtpModal, parentResendCountdown]);
   const [interestsError, setInterestsError] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [authToken, setAuthToken] = useState("");
