@@ -68,8 +68,9 @@ const trustPoints = [
 
 function Logo({ className = "" }: { className?: string }) {
   return (
-    <a href="#" className={`flex min-w-0 items-center gap-2 ${className}`} aria-label="CoachKonnects">
-      <img src={logo.url} alt="CoachKonnects" className="h-9 w-auto shrink-0 sm:h-10" />
+    <a href="/" className={`flex min-w-0 items-center gap-2 ${className}`} aria-label="CoachKonnects">
+      <img src="/favicon.png" alt="CoachKonnects" className="h-10 w-10 sm:hidden rounded-full object-cover shrink-0 bg-white p-1 shadow-sm" />
+      <img src={logo.url} alt="CoachKonnects" className="hidden sm:block h-10 w-auto shrink-0" />
     </a>
   );
 }
@@ -282,16 +283,23 @@ function Index() {
           {/* Hero content */}
           <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-10 pt-8 sm:px-8 sm:pb-32 sm:pt-14 md:pb-40 md:pt-16 lg:pb-48 text-left flex flex-col justify-between min-h-[80svh] sm:min-h-[unset] sm:block">
             
-            {/* TOP SECTION */}
-            <div className="w-full min-w-0 max-w-lg lg:max-w-[50%] xl:max-w-2xl flex flex-col items-center text-center sm:items-start sm:text-left mx-auto sm:mx-0 mt-12 sm:mt-0 bg-white/30 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none p-6 sm:p-0 rounded-3xl border border-white/40 sm:border-transparent shadow-lg sm:shadow-none">
-              <span className="mb-5 inline-block rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-700 shadow-sm backdrop-blur-md">
+            {/* Launching Badge (Mobile) */}
+            <div className="flex sm:hidden justify-center w-full mb-2 mt-2">
+              <span className="inline-block rounded-full border border-white/40 bg-white/40 backdrop-blur-md px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-900 shadow-sm">
                 🚀 Launching in Mumbai & India
               </span>
-              <h1 className="font-[var(--font-display)] text-[clamp(2rem,7vw,68px)] font-bold leading-[1.08] tracking-tight text-balance text-slate-900">
-                Find the perfect class{" "}
-                <em className="font-medium not-italic text-slate-500 italic">or</em>{" "}
-                coach for{" "}
-                <span className="bg-gradient-to-r from-orange-500 to-teal-500 bg-clip-text text-transparent drop-shadow-sm">your child.</span>
+            </div>
+
+            {/* TOP SECTION */}
+            <div className="w-full min-w-0 max-w-lg lg:max-w-[50%] xl:max-w-2xl flex flex-col items-center text-center sm:items-start sm:text-left mx-auto sm:mx-0 bg-white/30 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none p-4 sm:p-0 rounded-[2rem] border border-white/40 sm:border-transparent shadow-lg sm:shadow-none">
+              <span className="hidden sm:inline-block mb-5 rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-700 shadow-sm backdrop-blur-md">
+                🚀 Launching in Mumbai & India
+              </span>
+              <h1 className="font-[var(--font-display)] text-2xl sm:text-[clamp(2rem,7vw,68px)] font-bold leading-[1.08] tracking-tight text-balance text-slate-900">
+                Find The Perfect Class{" "}
+                <em className="font-medium not-italic text-slate-700 italic">Or</em>{" "}
+                Coach For{" "}
+                <span className="inline-block bg-orange-500 text-white px-2 py-1 mt-1 rounded-xl shadow-sm text-2xl sm:text-[clamp(2rem,7vw,68px)]">Your Child.</span>
               </h1>
               <p className="hidden sm:block mt-5 max-w-lg text-pretty text-base font-medium leading-relaxed text-slate-600 sm:text-lg md:text-xl">
                 Verified hobby coaches near you. Browse, connect directly on WhatsApp,
@@ -320,16 +328,16 @@ function Index() {
             <div className="w-full min-w-0 max-w-xl mt-auto pt-8 flex flex-col gap-4">
               
               {/* CTAs (Mobile) */}
-              <div className="flex sm:hidden flex-col gap-3 w-full pb-2">
+              <div className="flex sm:hidden flex-col items-center gap-3 w-full pb-2">
                 <Link
                   to="/coaches"
-                  className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(249,115,22,0.4)]"
+                  className="inline-flex w-[260px] items-center justify-center gap-2 whitespace-nowrap rounded-full bg-white/40 border border-white/50 backdrop-blur-md px-5 py-2.5 text-sm font-bold text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white/50"
                 >
                   📍 Find Classes Near Me <span aria-hidden="true">→</span>
                 </Link>
                 <Link
                   to="/register"
-                  className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white/90 px-7 py-3.5 text-sm font-semibold text-slate-800 backdrop-blur-md transition-all hover:border-orange-500 hover:text-orange-600 shadow-sm"
+                  className="inline-flex w-[260px] items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/50 bg-white/40 backdrop-blur-md px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white/50"
                 >
                   👤 Are You A Hobby Coach?
                 </Link>
