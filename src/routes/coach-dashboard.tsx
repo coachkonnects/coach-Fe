@@ -70,6 +70,9 @@ function CoachDashboard() {
 
   const handleCreateClassSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (classForm.description && classForm.description.trim().split(/\s+/).length > 250) {
+      return alert("Class/Workshop Description must not exceed 250 words!");
+    }
     if (classForm.type === "WORKSHOP" && !classForm.imageUrl) {
       alert("Workshop banner image is mandatory!");
       return;
@@ -362,6 +365,9 @@ function CoachDashboard() {
   };
 
   const handleSaveProfile = async () => {
+    if (editForm.description && editForm.description.trim().split(/\s+/).length > 250) {
+      return alert("About Me / Description must not exceed 250 words!");
+    }
     setIsSaving(true);
     try {
       const email = localStorage.getItem("userEmail");

@@ -49,6 +49,9 @@ function CoachProfilePage() {
 
   const handleSendEnquiry = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (enquiryMessage && enquiryMessage.trim().split(/\s+/).length > 250) {
+      return alert("Message must not exceed 250 words!");
+    }
     setSending(true);
     try {
       const res = await fetch('/api/enquiries/send', {

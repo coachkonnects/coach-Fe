@@ -20,7 +20,15 @@ function LoginPage() {
       setActivePath(type as AuthPath);
     }
   }, []);
-  
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('userRole');
+    if (token) {
+      navigate({ to: role === 'coach' ? '/coach-dashboard' : '/student-dashboard' });
+    }
+  }, [navigate]);
+
   // Auth state
   const [email, setEmail] = useState('');
   const [step, setStep] = useState<'email' | 'otp'>('email');
@@ -43,7 +51,7 @@ function LoginPage() {
       setError("Please enter your registered email address first.");
       return;
     }
-    
+
     setError("");
     setIsLoading(true);
     try {
@@ -56,7 +64,7 @@ function LoginPage() {
       const res = await fetch("/api/passkeys/login/start");
       const options = await res.json();
       const asseResp = await startAuthentication({ optionsJSON: options });
-      
+
       const verifyRes = await fetch("/api/passkeys/login/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,7 +72,7 @@ function LoginPage() {
       });
 
       if (!verifyRes.ok) throw new Error("Passkey login failed. Invalid passcode.");
-      
+
       const data = await verifyRes.json();
       localStorage.setItem('token', data.token);
       localStorage.setItem('userEmail', data.email || email);
@@ -81,14 +89,14 @@ function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
+
     try {
       const res = await fetch('/api/auth/request-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, intendedRole: activePath.toUpperCase() })
       });
-      
+
       if (!res.ok) {
         const text = await res.text();
         try {
@@ -98,7 +106,7 @@ function LoginPage() {
           throw new Error(`Server Error (${res.status})`);
         }
       }
-      
+
       setStep('otp');
       setCountdown(30);
       setSuccess('Security code sent! Check your inbox.');
@@ -113,14 +121,14 @@ function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
+
     try {
       const res = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code: otp })
       });
-      
+
       if (!res.ok) {
         const text = await res.text();
         try {
@@ -130,10 +138,10 @@ function LoginPage() {
           throw new Error(`Server Error (${res.status})`);
         }
       }
-      
+
       const data = await res.json();
       setSuccess('Successfully logged in!');
-      
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('userEmail', email);
       localStorage.setItem('userRole', activePath as string);
@@ -145,7 +153,7 @@ function LoginPage() {
       } else {
         navigate({ to: '/' });
       }
-      
+
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -170,14 +178,14 @@ function LoginPage() {
   if (activePath === 'selection') {
     return (
       <div className="min-h-screen bg-[#FFF8F0] flex flex-col md:flex-row overflow-hidden font-sans">
-        <div 
+        <div
           onClick={() => setActivePath('student')}
           className="flex-1 relative group cursor-pointer overflow-hidden flex flex-col items-center justify-center p-12 min-h-[50vh] md:min-h-screen border-b-4 md:border-b-0 md:border-r-4 border-[#FFF8F0]"
         >
           <div className="absolute inset-0 bg-[#FF7F5C] transition-transform duration-700 ease-out group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B35] to-[#FF7F5C] opacity-90" />
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
-          
+
           <div className="relative z-10 text-center transform transition-all duration-500 group-hover:-translate-y-2">
             <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-2xl border border-white/30 group-hover:rotate-6 transition-all duration-500">
               <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -191,7 +199,7 @@ function LoginPage() {
             <p className="text-white/90 text-lg font-medium max-w-xs mx-auto drop-shadow-sm">
               Ready to learn, explore, and connect with amazing coaches.
             </p>
-            
+
             <div className="mt-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-2 text-white font-bold bg-white/20 w-max mx-auto px-6 py-3 rounded-full backdrop-blur-sm border border-white/30">
               Login as Student
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
@@ -199,14 +207,14 @@ function LoginPage() {
           </div>
         </div>
 
-        <div 
+        <div
           onClick={() => setActivePath('coach')}
           className="flex-1 relative group cursor-pointer overflow-hidden flex flex-col items-center justify-center p-12 min-h-[50vh] md:min-h-screen"
         >
           <div className="absolute inset-0 bg-[#0f172a] transition-transform duration-700 ease-out group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-br from-teal-900 to-teal-950 opacity-95" />
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay" />
-          
+
           <div className="relative z-10 text-center transform transition-all duration-500 group-hover:-translate-y-2">
             <div className="w-24 h-24 bg-teal-500/20 backdrop-blur-md rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-2xl border border-teal-500/30 group-hover:-rotate-6 transition-all duration-500">
               <svg className="w-12 h-12 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -226,11 +234,11 @@ function LoginPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none hidden md:block">
           <div className="w-32 h-32 bg-white rounded-full p-3 shadow-2xl flex items-center justify-center">
             <div className="w-full h-full bg-[#FFF8F0] rounded-full border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden">
-               <img src="/homelogo.png" alt="Logo" className="w-20 h-auto" />
+              <img src="/homelogo.png" alt="Logo" className="w-20 h-auto" />
             </div>
           </div>
         </div>
@@ -251,7 +259,7 @@ function LoginPage() {
           <Sparkles className="absolute top-[15%] left-[20%] text-[#FF6B35]/40 w-10 h-10 animate-bounce" />
           <Sparkles className="absolute top-[30%] right-[30%] text-[#F4A460]/50 w-6 h-6 animate-ping" />
           <Sparkles className="absolute bottom-[25%] left-[10%] text-[#FF7F5C]/40 w-8 h-8 animate-pulse" />
-          
+
           {/* Subtle outlined glowing rings */}
           <div className="absolute top-[20%] left-[15%] w-32 h-32 border border-[#FF6B35]/30 rounded-full shadow-[0_0_15px_rgba(255,107,53,0.2)] animate-[spin_10s_linear_infinite]" />
           <div className="absolute bottom-[20%] right-[15%] w-48 h-48 border border-[#F4A460]/30 rounded-full shadow-[0_0_20px_rgba(244,164,96,0.2)] animate-[spin_15s_linear_infinite_reverse]" />
@@ -262,13 +270,13 @@ function LoginPage() {
           <div className="relative w-full max-w-lg aspect-square flex items-center justify-center">
             {/* Main Illustration */}
             <div className="w-64 h-64 md:w-80 md:h-80 rounded-full shadow-[0_20px_50px_rgba(255,107,53,0.3)] overflow-hidden relative z-20 border-[6px] border-white">
-               <img 
-                 src="/student.png" 
-                 alt="Student" 
-                 className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700" 
-               />
+              <img
+                src="/student.png"
+                alt="Student"
+                className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
+              />
             </div>
-            
+
             {/* Floating Orbits with Icons */}
             <div className="absolute w-[120%] h-[120%] border border-dashed border-[#B85C38]/20 rounded-full animate-[spin_30s_linear_infinite]">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center transform -rotate-12">
@@ -287,8 +295,8 @@ function LoginPage() {
         {/* Right Side: Glassmorphic Login Card */}
         <div className="flex-1 w-full flex items-center justify-center z-10 w-full px-2 mt-4 lg:mt-0">
           <div className="w-full max-w-lg lg:max-w-xl bg-white/60 backdrop-blur-2xl rounded-[2.5rem] border border-white/80 shadow-[0_8px_32px_rgba(44,24,16,0.1)] p-6 sm:p-10 md:p-14 relative overflow-hidden">
-            
-            <button 
+
+            <button
               onClick={handleBackToSelection}
               className="absolute top-6 left-6 flex items-center gap-1 text-sm font-bold text-[#8B4726] hover:text-[#FF6B35] transition-colors"
             >
@@ -309,7 +317,7 @@ function LoginPage() {
                   {error}
                 </div>
               )}
-              
+
               {success && (
                 <div className="text-emerald-600 text-sm font-bold text-center bg-emerald-50 py-3 px-4 rounded-xl border border-emerald-200 flex items-center gap-2 justify-center">
                   {success}
@@ -335,16 +343,16 @@ function LoginPage() {
                 </div>
               ) : (
                 <div className="space-y-4 animate-in fade-in zoom-in duration-300">
-                    <input
-                      type="text"
-                      maxLength={6}
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                      placeholder="------"
-                      disabled={isLoading}
-                      className="w-full px-5 py-4 bg-white/80 backdrop-blur-sm text-center tracking-widest font-mono text-3xl font-black text-[#FF6B35] rounded-2xl border-2 border-[#F4A460]/20 focus:outline-none focus:border-[#FF6B35] transition-all placeholder:text-[#8B4726]/20 shadow-sm"
-                      required
-                    />
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                    placeholder="------"
+                    disabled={isLoading}
+                    className="w-full px-5 py-4 bg-white/80 backdrop-blur-sm text-center tracking-widest font-mono text-3xl font-black text-[#FF6B35] rounded-2xl border-2 border-[#F4A460]/20 focus:outline-none focus:border-[#FF6B35] transition-all placeholder:text-[#8B4726]/20 shadow-sm"
+                    required
+                  />
                   <div className="flex justify-between items-center px-1">
                     <p className="text-sm text-[#8B4726] font-medium">
                       Code sent to <span className="font-bold text-[#2C1810]">{email}</span>
@@ -353,9 +361,9 @@ function LoginPage() {
                       <button type="button" onClick={() => { setStep('email'); setSuccess(''); setError(''); }} className="text-[#FF6B35] hover:underline text-sm font-bold">
                         Edit
                       </button>
-                      <button 
-                        type="button" 
-                        onClick={handleRequestOtp} 
+                      <button
+                        type="button"
+                        onClick={handleRequestOtp}
                         disabled={countdown > 0 || isLoading}
                         className="text-[#FF6B35] disabled:text-[#8B4726]/40 hover:underline text-sm font-bold transition-all"
                       >
@@ -455,7 +463,7 @@ function LoginPage() {
         <Sparkles className="absolute top-[15%] left-[20%] text-teal-300/40 w-10 h-10 animate-bounce" />
         <Sparkles className="absolute top-[30%] right-[30%] text-teal-400/50 w-6 h-6 animate-ping" />
         <Sparkles className="absolute bottom-[25%] left-[10%] text-emerald-400/40 w-8 h-8 animate-pulse" />
-        
+
         <div className="absolute top-[20%] left-[15%] w-32 h-32 border border-teal-500/30 rounded-full shadow-[0_0_15px_rgba(20,184,166,0.2)] animate-[spin_10s_linear_infinite]" />
         <div className="absolute bottom-[20%] right-[15%] w-48 h-48 border border-emerald-500/30 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.2)] animate-[spin_15s_linear_infinite_reverse]" />
       </div>
@@ -465,13 +473,13 @@ function LoginPage() {
         <div className="relative w-full max-w-lg aspect-square flex items-center justify-center">
           {/* Main Illustration */}
           <div className="w-64 h-64 md:w-80 md:h-80 rounded-full shadow-[0_20px_50px_rgba(13,148,136,0.3)] overflow-hidden relative z-20 border-[6px] border-white">
-             <img 
-               src="/coach.png" 
-               alt="Female Coach" 
-               className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700" 
-             />
+            <img
+              src="/coach.png"
+              alt="Female Coach"
+              className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
+            />
           </div>
-          
+
           {/* Floating Orbits with Icons */}
           <div className="absolute w-[120%] h-[120%] border border-dashed border-teal-400/20 rounded-full animate-[spin_30s_linear_infinite]">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl shadow-xl flex items-center justify-center transform -rotate-12 border border-teal-300/20">
@@ -490,11 +498,11 @@ function LoginPage() {
       {/* Right Side: Glassmorphic Login Card */}
       <div className="flex-1 w-full flex items-center justify-center z-10 w-full px-2 mt-4 lg:mt-0">
         <div className="w-full max-w-lg lg:max-w-xl bg-[#0f172a]/60 backdrop-blur-2xl rounded-[2.5rem] border border-teal-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-6 sm:p-10 md:p-14 relative overflow-hidden">
-          
+
           {/* Subtle top border accent */}
           <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-teal-400 to-emerald-400" />
 
-          <button 
+          <button
             onClick={handleBackToSelection}
             className="absolute top-6 left-6 flex items-center gap-1 text-sm font-bold text-teal-400/70 hover:text-teal-300 transition-colors"
           >
@@ -515,7 +523,7 @@ function LoginPage() {
                 {error}
               </div>
             )}
-            
+
             {success && (
               <div className="text-emerald-300 text-sm font-bold text-center bg-emerald-500/10 py-3 px-4 rounded-xl border border-emerald-500/20 flex items-center gap-2 justify-center">
                 {success}
@@ -559,9 +567,9 @@ function LoginPage() {
                     <button type="button" onClick={() => { setStep('email'); setSuccess(''); setError(''); }} className="text-teal-400 hover:underline text-sm font-bold">
                       Edit
                     </button>
-                    <button 
-                      type="button" 
-                      onClick={handleRequestOtp} 
+                    <button
+                      type="button"
+                      onClick={handleRequestOtp}
                       disabled={countdown > 0 || isLoading}
                       className="text-teal-400 disabled:text-teal-200/30 hover:underline text-sm font-bold transition-all"
                     >

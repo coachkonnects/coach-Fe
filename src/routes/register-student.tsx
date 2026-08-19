@@ -100,6 +100,25 @@ function RegisterPage() {
   const [authToken, setAuthToken] = useState("");
   const [otpCode, setOtpCode] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
+  const [mobileError, setMobileError] = useState('');
+
+  const checkMobileNumber = async () => {
+    if (!formData.mobile || formData.mobile.length !== 10) {
+      setMobileError('');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/auth/check-mobile?mobile=${formData.mobile}`);
+      const data = await res.json();
+      if (data.exists) {
+        setMobileError("This phone number is already registered, try with another number.");
+      } else {
+        setMobileError('');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
   const [countdown, setCountdown] = useState(0);
 
   useEffect(() => {
@@ -196,6 +215,7 @@ function RegisterPage() {
   };
 
   const handleSubmitProfile = async () => {
+    if (mobileError) return alert(mobileError);
     if (!emailVerified) return alert("Please verify your email first!");
     if (!formData.fullName) return alert("Please enter your name!");
     if (nameError || interestsError) return alert("Please remove blocked words before submitting.");
@@ -429,10 +449,12 @@ function RegisterPage() {
                   maxLength={10}
                   value={formData.mobile}
                   onChange={e => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
+                  onBlur={checkMobileNumber}
                   placeholder="9876543210"
                   className="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all font-mono shadow-sm placeholder:text-slate-400"
                 />
               </div>
+              {mobileError && <p className="text-red-500 text-xs mt-1 font-bold">{mobileError}</p>}
             </div>
           </div>
 

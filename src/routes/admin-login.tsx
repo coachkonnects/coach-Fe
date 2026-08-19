@@ -8,6 +8,12 @@ export const Route = createFileRoute("/admin-login")({
 
 function AdminLogin() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem('adminToken')) {
+      navigate({ to: '/admin' });
+    }
+  }, [navigate]);
   const [step, setStep] = useState<"EMAIL" | "OTP">("EMAIL");
 
   const [email, setEmail] = useState("");

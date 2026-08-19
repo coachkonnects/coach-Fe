@@ -219,6 +219,9 @@ function StudentDashboard() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (editForm.interests && editForm.interests.trim().split(/\s+/).length > 250) {
+      return alert("Interests section must not exceed 250 words!");
+    }
     if (isUnder18) {
       if (!editForm.parentalConsent || !editForm.parentName || !editForm.parentContact || !editForm.parentEmail) {
         alert("Parental consent and all parent details (Name, Contact, Email) are required for students under 18.");

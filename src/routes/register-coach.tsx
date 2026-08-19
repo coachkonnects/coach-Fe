@@ -180,6 +180,25 @@ function CoachRegisterPage() {
   const [otpCode, setOtpCode] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [mobileError, setMobileError] = useState('');
+
+  const checkMobileNumber = async () => {
+    if (!formData.mobile || formData.mobile.length !== 10) {
+      setMobileError('');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/auth/check-mobile?mobile=${formData.mobile}`);
+      const data = await res.json();
+      if (data.exists) {
+        setMobileError("This phone number is already registered, try with another number.");
+      } else {
+        setMobileError('');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -416,7 +435,8 @@ function CoachRegisterPage() {
 
   const handleNextStep = () => {
     if (step === 1) {
-      if (!emailVerified) return alert("Please verify your email first!");
+      if (mobileError) return alert(mobileError);
+    if (!emailVerified) return alert("Please verify your email first!");
       if (!formData.fullName) return alert("Please enter your name!");
       if (nameError) return alert(nameError);
       if (!formData.mobile || formData.mobile.length < 10) return alert("Please enter a valid 10-digit mobile number!");
@@ -616,10 +636,12 @@ function CoachRegisterPage() {
                     maxLength={10}
                     value={formData.mobile}
                     onChange={e => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
+                    onBlur={checkMobileNumber}
                     placeholder="9876543210"
                     className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm font-mono"
                   />
                 </div>
+                {mobileError && <p className="text-red-500 text-xs mt-1 font-bold">{mobileError}</p>}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
