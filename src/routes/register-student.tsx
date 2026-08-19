@@ -103,7 +103,7 @@ function RegisterPage() {
   const [mobileError, setMobileError] = useState('');
 
   const checkMobileNumber = async () => {
-    if (!formData.mobile || formData.mobile.length !== 10) {
+    if (!formData.mobile || formData.mobile.length !== 10 || !/^[6-9]/.test(formData.mobile)) {
       setMobileError('');
       return;
     }
@@ -219,7 +219,7 @@ function RegisterPage() {
     if (!emailVerified) return alert("Please verify your email first!");
     if (!formData.fullName) return alert("Please enter your name!");
     if (nameError || interestsError) return alert("Please remove blocked words before submitting.");
-    if (!formData.mobile || formData.mobile.length < 10) return alert("Please enter a valid 10-digit mobile number!");
+    if (!formData.mobile || formData.mobile.length < 10 || !/^[6-9]/.test(formData.mobile)) return alert("Mobile number must be 10 digits and start with 6, 7, 8, or 9!");
     if (!formData.dob || formData.dob.length !== 10) return alert("Please enter a complete Date of Birth (DD/MM/YYYY)!");
     const dobParts = formData.dob.split('/');
     if (dobParts.length !== 3) return alert("Please enter a valid Date of Birth (DD/MM/YYYY)!");

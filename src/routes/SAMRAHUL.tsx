@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import { startRegistration } from '@simplewebauthn/browser';
 import { Search, MapPin, Filter, Mail, Phone, Calendar, User, CheckCircle2, FileText, Settings, LogOut, ChevronRight, Download, Activity, FileSpreadsheet } from 'lucide-react';
@@ -749,7 +749,7 @@ function AdminDashboard() {
 
       {/* Mobile Header */}
       <div className="md:hidden absolute top-0 left-0 right-0 h-16 bg-teal-900 text-white flex items-center justify-between px-4 z-20 shadow-md">
-        <img src="/homelogo.png" alt="CoachKonnects" className="h-8 w-auto rounded object-contain bg-white px-2 shadow-sm" />
+        <Link to="/"><img src="/homelogo.png" alt="CoachKonnects" className="h-8 w-auto rounded object-contain bg-white px-2 shadow-sm hover:opacity-80 transition-opacity" /></Link>
         <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 text-white">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
         </button>
@@ -764,7 +764,7 @@ function AdminDashboard() {
       <div className={`fixed inset-y-0 left-0 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0 transition duration-200 ease-in-out w-64 bg-teal-900/90 backdrop-blur-3xl text-white flex flex-col shadow-2xl z-40 md:z-10 border-r border-white/10`}>
         <div className="p-6 border-b border-teal-800 relative">
           <div className="flex items-center gap-3 relative z-10 mb-2">
-            <img src="/homelogo.png" alt="CoachKonnects" className="h-10 w-auto rounded-md object-contain bg-white px-2 py-1 shadow-sm" />
+            <Link to="/"><img src="/homelogo.png" alt="CoachKonnects" className="h-10 w-auto rounded-md object-contain bg-white px-2 py-1 shadow-sm hover:opacity-80 transition-opacity" /></Link>
           </div>
           <p className="text-lg font-bold relative z-10 bg-gradient-to-r from-orange-400 to-teal-300 bg-clip-text text-transparent mt-6 ml-8">Admin Portal</p>
         </div>

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useEffect } from "react";
 import { startAuthentication } from "@simplewebauthn/browser";
 
@@ -117,7 +117,7 @@ function AdminLogin() {
 
         <form onSubmit={step === 'EMAIL' ? handleRequestOtp : handleVerifyOtp} className="flex flex-col gap-6">
           <div className="text-center">
-            <img src="/homelogo.png" alt="CoachKonnects" className="mx-auto mb-4 h-12 w-auto" />
+            <Link to="/"><img src="/homelogo.png" alt="CoachKonnects" className="mx-auto mb-4 h-12 w-auto object-contain hover:opacity-80 transition-opacity" /></Link>
             <h1 className="text-2xl font-bold">Admin Portal</h1>
             <p className="text-sm text-slate-500">Sign in to manage CoachKonnects</p>
           </div>

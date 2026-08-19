@@ -364,11 +364,28 @@ function CoachDashboard() {
     }
   };
 
+  
+  const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.length > 8) val = val.slice(0, 8);
+    if (val.length > 4) {
+      val = `${val.slice(0, 2)}/${val.slice(2, 4)}/${val.slice(4)}`;
+    } else if (val.length > 2) {
+      val = `${val.slice(0, 2)}/${val.slice(2)}`;
+    }
+    setEditForm({ ...editForm, dob: val, dateOfBirth: val });
+  };
+
   const handleSaveProfile = async () => {
+    if (editForm.mobile && (!/^[6-9]/.test(editForm.mobile) || editForm.mobile.length !== 10)) {
+      return alert("Mobile number must be 10 digits and start with 6, 7, 8, or 9!");
+    }
     if (editForm.description && editForm.description.trim().split(/\s+/).length > 250) {
       return alert("About Me / Description must not exceed 250 words!");
     }
     setIsSaving(true);
+    editForm.dob = editForm.dob || editForm.dateOfBirth;
+
     try {
       const email = localStorage.getItem("userEmail");
       const res = await fetch(`/api/profile/coach/me?email=${email}`, {
@@ -394,6 +411,8 @@ function CoachDashboard() {
 
   const handleSaveAvailability = async () => {
     setIsSaving(true);
+    editForm.dob = editForm.dob || editForm.dateOfBirth;
+
     try {
       const email = localStorage.getItem("userEmail");
       const res = await fetch(`/api/availability?email=${email}`, {
@@ -698,6 +717,31 @@ function CoachDashboard() {
                         />
                       </div>
                       <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Date of Birth</label>
+                        <input type="text" placeholder="DD/MM/YYYY" value={editForm.dob || editForm.dateOfBirth || ""} onChange={handleDobChange} className="w-full px-4 py-2 border rounded-xl" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Category</label>
+                        <select value={editForm.category || ""} onChange={e => setEditForm({ ...editForm, category: e.target.value })} className="w-full px-4 py-2 border rounded-xl">
+                          <option value="">Select a Category</option>
+                          <option value="Sports">Sports</option>
+                          <option value="Academics">Academics</option>
+                          <option value="Arts">Arts</option>
+                          <option value="Music">Music</option>
+                          <option value="Dance">Dance</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Class Mode</label>
+                        <select value={editForm.classMode || ""} onChange={e => setEditForm({ ...editForm, classMode: e.target.value })} className="w-full px-4 py-2 border rounded-xl">
+                          <option value="">Select Class Mode</option>
+                          <option value="Online">Online</option>
+                          <option value="Offline">Offline</option>
+                          <option value="Hybrid">Hybrid</option>
+                        </select>
+                      </div>
+                      <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">
                           Expertise / Title
                         </label>
@@ -835,6 +879,18 @@ function CoachDashboard() {
                             </div>
                           )}
                         </div>
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                          Intro Video URL (YouTube)
+                        </label>
+                        <input
+                          type="text"
+                          value={editForm.introVideoUrl || ""}
+                          onChange={(e) => setEditForm({ ...editForm, introVideoUrl: e.target.value })}
+                          className="w-full px-4 py-2 border rounded-xl mb-6"
+                          placeholder="https://youtube.com/watch?v=..."
+                        />
                       </div>
                       <div className="col-span-1 sm:col-span-2">
                         <label className="block text-sm font-bold text-slate-700 mb-2">

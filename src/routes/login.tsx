@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import { Mail, Music, Palette, Crown, Shield, Camera, MoreHorizontal, Sparkles, ChevronLeft, Calendar, Users, TrendingUp, Award, BookOpen, Key } from 'lucide-react';
 import { startAuthentication } from '@simplewebauthn/browser';
@@ -237,9 +237,9 @@ function LoginPage() {
 
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none hidden md:block">
           <div className="w-32 h-32 bg-white rounded-full p-3 shadow-2xl flex items-center justify-center">
-            <div className="w-full h-full bg-[#FFF8F0] rounded-full border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden">
-              <img src="/homelogo.png" alt="Logo" className="w-20 h-auto" />
-            </div>
+            <Link to="/" className="w-full h-full bg-[#FFF8F0] rounded-full border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden hover:opacity-90 transition-opacity">
+              <img src="/homelogo.png" alt="Logo" className="w-20 h-auto object-contain" />
+            </Link>
           </div>
         </div>
       </div>

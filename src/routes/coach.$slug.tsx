@@ -24,6 +24,8 @@ function CoachProfilePage() {
   const [enquiryName, setEnquiryName] = useState('');
   const [enquiryPhone, setEnquiryPhone] = useState('');
   const [enquiryLocation, setEnquiryLocation] = useState('');
+  const [selectedSkill, setSelectedSkill] = useState('');
+  const [selectedTiming, setSelectedTiming] = useState('');
   const [sending, setSending] = useState(false);
   
   const userEmail = typeof window !== 'undefined' ? localStorage.getItem('userEmail') : null;
@@ -47,11 +49,21 @@ function CoachProfilePage() {
       });
   }, [slug]);
 
+  
+  const coachSkills = coach?.expertise ? coach.expertise.split(/\s+/).filter(Boolean) : ['General'];
+  const coachTimings = coach?.timeSlots ? coach.timeSlots.split(',').map((s: string) => s.trim()).filter(Boolean) : ['Morning', 'Afternoon', 'Evening'];
+  
+  // Auto-select first option if not selected
+  useEffect(() => {
+    if (showModal) {
+      if (!selectedSkill && coachSkills.length > 0) setSelectedSkill(coachSkills[0]);
+      if (!selectedTiming && coachTimings.length > 0) setSelectedTiming(coachTimings[0]);
+    }
+  }, [showModal, coachSkills, coachTimings]);
+
   const handleSendEnquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (enquiryMessage && enquiryMessage.trim().split(/\s+/).length > 250) {
-      return alert("Message must not exceed 250 words!");
-    }
+
     setSending(true);
     try {
       const res = await fetch('/api/enquiries/send', {
@@ -63,7 +75,7 @@ function CoachProfilePage() {
           phone: enquiryPhone,
           location: enquiryLocation,
           coachSlug: slug,
-          message: enquiryMessage
+          message: `I am interested to join your classes for ${selectedSkill}. Preferred timing: ${selectedTiming}.`
         })
       });
 
@@ -285,16 +297,34 @@ function CoachProfilePage() {
                 </>
               )}
 
-              <div className="space-y-2 pt-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">Message <span className="text-orange-500">*</span></label>
-                <textarea
-                  required
-                  rows={4}
-                  value={enquiryMessage}
-                  onChange={e => setEnquiryMessage(e.target.value)}
-                  placeholder="Hi, I'm interested in your classes. What is your availability?"
-                  className="w-full px-5 py-4 bg-white border border-slate-200/60 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all shadow-sm resize-none font-medium"
-                ></textarea>
+              <div className="space-y-6 pt-2">
+                <div className="space-y-3">
+                  <label className="text-sm font-bold text-slate-700 ml-1">What skill are you interested in? <span className="text-orange-500">*</span></label>
+                  <div className="flex flex-wrap gap-3">
+                    {coachSkills.map((skill: string) => (
+                      <label key={skill} className={`cursor-pointer px-4 py-2 rounded-xl border-2 font-medium transition-all ${selectedSkill === skill ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-slate-200 bg-white text-slate-600 hover:border-teal-200'}`}>
+                        <input type="radio" name="skill" value={skill} checked={selectedSkill === skill} onChange={() => setSelectedSkill(skill)} className="hidden" />
+                        {skill}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-sm font-bold text-slate-700 ml-1">Preferred Timing <span className="text-orange-500">*</span></label>
+                  <div className="flex flex-wrap gap-3">
+                    {coachTimings.map((timing: string) => (
+                      <label key={timing} className={`cursor-pointer px-4 py-2 rounded-xl border-2 font-medium transition-all ${selectedTiming === timing ? 'border-[#f26b21] bg-orange-50 text-[#f26b21]' : 'border-slate-200 bg-white text-slate-600 hover:border-orange-200'}`}>
+                        <input type="radio" name="timing" value={timing} checked={selectedTiming === timing} onChange={() => setSelectedTiming(timing)} className="hidden" />
+                        {timing}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 text-sm font-medium text-slate-600">
+                  <span className="font-bold text-slate-800">Preview:</span> "I am interested to join your classes for {selectedSkill}. Preferred timing: {selectedTiming}."
+                </div>
               </div>
 
               <button
