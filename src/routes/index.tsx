@@ -232,11 +232,13 @@ function Index() {
         {/* HERO */}
         <section className="relative isolate w-full overflow-hidden bg-transparent min-h-[75svh] md:min-h-[720px] lg:min-h-[760px] xl:min-h-0 md:aspect-video">
           <picture>
+            <source media="(max-width: 639px)" srcSet="/Mobile_BG.jpg" />
+            <source media="(min-width: 640px)" srcSet="/Desktop%20BG.png" />
             <img
               src="/Desktop%20BG.png"
               alt="Hero background"
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-10 h-full w-full select-none object-cover sm:object-contain md:object-cover object-center"
+              className="pointer-events-none absolute inset-0 -z-10 h-full w-full select-none object-cover object-bottom sm:object-center"
             />
           </picture>
           {/* Soft fade for text legibility on the left */}
@@ -249,11 +251,18 @@ function Index() {
             className="absolute inset-x-0 bottom-0 -z-10 h-40 hidden md:block bg-gradient-to-b from-transparent to-white"
           />
 
-          {/* Header */}
           <header className="relative z-10 w-full pt-8 sm:pt-4">
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
               <Logo />
               <nav className="flex shrink-0 items-center gap-3 sm:gap-5">
+                <Link
+                  to="/coaches"
+                  className="sm:hidden flex items-center justify-center w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-sm border border-slate-200 text-slate-700 hover:text-[color:var(--color-brand)] transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </Link>
                 <Link
                   to="/login"
                   className="text-sm font-bold text-slate-800 transition-colors hover:text-[color:var(--color-brand)] px-2 sm:px-0"
@@ -270,11 +279,11 @@ function Index() {
             </div>
           </header>
 
-          {/* Hero content */}{/* Hero content */}
-          <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-10 pt-8 sm:px-8 sm:pb-32 sm:pt-14 md:pb-40 md:pt-16 lg:pb-48 text-left flex flex-col justify-between min-h-[75svh] sm:min-h-[unset] sm:block">
+          {/* Hero content */}
+          <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-10 pt-8 sm:px-8 sm:pb-32 sm:pt-14 md:pb-40 md:pt-16 lg:pb-48 text-left flex flex-col justify-between min-h-[80svh] sm:min-h-[unset] sm:block">
             
             {/* TOP SECTION */}
-            <div className="w-full min-w-0 max-w-lg lg:max-w-[50%] xl:max-w-2xl">
+            <div className="w-full min-w-0 max-w-lg lg:max-w-[50%] xl:max-w-2xl flex flex-col items-center text-center sm:items-start sm:text-left mx-auto sm:mx-0 mt-12 sm:mt-0 bg-white/30 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none p-6 sm:p-0 rounded-3xl border border-white/40 sm:border-transparent shadow-lg sm:shadow-none">
               <span className="mb-5 inline-block rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-700 shadow-sm backdrop-blur-md">
                 🚀 Launching in Mumbai & India
               </span>
@@ -284,13 +293,13 @@ function Index() {
                 coach for{" "}
                 <span className="bg-gradient-to-r from-orange-500 to-teal-500 bg-clip-text text-transparent drop-shadow-sm">your child.</span>
               </h1>
-              <p className="mt-5 max-w-lg text-pretty text-base font-medium leading-relaxed text-slate-600 sm:text-lg md:text-xl">
+              <p className="hidden sm:block mt-5 max-w-lg text-pretty text-base font-medium leading-relaxed text-slate-600 sm:text-lg md:text-xl">
                 Verified hobby coaches near you. Browse, connect directly on WhatsApp,
                 and enroll — zero booking fees.
               </p>
 
-              {/* CTAs */}
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+              {/* CTAs (Desktop) */}
+              <div className="hidden sm:flex mt-8 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                 <Link
                   to="/coaches"
                   className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(249,115,22,0.4)] sm:w-auto"
@@ -305,13 +314,29 @@ function Index() {
                 </Link>
               </div>
 
-              </div>
+            </div>
 
             {/* BOTTOM SECTION (Pushed down on mobile) */}
             <div className="w-full min-w-0 max-w-xl mt-auto pt-8 flex flex-col gap-4">
               
+              {/* CTAs (Mobile) */}
+              <div className="flex sm:hidden flex-col gap-3 w-full pb-2">
+                <Link
+                  to="/coaches"
+                  className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-7 py-3.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(249,115,22,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(249,115,22,0.4)]"
+                >
+                  📍 Find Classes Near Me <span aria-hidden="true">→</span>
+                </Link>
+                <Link
+                  to="/register"
+                  className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white/90 px-7 py-3.5 text-sm font-semibold text-slate-800 backdrop-blur-md transition-all hover:border-orange-500 hover:text-orange-600 shadow-sm"
+                >
+                  👤 Are You A Hobby Coach?
+                </Link>
+              </div>
+
               {/* Trust chips - white box on mobile, raw on desktop */}
-              <div className="bg-white/90 backdrop-blur-xl sm:bg-transparent sm:backdrop-blur-none rounded-3xl p-4 sm:p-0 shadow-lg sm:shadow-none border border-white sm:border-transparent">
+              <div className="hidden sm:block bg-white/90 backdrop-blur-xl sm:bg-transparent sm:backdrop-blur-none rounded-3xl p-4 sm:p-0 shadow-lg sm:shadow-none border border-white sm:border-transparent">
                 <div className="grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm font-semibold text-[color:var(--color-ink)] sm:text-[15px]">
                   
                   <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
@@ -366,7 +391,7 @@ function Index() {
               </div>
 
               {/* Search */}
-              <div className="w-full">
+              <div className="hidden sm:block w-full">
                 <form onSubmit={handleSearch} className="flex w-full min-w-0 flex-col gap-2 rounded-3xl border border-black/5 bg-white p-2 shadow-xl sm:flex-row sm:items-center sm:gap-0 sm:rounded-full sm:p-1.5 sm:pl-5">
                   <div className="hidden sm:flex shrink-0 items-center gap-2 border-b border-slate-200 pb-2 text-sm font-medium text-[color:var(--color-ink-muted)] sm:whitespace-nowrap sm:border-b-0 sm:border-r sm:pb-0 sm:pr-4">
                     <span className="shrink-0 text-[color:var(--color-brand)]">📍</span>

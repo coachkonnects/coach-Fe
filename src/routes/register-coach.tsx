@@ -470,6 +470,7 @@ function CoachRegisterPage() {
     if (step === 5) {
       if (!formData.profileImageUrl) return alert("Please upload a profile headshot!");
       if (!formData.isFresher && !formData.groupImageUrl) return alert("Please upload a group action photo!");
+      if (!formData.instagram) return alert("Please enter your Instagram handle!");
     }
 
     const payload = {
@@ -982,7 +983,7 @@ function CoachRegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">Instagram Handle</label>
+                <label className="text-sm font-bold text-slate-700 ml-1">Instagram Handle <span className="text-orange-500">*</span></label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">@</span>
                   <input
