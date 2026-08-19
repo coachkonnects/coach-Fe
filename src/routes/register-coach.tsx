@@ -467,7 +467,7 @@ function CoachRegisterPage() {
   const handleSubmitProfile = async () => {
     if (step === 5) {
       if (!formData.profileImageUrl) return alert("Please upload a profile headshot!");
-      if (!formData.groupImageUrl) return alert("Please upload a group action photo!");
+      if (!formData.isFresher && !formData.groupImageUrl) return alert("Please upload a group action photo!");
     }
 
     const payload = {
@@ -486,7 +486,7 @@ function CoachRegisterPage() {
         method: method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken || localStorage.getItem('coachToken') || ''}`
+          'Authorization': `Bearer ${authToken || localStorage.getItem('token') || ''}`
         },
         body: JSON.stringify(payload)
       });

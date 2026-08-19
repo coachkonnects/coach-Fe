@@ -59,7 +59,7 @@ function CoachProfilePage() {
       if (!selectedSkill && coachSkills.length > 0) setSelectedSkill(coachSkills[0]);
       if (!selectedTiming && coachTimings.length > 0) setSelectedTiming(coachTimings[0]);
     }
-  }, [showModal, coachSkills, coachTimings]);
+  }, [showModal, coach?.expertise, coach?.timeSlots]); // Use primitive strings in deps to avoid infinite loops
 
   const handleSendEnquiry = async (e: React.FormEvent) => {
     e.preventDefault();

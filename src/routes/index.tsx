@@ -232,12 +232,11 @@ function Index() {
         {/* HERO */}
         <section className="relative isolate w-full overflow-hidden bg-transparent min-h-[75svh] md:min-h-[720px] lg:min-h-[760px] xl:min-h-0 md:aspect-video">
           <picture>
-            <source media="(min-width: 768px)" srcSet="/Desktop%20BG.png" />
             <img
-              src="/mobile-bg-new.jpg"
+              src="/Desktop%20BG.png"
               alt="Hero background"
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-10 h-full w-full select-none object-cover object-bottom md:object-right-bottom"
+              className="pointer-events-none absolute inset-0 -z-10 h-full w-full select-none object-cover sm:object-contain md:object-cover object-center"
             />
           </picture>
           {/* Soft fade for text legibility on the left */}
@@ -251,13 +250,13 @@ function Index() {
           />
 
           {/* Header */}
-          <header className="relative z-10 w-full pt-4">
+          <header className="relative z-10 w-full pt-8 sm:pt-4">
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
               <Logo />
               <nav className="flex shrink-0 items-center gap-3 sm:gap-5">
                 <Link
                   to="/login"
-                  className="hidden text-sm font-semibold text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-brand)] sm:inline"
+                  className="text-sm font-bold text-slate-800 transition-colors hover:text-[color:var(--color-brand)] px-2 sm:px-0"
                 >
                   Log In
                 </Link>
