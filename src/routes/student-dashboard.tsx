@@ -252,7 +252,11 @@ function StudentDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editForm)
       });
-      if (!res.ok) throw new Error("Failed to update profile");
+      
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.error || "Failed to update profile");
+      }
       
       await fetchProfile();
       setIsEditing(false);
@@ -262,8 +266,8 @@ function StudentDashboard() {
       } else {
         alert("Profile updated successfully!");
       }
-    } catch (err) {
-      alert("Error saving profile");
+    } catch (err: any) {
+      alert(err.message || "Error saving profile");
     } finally {
       setIsSaving(false);
     }
