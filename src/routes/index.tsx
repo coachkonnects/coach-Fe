@@ -16,12 +16,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Verified hobby coaches near you in Mumbai & across India. Browse, connect on WhatsApp, and enroll — zero booking fees.",
+          "Discover passionate hobby coaches near you in Mumbai & across India. Browse, connect on WhatsApp, and enroll — zero booking fees.",
       },
       { property: "og:title", content: "CoachKonnects — Where Hobbies Become Identity" },
       {
         property: "og:description",
-        content: "Verified hobby coaches near you. Zero booking fees.",
+        content: "Discover passionate hobby coaches near you. Zero booking fees.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -295,7 +295,7 @@ function Index() {
                 <span className="inline-block bg-orange-500 text-white px-2 py-0.5 mt-0.5 rounded-lg shadow-sm text-[22px] sm:text-4xl md:text-5xl lg:text-[68px]">Your Child.</span>
               </h1>
               <p className="hidden sm:block mt-5 max-w-lg text-pretty text-base font-medium leading-relaxed text-slate-600 sm:text-lg">
-                Verified hobby coaches near you. Browse, connect directly on WhatsApp,
+                Discover passionate hobby coaches near you. Browse, connect directly on WhatsApp,
                 and enroll — zero booking fees.
               </p>
 
