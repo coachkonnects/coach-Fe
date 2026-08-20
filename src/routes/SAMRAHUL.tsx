@@ -13,7 +13,7 @@ function AdminDashboard() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>(() => localStorage.getItem('adminActiveTab') || 'students');
+  const [activeTab, setActiveTab] = useState<string>(() => localStorage.getItem('adminActiveTab') || 'dashboard');
   const [coaches, setCoaches] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [categorySearchQuery, setCategorySearchQuery] = useState('');
@@ -25,7 +25,7 @@ function AdminDashboard() {
   const [selectedCoach, setSelectedCoach] = useState<any | null>(null);
   const [students, setStudents] = useState<any[]>([]);
   const [bannedUsers, setBannedUsers] = useState<any[]>([]);
-  const [banConfirm, setBanConfirm] = useState<{type: 'student'|'coach', id: any} | null>(null);
+  const [banConfirm, setBanConfirm] = useState<{ type: 'student' | 'coach', id: any } | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const [studentSortConfig, setStudentSortConfig] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
@@ -232,32 +232,50 @@ function AdminDashboard() {
   const [newPassword, setNewPassword] = useState("");
   const [enquiries, setEnquiries] = useState<any[]>([]);
   const [demands, setDemands] = useState<any[]>([]);
+  const [passkeyRegistered, setPasskeyRegistered] = useState<boolean>(() => {
+    const email = localStorage.getItem("adminEmail") || "";
+    return localStorage.getItem(`passkey_registered_${email}`) === "true";
+  });
 
   const handleRegisterPasskey = async () => {
+    const email = localStorage.getItem("adminEmail");
+    if (!email) {
+      alert("Could not determine admin email. Please log out and log in again.");
+      return;
+    }
     try {
-      const res = await fetch("/api/admin/passkeys/register/start", {
+      const res = await fetch("/api/passkeys/register/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: localStorage.getItem("adminToken") })
+        body: JSON.stringify({ email })
       });
-      const options = await res.json();
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to start passkey registration");
+      }
+      const optionsRaw = await res.json();
+      const options = optionsRaw.publicKey ?? optionsRaw;
 
       const attResp = await startRegistration({ optionsJSON: options });
 
-      const finishRes = await fetch("/api/admin/passkeys/register/finish", {
+      const finishRes = await fetch("/api/passkeys/register/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(attResp)
+        body: JSON.stringify({ email, response: attResp })
       });
 
       if (finishRes.ok) {
-        alert("Passkey successfully registered!");
+        const regEmail = localStorage.getItem("adminEmail") || "";
+        localStorage.setItem(`passkey_registered_${regEmail}`, "true");
+        setPasskeyRegistered(true);
+        alert("🔐 Passkey registered! Next time you can sign in with Passkey🗝️");
       } else {
-        alert("Failed to register Passkey on the server.");
+        const err = await finishRes.json();
+        throw new Error(err.error || "Failed to save passkey on server");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Error registering Passkey (Is your browser supported?)");
+      alert("Error: " + (err.message || "Could not register Passkey. Is your browser supported?"));
     }
   };
 
@@ -474,7 +492,7 @@ function AdminDashboard() {
   };
 
   const handleReject = async (id: string, isEdit: boolean = false) => {
-    const msg = isEdit 
+    const msg = isEdit
       ? "Are you sure you want to reject these profile changes? The original profile will remain active."
       : "Are you sure you want to completely reject this coach profile?";
     if (!confirm(msg)) return;
@@ -716,21 +734,21 @@ function AdminDashboard() {
     const matchesFilter = filterValue === 'ALL' || (filterValue === 'WORKSHOP' ? c.type === 'WORKSHOP' : (filterValue === 'REGULAR' ? c.type !== 'WORKSHOP' : true));
     return matchesSearch && matchesFilter;
   });
-  
+
   const filteredDemands = demands.filter(d => {
     const s = searchQuery.toLowerCase();
     const matchesSearch = !s || (d.skillName?.toLowerCase().includes(s) || d.email?.toLowerCase().includes(s) || d.location?.toLowerCase().includes(s));
     const matchesFilter = filterValue === 'ALL' || (filterValue === 'APPROVED' ? d.approved : (filterValue === 'PENDING' ? !d.approved : true));
     return matchesSearch && matchesFilter;
   });
-  
+
   const filteredEnquiries = enquiries.filter(l => {
     const s = searchQuery.toLowerCase();
     const matchesSearch = !s || (l.leadName?.toLowerCase().includes(s) || l.leadEmail?.toLowerCase().includes(s) || l.leadPhone?.toLowerCase().includes(s));
     const matchesFilter = filterValue === 'ALL' || l.status === filterValue;
     return matchesSearch && matchesFilter;
   });
-  
+
   const filteredCategories = categories.filter(c => !searchQuery || c.name?.toLowerCase().includes(searchQuery.toLowerCase()) || (c.expertises && c.expertises.toLowerCase().includes(searchQuery.toLowerCase())));
   const filteredAdmins = adminsList.filter(a => !searchQuery || a.email?.toLowerCase().includes(searchQuery.toLowerCase()));
   const filteredBanned = bannedUsers.filter(b => !searchQuery || b.email?.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -1094,44 +1112,44 @@ function AdminDashboard() {
                                     ) : (
                                       <span className="font-medium">{value as string}</span>
                                     )}
-                              
-      {showLogoutModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            </div>
-            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Abandoning Ship?</h3>
-            <p className="text-center text-slate-500 mb-8">Who's going to approve all these profiles if you leave? Just kidding, you deserve a break. Sure you want to log out?</p>
-            <div className="flex gap-4">
-              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Stay</button>
-              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all">Yes, Bye!</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-})}
-                        
-      {showLogoutModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            </div>
-            <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Abandoning Ship?</h3>
-            <p className="text-center text-slate-500 mb-8">Who's going to approve all these profiles if you leave? Just kidding, you deserve a break. Sure you want to log out?</p>
-            <div className="flex gap-4">
-              <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Stay</button>
-              <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all">Yes, Bye!</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-} catch (e) {
+
+                                    {showLogoutModal && (
+                                      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+                                        <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+                                          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                          </div>
+                                          <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Abandoning Ship?</h3>
+                                          <p className="text-center text-slate-500 mb-8">Who's going to approve all these profiles if you leave? Just kidding, you deserve a break. Sure you want to log out?</p>
+                                          <div className="flex gap-4">
+                                            <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Stay</button>
+                                            <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all">Yes, Bye!</button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+
+                              {showLogoutModal && (
+                                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+                                  <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
+                                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                      <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                    </div>
+                                    <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Abandoning Ship?</h3>
+                                    <p className="text-center text-slate-500 mb-8">Who's going to approve all these profiles if you leave? Just kidding, you deserve a break. Sure you want to log out?</p>
+                                    <div className="flex gap-4">
+                                      <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Stay</button>
+                                      <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-all">Yes, Bye!</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        } catch (e) {
                           return <div className="font-mono">{selectedCoach.pendingChanges}</div>;
                         }
                       })()}
@@ -1531,8 +1549,19 @@ function AdminDashboard() {
                     <div>
                       <h3 className="font-bold text-gray-900 text-lg">Biometric Login</h3>
                       <p className="text-gray-500 mt-1 text-sm">Register your Face ID, Touch ID, or Windows Hello to log into the Admin Portal instantly without a password or OTP.</p>
-                      <button onClick={handleRegisterPasskey} className="mt-4 bg-gray-900 text-white font-medium px-4 py-2 rounded-lg hover:bg-orange-500 transition-colors">
-                        Register Passkey
+                      <button
+                        onClick={handleRegisterPasskey}
+                        className={`mt-4 flex items-center gap-2 font-medium px-4 py-2 rounded-lg transition-all ${passkeyRegistered
+                            ? "bg-teal-500 text-white hover:bg-teal-600 ring-2 ring-teal-200"
+                            : "bg-gray-900 text-white hover:bg-orange-500"
+                          }`}
+                      >
+                        {passkeyRegistered ? (
+                          <>
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            Passkey Registered ✓
+                          </>
+                        ) : "Register Passkey"}
                       </button>
                     </div>
                   </div>
@@ -1616,8 +1645,8 @@ function AdminDashboard() {
                           </td>
                           <td className="p-4">
                             <span className={`px-3 py-1 rounded-full text-xs font-bold border ${admin.role === 'SUPER_ADMIN'
-                                ? 'bg-purple-50 text-purple-700 border-purple-200'
-                                : 'bg-blue-50 text-blue-600 border-blue-200'
+                              ? 'bg-purple-50 text-purple-700 border-purple-200'
+                              : 'bg-blue-50 text-blue-600 border-blue-200'
                               }`}>
                               {admin.role || 'ADMIN'}
                             </span>

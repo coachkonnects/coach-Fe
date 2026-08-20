@@ -75,6 +75,7 @@ function AdminLogin() {
       const data = await res.json();
       localStorage.setItem("adminToken", data.token || "dummy-admin-token");
       localStorage.setItem("adminEmail", email);
+      localStorage.removeItem("adminActiveTab"); // always start at Coaches tab
       navigate({ to: "/SAMRAHUL", replace: true });
     } catch (err: any) {
       setError(err.message);
@@ -85,26 +86,40 @@ function AdminLogin() {
 
   const handlePasskeyLogin = async () => {
     setError("");
+    if (!email) {
+      setError("Please enter your admin email first, then click Sign in with Passkey.");
+      return;
+    }
     try {
-      // 1. Get assertion options from server (now generic)
-      const res = await fetch("/api/passkeys/login/start");
-      const options = await res.json();
+      // 1. Get assertion options scoped to this specific email
+      const res = await fetch("/api/passkeys/login/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "No passkey found for this account");
+      }
+      const optionsRaw = await res.json();
+      const options = optionsRaw.publicKey ?? optionsRaw;
 
-      // 2. Prompt FaceID / TouchID
       const asseResp = await startAuthentication({ optionsJSON: options });
 
-      // 3. Send assertion to server
       const verifyRes = await fetch("/api/passkeys/login/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(asseResp)
+        body: JSON.stringify({ email, response: asseResp })
       });
-
-      if (!verifyRes.ok) throw new Error("Passkey login failed");
+      if (!verifyRes.ok) {
+        const err = await verifyRes.json();
+        throw new Error(err.error || "Passkey verification failed");
+      }
 
       const data = await verifyRes.json();
       localStorage.setItem("adminToken", data.token);
       localStorage.setItem("adminEmail", data.email || email);
+      localStorage.removeItem("adminActiveTab"); // always start at Coaches tab
       navigate({ to: "/SAMRAHUL", replace: true });
     } catch (err: any) {
       setError(err.message || "Failed to authenticate with Passkey");
@@ -152,9 +167,9 @@ function AdminLogin() {
               />
               <div className="flex justify-end mt-2 space-x-3">
                 <button type="button" onClick={() => { setStep('EMAIL'); setSuccess(''); setError(''); }} className="text-sm text-orange-500 font-bold hover:underline">Edit Email</button>
-                <button 
-                  type="button" 
-                  onClick={handleRequestOtp} 
+                <button
+                  type="button"
+                  onClick={handleRequestOtp}
                   disabled={countdown > 0 || isLoading}
                   className="text-sm text-orange-500 font-bold hover:underline disabled:opacity-50 disabled:hover:no-underline"
                 >
@@ -191,7 +206,7 @@ function AdminLogin() {
                 Sign in with Passkey
               </button>
             </>
-          )} 
+          )}
         </form>
 
       </div>
