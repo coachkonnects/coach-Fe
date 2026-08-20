@@ -277,7 +277,7 @@ function Index() {
           <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-10 pt-1 sm:px-8 sm:pb-32 sm:pt-14 lg:pb-48 text-left flex flex-col justify-between min-h-[80svh] sm:min-h-[unset] sm:block">
 
             {/* Launching Badge (Mobile) */}
-            <div className="flex sm:hidden justify-center w-full mb-3 mt-0">
+            <div className="flex sm:hidden justify-center w-full mb-4 mt-0">
               <span className="inline-block rounded-full border border-white/40 bg-white/40 backdrop-blur-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-orange-900 shadow-sm">
                 🚀 Launching in Mumbai & India
               </span>
