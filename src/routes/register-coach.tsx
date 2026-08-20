@@ -170,6 +170,36 @@ function CoachRegisterPage() {
       val = val.slice(0, 2) + '/' + val.slice(2, 4) + '/' + val.slice(4, 8);
     }
     setFormData(prev => ({ ...prev, dob: val }));
+
+    if (val.length === 10) {
+      const parts = val.split('/');
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        const currentYear = new Date().getFullYear();
+        if (isNaN(year) || year < 1940 || year > currentYear) {
+          setDobError(`Please enter a valid year between 1940 and ${currentYear}`);
+        } else {
+          const dobDate = new Date(year, month, day);
+          let age = currentYear - year;
+          const today = new Date();
+          const m = today.getMonth() - dobDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+            age--;
+          }
+          if (age < 18) {
+            setDobError("You must be at least 18 years old to register as a coach.");
+          } else if (age > 100) {
+            setDobError("Date of Birth cannot be more than 100 years ago.");
+          } else {
+            setDobError("");
+          }
+        }
+      }
+    } else {
+      setDobError("");
+    }
   };
 
   const [isVerifying, setIsVerifying] = useState(false);
@@ -183,6 +213,7 @@ function CoachRegisterPage() {
   const [emailVerified, setEmailVerified] = useState(false);
   const [mobileError, setMobileError] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [dobError, setDobError] = useState('');
 
   const checkEmailExists = async () => {
     if (!formData.email || !formData.email.includes('@')) {
@@ -457,18 +488,30 @@ function CoachRegisterPage() {
   const handleNextStep = () => {
     if (step === 1) {
       if (mobileError) return alert(mobileError);
-    if (!emailVerified) return alert("Please verify your email first!");
+      if (!emailVerified) return alert("Please verify your email first!");
       if (!formData.fullName) return alert("Please enter your name!");
       if (nameError) return alert(nameError);
+      if (dobError) return alert(dobError);
       if (!formData.mobile || formData.mobile.length < 10 || !/^[6-9]/.test(formData.mobile)) return alert("Mobile number must be 10 digits and start with 6, 7, 8, or 9!");
       if (!formData.dob || formData.dob.length !== 10) return alert("Please enter a complete Date of Birth (DD/MM/YYYY)!");
       if (!formData.gender) return alert("Please select your Gender!");
       const dobParts = formData.dob.split('/');
       if (dobParts.length !== 3) return alert("Please enter a valid Date of Birth (DD/MM/YYYY)!");
+      const day = parseInt(dobParts[0], 10);
+      const month = parseInt(dobParts[1], 10) - 1;
       const year = parseInt(dobParts[2], 10);
+      const dobDate = new Date(year, month, day);
       const currentYear = new Date().getFullYear();
-      if (isNaN(year) || year < 1900 || year > currentYear) return alert(`Please enter a valid year between 1900 and ${currentYear}!`);
-      const age = currentYear - year;
+      if (isNaN(year) || year < 1940 || year > currentYear) return alert(`Please enter a valid year between 1940 and ${currentYear}!`);
+      
+      let age = currentYear - year;
+      const today = new Date();
+      const m = today.getMonth() - dobDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+      }
+
+      if (age < 18) return alert("You must be at least 18 years old to register as a coach.");
       if (age > 100) return alert("Date of Birth cannot be more than 100 years ago!");
       if (!formData.pincode || formData.pincode.length !== 6 || !formData.district) return alert("Please enter a valid 6-digit Pincode and wait for location to auto-fill!");
       setStep(2);
@@ -678,8 +721,9 @@ function CoachRegisterPage() {
                     onChange={handleDobChange}
                     maxLength={10}
                     placeholder="DD/MM/YYYY"
-                    className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
+                    className={`w-full px-5 py-3.5 bg-white border rounded-2xl focus:outline-none shadow-sm ${dobError ? 'border-red-500' : 'border-slate-200 focus:border-orange-500'}`}
                   />
+                  {dobError && <p className="text-red-500 text-xs font-bold mt-1">{dobError}</p>}
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Gender <span className="text-orange-500">*</span></label>

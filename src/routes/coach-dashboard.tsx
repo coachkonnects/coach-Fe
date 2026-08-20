@@ -27,6 +27,7 @@ function CoachDashboard() {
   const [modelsLoaded, setModelsLoaded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingGroup, setIsUploadingGroup] = useState(false);
+  const [dobError, setDobError] = useState("");
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [cropType, setCropType] = useState<"profile" | "group" | "workshop">("profile");
@@ -374,6 +375,36 @@ function CoachDashboard() {
       val = `${val.slice(0, 2)}/${val.slice(2)}`;
     }
     setEditForm({ ...editForm, dob: val, dateOfBirth: val });
+
+    if (val.length === 10) {
+      const parts = val.split('/');
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        const currentYear = new Date().getFullYear();
+        if (isNaN(year) || year < 1940 || year > currentYear) {
+          setDobError(`Please enter a valid year between 1940 and ${currentYear}`);
+        } else {
+          const dobDate = new Date(year, month, day);
+          let age = currentYear - year;
+          const today = new Date();
+          const m = today.getMonth() - dobDate.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+            age--;
+          }
+          if (age < 18) {
+            setDobError("You must be at least 18 years old to be a coach.");
+          } else if (age > 100) {
+            setDobError("Date of Birth cannot be more than 100 years ago.");
+          } else {
+            setDobError("");
+          }
+        }
+      }
+    } else {
+      setDobError("");
+    }
   };
 
 
@@ -413,9 +444,37 @@ function CoachDashboard() {
     if (editForm.description && editForm.description.trim().split(/\s+/).length > 250) {
       return alert("About Me / Description must not exceed 250 words!");
     }
-    setIsSaving(true);
+    if (dobError) {
+      return alert(dobError);
+    }
     editForm.dob = editForm.dob || editForm.dateOfBirth;
+    if (!editForm.dob || editForm.dob.length !== 10) {
+      return alert("Please enter a complete Date of Birth (DD/MM/YYYY)!");
+    }
+    
+    const dobParts = editForm.dob.split('/');
+    if (dobParts.length === 3) {
+      const day = parseInt(dobParts[0], 10);
+      const month = parseInt(dobParts[1], 10) - 1;
+      const year = parseInt(dobParts[2], 10);
+      const dobDate = new Date(year, month, day);
+      const currentYear = new Date().getFullYear();
+      if (isNaN(year) || year < 1940 || year > currentYear) return alert(`Please enter a valid year between 1940 and ${currentYear}!`);
+      
+      let age = currentYear - year;
+      const today = new Date();
+      const m = today.getMonth() - dobDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+      }
 
+      if (age < 18) return alert("You must be at least 18 years old to be a coach.");
+      if (age > 100) return alert("Date of Birth cannot be more than 100 years ago!");
+    } else {
+      return alert("Please enter a valid Date of Birth (DD/MM/YYYY)!");
+    }
+
+    setIsSaving(true);
     try {
       const email = localStorage.getItem("userEmail");
       const res = await fetch(`/api/profile/coach/me?email=${email}`, {
@@ -748,7 +807,8 @@ function CoachDashboard() {
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">Date of Birth</label>
-                        <input type="text" placeholder="DD/MM/YYYY" value={editForm.dob || editForm.dateOfBirth || ""} onChange={handleDobChange} className="w-full px-4 py-2 border rounded-xl" />
+                        <input type="text" placeholder="DD/MM/YYYY" value={editForm.dob || editForm.dateOfBirth || ""} onChange={handleDobChange} className={`w-full px-4 py-2 border rounded-xl ${dobError ? 'border-red-500' : ''}`} />
+                        {dobError && <p className="text-red-500 text-xs font-bold mt-1">{dobError}</p>}
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">Category</label>
@@ -979,9 +1039,10 @@ function CoachDashboard() {
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
                       {[
+                        { label: 'Email', value: profile?.user?.email || localStorage.getItem('userEmail') },
+                        { label: 'Mobile Number', value: profile?.user?.phoneNumber || profile?.mobile },
                         { label: 'Date of Birth', value: profile?.dob || profile?.dateOfBirth },
                         { label: 'Gender', value: profile?.gender },
-                        { label: 'Mobile Number', value: profile?.user?.phoneNumber || profile?.mobile },
                         { label: 'Category', value: profile?.category },
                         { label: 'Class Mode', value: profile?.classMode },
                         { label: 'Pricing', value: profile?.pricing },
@@ -1002,6 +1063,17 @@ function CoachDashboard() {
                       <div className="col-span-1 sm:col-span-2 bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description / Bio</h3>
                         <p className="font-medium text-slate-700 leading-relaxed text-sm whitespace-pre-wrap">{profile?.description || '-'}</p>
+                      </div>
+                      <div className="col-span-1 sm:col-span-2 bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Intro Video URL (YouTube)</h3>
+                        {profile?.introVideoUrl ? (
+                          <a href={profile.introVideoUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-teal-600 hover:text-teal-700 text-sm hover:underline flex items-center gap-2">
+                            <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                            {profile.introVideoUrl}
+                          </a>
+                        ) : (
+                          <p className="font-bold text-slate-800 text-sm">-</p>
+                        )}
                       </div>
                     </div>
                   )}

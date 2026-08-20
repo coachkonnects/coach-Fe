@@ -593,14 +593,43 @@ function StudentDashboard() {
                 </div>
 
                 <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-pink-50 flex items-center justify-center text-pink-600">
+                    <User className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Gender</p>
+                    <p className="text-slate-800 font-bold">{profile?.gender || 'Not provided'}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
                     <MapPin className="w-6 h-6" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Location</p>
-                    <p className="text-slate-800 font-bold">{profile?.district ? `${profile.district}, ${profile.state}` : 'Not provided'}</p>
+                    <p className="text-slate-800 font-bold">
+                      {[profile?.location, profile?.area, profile?.district, profile?.state].filter(Boolean).join(', ') || 'Not provided'}
+                      {profile?.pincode ? ` - ${profile.pincode}` : ''}
+                    </p>
                   </div>
                 </div>
+
+                {profile?.parentalConsent && (
+                  <>
+                    <div className="w-full h-px bg-slate-100 my-2"></div>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Parent / Guardian</p>
+                        <p className="text-slate-800 font-bold">{profile?.parentName || 'Not provided'}</p>
+                        <p className="text-slate-500 text-sm font-medium">{profile?.parentEmail} • {profile?.parentContact}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
