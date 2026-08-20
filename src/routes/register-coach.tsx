@@ -182,6 +182,25 @@ function CoachRegisterPage() {
   const [countdown, setCountdown] = useState(0);
   const [emailVerified, setEmailVerified] = useState(false);
   const [mobileError, setMobileError] = useState('');
+  const [emailError, setEmailError] = useState('');
+
+  const checkEmailExists = async () => {
+    if (!formData.email || !formData.email.includes('@')) {
+      setEmailError('');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/auth/check-email?email=${formData.email}`);
+      const data = await res.json();
+      if (data.exists) {
+        setEmailError("This email is already registered. Please log in instead.");
+      } else {
+        setEmailError('');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const checkMobileNumber = async () => {
     if (!formData.mobile || formData.mobile.length !== 10 || !/^[6-9]/.test(formData.mobile)) {
@@ -230,13 +249,14 @@ function CoachRegisterPage() {
   };
 
   const handleSendOtp = async () => {
+    if (emailError) return alert(emailError);
     if (!formData.email) return alert("Please enter an email first");
     setIsVerifying(true);
     try {
       const res = await fetch('/api/auth/request-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, intendedRole: "COACH", isRegister: true })
+        body: JSON.stringify({ email: formData.email, intendedRole: "COACH", isRegister: "true" })
       });
       if (res.ok) {
         setOtpSent(true);
@@ -565,6 +585,7 @@ function CoachRegisterPage() {
                       type="email"
                       value={formData.email}
                       onChange={e => setFormData({ ...formData, email: e.target.value })}
+                      onBlur={checkEmailExists}
                       placeholder="coach@example.com"
                       disabled={emailVerified}
                       className="w-full px-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all disabled:opacity-50 text-slate-900 shadow-sm"
@@ -579,6 +600,7 @@ function CoachRegisterPage() {
                     {emailVerified ? 'Verified ✓' : otpSent ? 'OTP Sent' : isVerifying ? 'Sending...' : 'Verify email'}
                   </button>
                 </div>
+                {emailError && <p className="text-red-500 text-xs mt-1 font-bold">{emailError}</p>}
               </div>
 
               {otpSent && !emailVerified && (

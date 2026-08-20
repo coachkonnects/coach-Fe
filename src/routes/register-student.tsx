@@ -101,6 +101,25 @@ function RegisterPage() {
   const [otpCode, setOtpCode] = useState('');
   const [emailVerified, setEmailVerified] = useState(false);
   const [mobileError, setMobileError] = useState('');
+  const [emailError, setEmailError] = useState('');
+
+  const checkEmailExists = async () => {
+    if (!formData.email || !formData.email.includes('@')) {
+      setEmailError('');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/auth/check-email?email=${formData.email}`);
+      const data = await res.json();
+      if (data.exists) {
+        setEmailError("This email is already registered. Please log in instead.");
+      } else {
+        setEmailError('');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const checkMobileNumber = async () => {
     if (!formData.mobile || formData.mobile.length !== 10 || !/^[6-9]/.test(formData.mobile)) {
@@ -169,13 +188,14 @@ function RegisterPage() {
   };
 
   const handleSendOtp = async () => {
+    if (emailError) return alert(emailError);
     if (!formData.email) return alert("Please enter an email first");
     setIsVerifying(true);
     try {
       const res = await fetch('/api/auth/request-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, intendedRole: "STUDENT", isRegister: true })
+        body: JSON.stringify({ email: formData.email, intendedRole: "STUDENT", isRegister: "true" })
       });
       if (res.ok) {
         setOtpSent(true);
@@ -364,6 +384,7 @@ function RegisterPage() {
                   type="email"
                   value={formData.email}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
+                  onBlur={checkEmailExists}
                   placeholder="hello@example.com"
                   disabled={emailVerified}
                   className="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-slate-200/50 backdrop-blur-sm rounded-2xl focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all disabled:opacity-50 text-slate-900 placeholder-slate-400 shadow-sm"
@@ -381,6 +402,7 @@ function RegisterPage() {
                 {emailVerified ? 'Verified ✓' : otpSent ? 'OTP Sent' : isVerifying ? 'Sending...' : 'Verify email'}
               </button>
             </div>
+            {emailError && <p className="text-red-500 text-xs mt-1 font-bold">{emailError}</p>}
           </div>
 
           {/* OTP Input Box */}
