@@ -939,13 +939,7 @@ function AdminDashboard() {
                           >
                             {coach.active ? "Deactivate" : "Activate"}
                           </button>
-                          <button
-                            onClick={() => handleDeleteCoach(coach.id)}
-                            className="text-red-600 hover:text-red-700 font-medium text-sm border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                            title="Delete Coach"
-                          >
-                            🗑️
-                          </button>
+
                           <button
                             onClick={() => setBanConfirm({ type: 'coach', id: coach.id })}
                             className="text-white hover:text-white font-medium text-sm border border-red-600 bg-red-600 px-3 py-1.5 rounded-lg hover:bg-red-700 transition-colors shadow-sm"
