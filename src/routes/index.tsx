@@ -321,18 +321,26 @@ function Index() {
             <div className="w-full min-w-0 max-w-xl mt-auto pt-8 flex flex-col gap-4">
 
               {/* CTAs (Mobile) */}
-              <div className="flex sm:hidden flex-col items-center gap-3 w-full pb-2">
+              <div className="flex sm:hidden flex-row items-center justify-between w-full pb-2 gap-1.5 px-1">
                 <Link
                   to="/coaches"
-                  className="inline-flex w-[260px] items-center justify-center gap-2 whitespace-nowrap rounded-full bg-white/40 border border-white/50 backdrop-blur-md px-5 py-2.5 text-sm font-bold text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white/50"
+                  className="flex-1 flex flex-col items-center justify-center rounded-2xl bg-white/40 border border-white/50 backdrop-blur-md py-2.5 px-2 text-[11px] leading-tight font-bold text-slate-900 shadow-sm text-center h-[52px]"
                 >
-                  📍 Find Classes Near Me <span aria-hidden="true">→</span>
+                  <span>📍 Find Classes</span>
                 </Link>
+
+                <Link
+                  to="/coaches"
+                  className="shrink-0 flex items-center justify-center w-[46px] h-[46px] rounded-2xl bg-orange-500 text-white shadow-md"
+                >
+                  <Search className="w-5 h-5" strokeWidth={3} />
+                </Link>
+
                 <Link
                   to="/register"
-                  className="inline-flex w-[260px] items-center justify-center gap-2 whitespace-nowrap rounded-full border border-white/50 bg-white/40 backdrop-blur-md px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white/50"
+                  className="flex-1 flex flex-col items-center justify-center rounded-2xl border border-white/50 bg-white/40 backdrop-blur-md py-2.5 px-2 text-[11px] leading-tight font-bold text-slate-900 shadow-sm text-center h-[52px]"
                 >
-                  👤 Are You A Hobby Coach?
+                  <span>👤 Are You Coach?</span>
                 </Link>
               </div>
 
@@ -439,17 +447,6 @@ function Index() {
                 <span className="text-[10px] font-bold text-slate-800">{cat.name}</span>
               </div>
             ))}
-
-            {/* "Search" link */}
-            <Link
-              to="/coaches"
-              className="flex flex-col items-center gap-1.5 transition-transform active:scale-95"
-            >
-              <div className="flex items-center justify-center text-orange-600">
-                <Search className="w-6 h-6 drop-shadow-md" strokeWidth={2.5} />
-              </div>
-              <span className="text-[10px] font-bold text-slate-800">Search</span>
-            </Link>
           </div>
         </section>
 
