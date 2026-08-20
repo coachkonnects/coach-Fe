@@ -896,16 +896,7 @@ function CoachDashboard() {
                         </select>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Gender</label>
-                        <select value={editForm.gender || ""} onChange={e => setEditForm({ ...editForm, gender: e.target.value })} className="w-full px-4 py-2 border rounded-xl">
-                          <option value="">Select Gender</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                          <option value="Other">Other</option>
-                          <option value="Prefer not to say">Prefer not to say</option>
-                        </select>
-                      </div>
+
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">Pincode</label>
                         <input type="text" maxLength={6} value={editForm.pincode || ""} onChange={(e) => handlePincodeChange(e.target.value.replace(/\D/g, ''))} className="w-full px-4 py-2 border rounded-xl" />
@@ -922,10 +913,7 @@ function CoachDashboard() {
                         <label className="block text-sm font-bold text-slate-700 mb-2">State</label>
                         <input type="text" value={editForm.state || ""} readOnly className="w-full px-4 py-2 border rounded-xl bg-slate-50" />
                       </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Detailed Address</label>
-                        <input type="text" value={editForm.address || ""} onChange={e => setEditForm({ ...editForm, address: e.target.value })} className="w-full px-4 py-2 border rounded-xl" />
-                      </div>
+
                       <div className="col-span-1 sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
                           <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -1042,7 +1030,6 @@ function CoachDashboard() {
                         { label: 'Email', value: profile?.user?.email || localStorage.getItem('userEmail') },
                         { label: 'Mobile Number', value: profile?.user?.phoneNumber || profile?.mobile },
                         { label: 'Date of Birth', value: profile?.dob || profile?.dateOfBirth },
-                        { label: 'Gender', value: profile?.gender },
                         { label: 'Category', value: profile?.category },
                         { label: 'Class Mode', value: profile?.classMode },
                         { label: 'Pricing', value: profile?.pricing },
@@ -1056,10 +1043,7 @@ function CoachDashboard() {
                           <p className="font-bold text-slate-800 text-sm text-right">{item.value || '-'}</p>
                         </div>
                       ))}
-                      <div className="col-span-1 sm:col-span-2 bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
-                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Address</h3>
-                        <p className="font-bold text-slate-800 text-sm">{profile?.address || '-'}</p>
-                      </div>
+
                       <div className="col-span-1 sm:col-span-2 bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description / Bio</h3>
                         <p className="font-medium text-slate-700 leading-relaxed text-sm whitespace-pre-wrap">{profile?.description || '-'}</p>
