@@ -45,7 +45,8 @@ function AdminLogin() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to send OTP');
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to send OTP');
       }
 
       setStep("OTP");

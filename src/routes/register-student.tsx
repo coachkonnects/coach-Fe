@@ -290,7 +290,8 @@ function RegisterPage() {
         setParentResendCountdown(30);
         alert("OTP resent successfully!");
       } else {
-        alert("Failed to resend OTP.");
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error || "Failed to resend OTP.");
       }
     } catch (e) {
       alert("Error resending OTP.");
