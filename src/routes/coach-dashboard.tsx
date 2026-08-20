@@ -1,3 +1,4 @@
+import { Sparkles } from "lucide-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router"; // test
 import { useState, useEffect, useCallback } from "react";
 import * as faceapi from "face-api.js";
@@ -16,7 +17,7 @@ function CoachDashboard() {
   const [enquiries, setEnquiries] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [availabilities, setAvailabilities] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<"overview" | "classes" | "calendar" | "enquiries">(
+  const [activeTab, setActiveTab] = useState<"overview" | "classes" | "enquiries">(
     "overview",
   );
   const [loading, setLoading] = useState(true);
@@ -47,12 +48,13 @@ function CoachDashboard() {
     imageUrl: "",
   });
   const [isUploadingWorkshopImage, setIsUploadingWorkshopImage] = useState(false);
+  const [blockedWords, setBlockedWords] = useState<string[]>([]);
 
   const [passkeyStatus, setPasskeyStatus] = useState<"SUCCESS" | "ERROR" | null>(
-    localStorage.getItem("hasPasskeyRegistered") === "true" ? "SUCCESS" : null
+    (typeof window !== "undefined" && localStorage.getItem("hasPasskeyRegistered") === "true") ? "SUCCESS" : null
   );
   const [passkeyMessage, setPasskeyMessage] = useState(
-    localStorage.getItem("hasPasskeyRegistered") === "true" ? "Passkey successfully registered!" : ""
+    (typeof window !== "undefined" && localStorage.getItem("hasPasskeyRegistered") === "true") ? "Passkey successfully registered!" : ""
   );
 
   const handleWorkshopImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,10 +71,20 @@ function CoachDashboard() {
     e.target.value = "";
   };
 
+  const checkRestrictedWords = (text: string) => {
+    if (!text || !blockedWords || blockedWords.length === 0) return false;
+    const words = text.toLowerCase().split(/\s+/);
+    return blockedWords.some((word: string) => words.includes(word.toLowerCase()));
+  };
+
   const handleCreateClassSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (classForm.description && classForm.description.trim().split(/\s+/).length > 250) {
       return alert("Class/Workshop Description must not exceed 250 words!");
+    }
+    
+    if (checkRestrictedWords(classForm.title) || checkRestrictedWords(classForm.description)) {
+      return alert("Title or Description contains restricted words!");
     }
     if (classForm.type === "WORKSHOP" && !classForm.imageUrl) {
       alert("Workshop banner image is mandatory!");
@@ -81,15 +93,15 @@ function CoachDashboard() {
     try {
       const isEdit = !!classForm.id;
       const url = isEdit
-        ? `/api/classes/${classForm.id}?email=${localStorage.getItem("userEmail")}`
-        : `/api/classes?email=${localStorage.getItem("userEmail")}`;
+        ? `/api/classes/${classForm.id}?email=${(typeof window !== "undefined" ? localStorage.getItem("userEmail") : null)}`
+        : `/api/classes?email=${(typeof window !== "undefined" ? localStorage.getItem("userEmail") : null)}`;
 
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...classForm,
-          price: parseFloat(classForm.price || "0"),
+          price: 0,
           capacity: parseInt(classForm.capacity || "1"),
         }),
       });
@@ -124,8 +136,8 @@ function CoachDashboard() {
   }, []);
 
   useEffect(() => {
-    const email = localStorage.getItem("userEmail");
-    const role = localStorage.getItem("userRole");
+    const email = (typeof window !== "undefined" ? localStorage.getItem("userEmail") : null);
+    const role = (typeof window !== "undefined" ? localStorage.getItem("userRole") : null);
 
     if (!email || role !== "coach") {
       navigate({ to: "/login" });
@@ -137,6 +149,7 @@ function CoachDashboard() {
       fetch(`/api/enquiries/coach?email=${email}`),
       fetch(`/api/classes?email=${email}`),
       fetch(`/api/availability?email=${email}`),
+      fetch(`/api/config/blocked-words`)
     ])
       .then(async (responses) => {
         if (responses.some(r => r.status === 401 || r.status === 403)) {
@@ -152,11 +165,13 @@ function CoachDashboard() {
           responses[1].ok ? responses[1].json() : [],
           responses[2].ok ? responses[2].json() : [],
           responses[3].ok ? responses[3].json() : [],
+          responses[4].ok ? responses[4].json() : { words: [] },
         ]);
       })
       .then((results) => {
         if (!results) return;
-        const [data, enquiriesData, classesData, availData] = results;
+        const [data, enquiriesData, classesData, availData, blockedWordsData] = results;
+        if (blockedWordsData?.words) setBlockedWords(blockedWordsData.words);
         if (data && data.profile) {
           setProfile(data.profile);
           setFlags(data.flags || []);
@@ -350,7 +365,7 @@ function CoachDashboard() {
 
   const handleToggleActive = async () => {
     try {
-      const email = localStorage.getItem("userEmail");
+      const email = (typeof window !== "undefined" ? localStorage.getItem("userEmail") : null);
       const res = await fetch(`/api/profile/coach/toggle-active?email=${email}`, {
         method: "POST",
       });
@@ -476,7 +491,7 @@ function CoachDashboard() {
 
     setIsSaving(true);
     try {
-      const email = localStorage.getItem("userEmail");
+      const email = (typeof window !== "undefined" ? localStorage.getItem("userEmail") : null);
       const res = await fetch(`/api/profile/coach/me?email=${email}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -503,7 +518,7 @@ function CoachDashboard() {
     editForm.dob = editForm.dob || editForm.dateOfBirth;
 
     try {
-      const email = localStorage.getItem("userEmail");
+      const email = (typeof window !== "undefined" ? localStorage.getItem("userEmail") : null);
       const res = await fetch(`/api/availability?email=${email}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -523,7 +538,7 @@ function CoachDashboard() {
     setPasskeyStatus(null);
     setPasskeyMessage("");
     try {
-      const email = localStorage.getItem("userEmail");
+      const email = (typeof window !== "undefined" ? localStorage.getItem("userEmail") : null);
       const startRes = await fetch(`/api/passkeys/register/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -663,64 +678,41 @@ function CoachDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/50 to-orange-50/30 py-12 px-4 sm:px-6 relative overflow-hidden">
-      {/* Decorative Blobs */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/50 to-orange-50/30 pb-24 relative overflow-hidden font-sans">
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-teal-400/10 rounded-full blur-[120px] -z-10 mix-blend-multiply"></div>
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-orange-400/10 rounded-full blur-[100px] -z-10 mix-blend-multiply"></div>
 
-      <div className="max-w-3xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Coach Dashboard</h1>
-          <button
-            onClick={() => setShowLogoutModal(true)}
-            className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-slate-900 font-bold shadow-sm transition-all hover:border-slate-300"
-          >
-            Logout
-          </button>
+      <nav className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
+              <img src="/homelogo.png" alt="Logo" className="w-8 h-8" />
+            </div>
+            <span className="text-xl font-black text-slate-800 tracking-tight hidden sm:block">CoachKonnects</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <button onClick={() => setShowLogoutModal(true)} className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-sm transition-colors border border-slate-200/50">
+              Logout
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
+          <div>
+            <h1 className="text-4xl font-black text-slate-800 tracking-tight mb-2 flex items-center gap-3">
+              Hello, {profile?.fullName ? profile.fullName.split(' ')[0] : 'Coach'} <Sparkles className="w-8 h-8 text-orange-500 animate-pulse" />
+            </h1>
+            <p className="text-slate-500 font-medium text-lg">Welcome to your Coach Dashboard</p>
+          </div>
         </div>
 
         {getStatusBanner()}
 
-        <div className="bg-white/80 backdrop-blur-2xl rounded-[3rem] shadow-xl border border-white overflow-hidden relative">
-          <div className="flex overflow-x-auto border-b border-slate-200 bg-slate-50 w-full [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full pb-1">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`shrink-0 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap ${activeTab === "overview" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
-            >
-              Profile Overview
-            </button>
-            <button
-              onClick={() => setActiveTab("classes")}
-              className={`shrink-0 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap flex items-center justify-center gap-2 ${activeTab === "classes" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
-            >
-              Classes
-              <span
-                className={`px-2 py-0.5 rounded-full text-xs ${activeTab === "classes" ? "bg-[#f26b21]/10 text-[#f26b21]" : "bg-slate-200 text-slate-600"}`}
-              >
-                {classes.length}
-              </span>
-            </button>
-            <button
-              onClick={() => setActiveTab("calendar")}
-              className={`shrink-0 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap ${activeTab === "calendar" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
-            >
-              Calendar
-            </button>
-            <button
-              onClick={() => setActiveTab("enquiries")}
-              className={`shrink-0 min-w-[140px] px-4 py-4 text-center font-bold text-sm uppercase tracking-wider transition-colors whitespace-nowrap flex items-center justify-center gap-2 ${activeTab === "enquiries" ? "text-[#f26b21] border-b-2 border-[#f26b21] bg-white" : "text-slate-500 hover:text-slate-800"}`}
-            >
-              Leads / Enquiries
-              {enquiries.filter((e: any) => e.status === 'PENDING_COACH_APPROVAL').length > 0 && (
-                <span className="bg-teal-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {enquiries.filter((e: any) => e.status === 'PENDING_COACH_APPROVAL').length}
-                </span>
-              )}
-            </button>
-          </div>
-
-          <div className="p-8">
-            {activeTab === "overview" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+          <div className="lg:col-span-1 space-y-8">
+            <div className="bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] shadow-xl overflow-hidden relative group hover:shadow-2xl transition-all duration-300">
               <div>
                 <div className="relative mb-24 sm:mb-16">
                   {/* Cover Photo */}
@@ -737,17 +729,17 @@ function CoachDashboard() {
                   </div>
 
                   {/* Profile Info Overlay */}
-                  <div className="absolute -bottom-20 sm:-bottom-12 left-4 sm:left-8 flex flex-col sm:flex-row items-start sm:items-end gap-2 sm:gap-6 w-[calc(100%-2rem)] sm:w-auto">
+                  <div className="absolute -bottom-20 sm:-bottom-12 left-4 sm:left-8 flex flex-col sm:flex-row items-start sm:items-end gap-2 sm:gap-3 w-[calc(100%-2rem)] sm:w-auto">
                     <img
                       src={profile?.profileImageUrl || "/placeholder.png"}
                       alt="Profile"
                       className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-white shadow-xl bg-white"
                     />
-                    <div className="pb-1 sm:pb-2 bg-white/60 sm:bg-white/40 backdrop-blur-md px-3 sm:px-4 py-1 sm:py-2 rounded-xl shadow-sm border border-white/50 mb-1 sm:mb-0">
-                      <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 drop-shadow-sm line-clamp-1">
+                    <div className="pb-1 sm:pb-1.5 bg-white/60 sm:bg-white/40 backdrop-blur-md px-3 sm:px-3 py-1 sm:py-1.5 rounded-xl shadow-sm border border-white/50 mb-1 sm:mb-2">
+                      <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 drop-shadow-sm line-clamp-1">
                         {profile?.fullName}
                       </h2>
-                      <p className="text-slate-800 font-bold text-sm sm:text-lg mt-0.5 sm:mt-1 drop-shadow-sm line-clamp-1">
+                      <p className="text-slate-800 font-bold text-sm sm:text-base mt-0.5 sm:mt-0.5 drop-shadow-sm line-clamp-1">
                         {profile?.expertise} {profile?.location ? `• ${profile.location}` : ""}
                       </p>
                     </div>
@@ -774,21 +766,6 @@ function CoachDashboard() {
                       >
                         {isEditing ? "Cancel Edit" : "Edit Profile"}
                       </button>
-                      <div className="flex items-center gap-3 bg-white p-2 rounded-xl shadow-sm border border-slate-100">
-                        <span
-                          className={`text-sm font-bold ${profile?.active ? "text-teal-600" : "text-slate-500"}`}
-                        >
-                          {profile?.active ? "Available" : "On Leave"}
-                        </span>
-                        <button
-                          onClick={handleToggleActive}
-                          className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none ${profile?.active ? "bg-teal-500" : "bg-slate-300"}`}
-                        >
-                          <span
-                            className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${profile?.active ? "translate-x-6" : "translate-x-1"}`}
-                          />
-                        </button>
-                      </div>
                     </div>
                   </div>
 
@@ -810,18 +787,7 @@ function CoachDashboard() {
                         <input type="text" placeholder="DD/MM/YYYY" value={editForm.dob || editForm.dateOfBirth || ""} onChange={handleDobChange} className={`w-full px-4 py-2 border rounded-xl ${dobError ? 'border-red-500' : ''}`} />
                         {dobError && <p className="text-red-500 text-xs font-bold mt-1">{dobError}</p>}
                       </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Category</label>
-                        <select value={editForm.category || ""} onChange={e => setEditForm({ ...editForm, category: e.target.value })} className="w-full px-4 py-2 border rounded-xl">
-                          <option value="">Select a Category</option>
-                          <option value="Sports">Sports</option>
-                          <option value="Academics">Academics</option>
-                          <option value="Arts">Arts</option>
-                          <option value="Music">Music</option>
-                          <option value="Dance">Dance</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
+                      
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">Class Mode</label>
                         <select value={editForm.classMode || ""} onChange={e => setEditForm({ ...editForm, classMode: e.target.value })} className="w-full px-4 py-2 border rounded-xl">
@@ -842,17 +808,7 @@ function CoachDashboard() {
                           className="w-full px-4 py-2 border rounded-xl"
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                          Location (e.g. Mumbai, MH)
-                        </label>
-                        <input
-                          type="text"
-                          value={editForm.location || ""}
-                          onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
-                          className="w-full px-4 py-2 border rounded-xl"
-                        />
-                      </div>
+                      
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">
                           Mobile Number
@@ -1025,12 +981,12 @@ function CoachDashboard() {
                       </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 relative z-10">
+                    <div className="grid grid-cols-1 gap-4 relative z-10">
                       {[
-                        { label: 'Email', value: profile?.user?.email || localStorage.getItem('userEmail') },
+                        { label: 'Email', value: profile?.user?.email || (typeof window !== 'undefined' ? localStorage.getItem('userEmail') : null) },
                         { label: 'Mobile Number', value: profile?.user?.phoneNumber || profile?.mobile },
                         { label: 'Date of Birth', value: profile?.dob || profile?.dateOfBirth },
-                        { label: 'Category', value: profile?.category },
+                        
                         { label: 'Class Mode', value: profile?.classMode },
                         { label: 'Pricing', value: profile?.pricing },
                         { label: 'Target Audience', value: profile?.targetAudience },
@@ -1038,17 +994,17 @@ function CoachDashboard() {
                         { label: 'Area / District', value: `${profile?.area || ''} ${profile?.district ? ', ' + profile.district : ''}` },
                         { label: 'State', value: profile?.state },
                       ].map((item, i) => (
-                        <div key={i} className="bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+                        <div key={i} className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50 flex flex-col gap-1 items-start">
                           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{item.label}</h3>
-                          <p className="font-bold text-slate-800 text-sm text-right">{item.value || '-'}</p>
+                          <p className="font-bold text-slate-800 text-sm">{item.value || '-'}</p>
                         </div>
                       ))}
 
-                      <div className="col-span-1 sm:col-span-2 bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
+                      <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50">
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description / Bio</h3>
                         <p className="font-medium text-slate-700 leading-relaxed text-sm whitespace-pre-wrap">{profile?.description || '-'}</p>
                       </div>
-                      <div className="col-span-1 sm:col-span-2 bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
+                      <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100/50">
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Intro Video URL (YouTube)</h3>
                         {profile?.introVideoUrl ? (
                           <a href={profile.introVideoUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-teal-600 hover:text-teal-700 text-sm hover:underline flex items-center gap-2">
@@ -1062,49 +1018,14 @@ function CoachDashboard() {
                     </div>
                   )}
 
-                  {!isEditing && (
-                    <div className="mt-8 bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                            <svg className="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
-                            Security Settings
-                          </h3>
-                          <p className="text-sm text-slate-500 mt-1">
-                            Set up Passkeys (FaceID, TouchID) for faster, more secure login without OTP.
-                          </p>
-                        </div>
-                        <button
-                          onClick={handleSetupPasskey}
-                          className={`px-4 py-2 font-bold rounded-xl shadow-sm transition-colors text-sm ${passkeyStatus === "SUCCESS"
-                              ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                              : passkeyStatus === "ERROR"
-                                ? "bg-red-500 hover:bg-red-600 text-white"
-                                : "bg-slate-900 hover:bg-slate-800 text-white"
-                            }`}
-                        >
-                          {passkeyStatus === "SUCCESS"
-                            ? "✓ Registered"
-                            : passkeyStatus === "ERROR"
-                              ? "Try Again"
-                              : "Register Passkey"}
-                        </button>
-                      </div>
-                      {passkeyMessage && (
-                        <p
-                          className={`mt-3 text-sm font-bold ${passkeyStatus === "SUCCESS" ? "text-emerald-600" : "text-red-600"
-                            }`}
-                        >
-                          {passkeyMessage}
-                        </p>
-                      )}
-                    </div>
-                  )}
+
                 </div>
               </div>
-            )}
+            </div>
+          </div>
 
-            {activeTab === "classes" && (
+          <div className="lg:col-span-2 space-y-8">
+            <div className="bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] shadow-xl p-8 relative overflow-hidden flex flex-col">
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                   <div>
@@ -1150,9 +1071,7 @@ function CoachDashboard() {
                               </span>
                             )}
                           </div>
-                          <span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-sm font-bold">
-                            {c.price === 0 ? "Free" : `₹${c.price}`}
-                          </span>
+                          
                         </div>
                         <p className="text-slate-600 mb-4 line-clamp-2">{c.description}</p>
 
@@ -1188,7 +1107,7 @@ function CoachDashboard() {
                               if (!window.confirm("Are you sure you want to delete this class?"))
                                 return;
                               fetch(
-                                `/api/classes/${c.id}?email=${localStorage.getItem("userEmail")}`,
+                                `/api/classes/${c.id}?email=${(typeof window !== "undefined" ? localStorage.getItem("userEmail") : null)}`,
                                 { method: "DELETE" },
                               )
                                 .then(() => setClasses(classes.filter((cl) => cl.id !== c.id)))
@@ -1204,126 +1123,9 @@ function CoachDashboard() {
                   </div>
                 )}
               </div>
-            )}
+            </div>
 
-            {activeTab === "calendar" && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                  <div>
-                    <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-                      Availability Calendar
-                    </h2>
-                    <p className="text-sm sm:text-base text-slate-500">
-                      Set the hours you are available for coaching each day.
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleSaveAvailability}
-                    disabled={isSaving}
-                    className="w-full sm:w-auto bg-teal-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover:bg-teal-700 transition-colors disabled:opacity-50"
-                  >
-                    {isSaving ? "Saving..." : "Save Schedule"}
-                  </button>
-                </div>
-
-                <div className="bg-white/70 backdrop-blur-md border border-white rounded-[1rem] sm:rounded-[2rem] overflow-hidden shadow-sm">
-                  {[
-                    "MONDAY",
-                    "TUESDAY",
-                    "WEDNESDAY",
-                    "THURSDAY",
-                    "FRIDAY",
-                    "SATURDAY",
-                    "SUNDAY",
-                  ].map((day) => {
-                    const avail = availabilities.find((a) => a.dayOfWeek === day);
-                    const isAvailable = !!avail;
-
-                    return (
-                      <div
-                        key={day}
-                        className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors last:border-b-0 gap-3 sm:gap-0"
-                      >
-                        <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-1/3">
-                          <input
-                            type="checkbox"
-                            checked={isAvailable}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setAvailabilities([
-                                  ...availabilities,
-                                  { dayOfWeek: day, startTime: "09:00", endTime: "17:00" },
-                                ]);
-                              } else {
-                                setAvailabilities(
-                                  availabilities.filter((a) => a.dayOfWeek !== day),
-                                );
-                              }
-                            }}
-                            className="w-5 h-5 text-teal-600 rounded border-slate-300 focus:ring-teal-500"
-                          />
-                          <span className="font-bold text-slate-700 w-24">
-                            {day.charAt(0) + day.slice(1).toLowerCase()}
-                          </span>
-                        </div>
-
-                        {isAvailable ? (
-                          <div className="flex items-center gap-2 sm:gap-4 w-full sm:flex-1 justify-start sm:justify-end pl-8 sm:pl-0">
-                            <input
-                              type="time"
-                              value={avail.startTime}
-                              onChange={(e) =>
-                                setAvailabilities(
-                                  availabilities.map((a) =>
-                                    a.dayOfWeek === day ? { ...a, startTime: e.target.value } : a,
-                                  ),
-                                )
-                              }
-                              className="px-2 py-1 sm:px-3 sm:py-1.5 border rounded-lg text-xs sm:text-sm font-medium w-[100px] sm:w-auto"
-                            />
-                            <span className="text-slate-400 text-xs sm:text-sm">to</span>
-                            <input
-                              type="time"
-                              value={avail.endTime}
-                              onChange={(e) =>
-                                setAvailabilities(
-                                  availabilities.map((a) =>
-                                    a.dayOfWeek === day ? { ...a, endTime: e.target.value } : a,
-                                  ),
-                                )
-                              }
-                              className="px-2 py-1 sm:px-3 sm:py-1.5 border rounded-lg text-xs sm:text-sm font-medium w-[100px] sm:w-auto"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-full sm:flex-1 text-left sm:text-right pl-8 sm:pl-0 text-slate-400 font-medium italic text-xs sm:text-sm">
-                            Unavailable
-                          </div>
-                        )}
-
-                        {showLogoutModal && (
-                          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-                            <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
-                              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                              </div>
-                              <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Done Coaching?</h3>
-                              <p className="text-center text-slate-500 mb-8">Taking a breather from shaping minds and changing lives? We get it. Are you sure you want to log out?</p>
-                              <div className="flex gap-4">
-                                <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Keep Coaching</button>
-                                <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-all">Yes, Log out</button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {activeTab === "enquiries" && (
+            <div className="bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] shadow-xl p-8 relative overflow-hidden flex flex-col">
               <div>
                 <h2 className="text-2xl font-extrabold text-slate-900 mb-6">Leads / Enquiries</h2>
                 {enquiries.length === 0 ? (
@@ -1426,10 +1228,10 @@ function CoachDashboard() {
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
         </div>
-      </div>
+      </main>
 
       {cropModalOpen && cropImageSrc && (
         <div className="fixed inset-0 bg-slate-900/90 z-[60] flex items-center justify-center p-4">
@@ -1484,7 +1286,7 @@ function CoachDashboard() {
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+            <div className="p-6 overflow-y-auto overflow-x-hidden flex-1 [&::-webkit-scrollbar]:hidden">
               <form id="createClassForm" onSubmit={handleCreateClassSubmit} className="space-y-5">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1">Title</label>
@@ -1514,77 +1316,76 @@ function CoachDashboard() {
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-1">Schedule</label>
-                    <div className="flex gap-2 items-center">
-                      <select
-                        required
-                        value={classForm.schedule.split(' ')[0] || ''}
-                        onChange={(e) => {
-                          const parts = classForm.schedule.split(' ');
-                          const start = parts[1] || '';
-                          const end = parts[3] || '';
-                          const newSched = `${e.target.value} ${start} - ${end}`.trim().replace(/(^\s*-\s*$|^\s*-\s*|\s*-\s*$)/, '');
-                          setClassForm({ ...classForm, schedule: newSched })
-                        }}
-                        className="flex-1 px-3 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm"
-                      >
-                        <option value="">Day</option>
-                        <option value="Mondays">Mondays</option>
-                        <option value="Tuesdays">Tuesdays</option>
-                        <option value="Wednesdays">Wednesdays</option>
-                        <option value="Thursdays">Thursdays</option>
-                        <option value="Fridays">Fridays</option>
-                        <option value="Saturdays">Saturdays</option>
-                        <option value="Sundays">Sundays</option>
-                        <option value="Weekends">Weekends</option>
-                        <option value="Daily">Daily</option>
-                      </select>
-                      <input
-                        required
-                        type="time"
-                        value={classForm.schedule.split(' ')[1] || ''}
-                        onChange={(e) => {
-                          const parts = classForm.schedule.split(' ');
-                          const day = parts[0] || '';
-                          const end = parts[3] || '';
-                          const newSched = `${day} ${e.target.value} - ${end}`.trim().replace(/(^\s*-\s*$|^\s*-\s*|\s*-\s*$)/, '');
-                          setClassForm({ ...classForm, schedule: newSched })
-                        }}
-                        className="flex-1 px-2 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm"
-                      />
-                      <span className="text-slate-400 font-bold">-</span>
-                      <input
-                        required
-                        type="time"
-                        value={classForm.schedule.split(' ')[3] || ''}
-                        onChange={(e) => {
-                          const parts = classForm.schedule.split(' ');
-                          const day = parts[0] || '';
-                          const start = parts[1] || '';
-                          let newSched = `${day} ${start} - ${e.target.value}`.trim();
-                          if (newSched === '-') newSched = '';
-                          setClassForm({ ...classForm, schedule: newSched })
-                        }}
-                        className="flex-1 px-2 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm"
-                      />
+                    <div className="grid grid-cols-1 gap-3 items-start">
+                      <details className="relative group">
+                        <summary className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm cursor-pointer list-none flex justify-between items-center select-none shadow-sm [&::-webkit-details-marker]:hidden">
+                          <span className="truncate font-medium text-slate-700">
+                            {classForm.schedule.split(' ')[0] || 'Select Days...'}
+                          </span>
+                          <span className="text-slate-400 text-[10px] ml-2 group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div className="absolute z-[100] top-full left-0 mt-2 w-full sm:w-[280px] bg-white rounded-2xl shadow-xl border border-slate-100 p-2 flex flex-col gap-1 max-h-[350px] overflow-y-auto [&::-webkit-scrollbar]:hidden">
+                          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => {
+                            const currentDays = (classForm.schedule.split(' ')[0] || '').split(',');
+                            const isSelected = currentDays.includes(d);
+                            return (
+                              <button
+                                key={d}
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  let newDays = [...currentDays].filter(Boolean);
+                                  if (isSelected) newDays = newDays.filter(x => x !== d);
+                                  else newDays.push(d);
+                                  
+                                  const parts = classForm.schedule.split(' ');
+                                  const start = parts[1] || '';
+                                  const end = parts[3] || '';
+                                  const newSched = `${newDays.join(',')} ${start} - ${end}`.trim().replace(/(^\s*-\s*$|^\s*-\s*|\s*-\s*$)/, '');
+                                  setClassForm({ ...classForm, schedule: newSched });
+                                }}
+                                className={`w-full px-3 py-2.5 rounded-xl text-sm text-left transition-all flex items-center gap-3 ${isSelected ? "bg-[#f26b21]/10 text-[#f26b21] font-bold" : "text-slate-600 hover:bg-slate-50 font-medium"}`}
+                              >
+                                <div className={`w-5 h-5 rounded flex items-center justify-center border transition-all flex-shrink-0 ${isSelected ? "border-[#f26b21] bg-[#f26b21]" : "border-slate-300 bg-white"}`}>
+                                  {isSelected && <span className="text-white text-[12px] leading-none">✓</span>}
+                                </div>
+                                <span className="truncate">{d}</span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </details>
+                      <div className="flex gap-2 items-center">
+                        <input
+                          required
+                          type="time"
+                          value={classForm.schedule.split(' ')[1] || ''}
+                          onChange={(e) => {
+                            const parts = classForm.schedule.split(' ');
+                            const day = parts[0] || '';
+                            const end = parts[3] || '';
+                            const newSched = `${day} ${e.target.value} - ${end}`.trim().replace(/(^\s*-\s*$|^\s*-\s*|\s*-\s*$)/, '');
+                            setClassForm({ ...classForm, schedule: newSched })
+                          }}
+                          className="w-full px-3 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm"
+                        />
+                        <span className="text-slate-400 font-bold flex-shrink-0">-</span>
+                        <input
+                          required
+                          type="time"
+                          value={classForm.schedule.split(' ')[3] || ''}
+                          onChange={(e) => {
+                            const parts = classForm.schedule.split(' ');
+                            const day = parts[0] || '';
+                            const start = parts[1] || '';
+                            let newSched = `${day} ${start} - ${e.target.value}`.trim();
+                            if (newSched === '-') newSched = '';
+                            setClassForm({ ...classForm, schedule: newSched })
+                          }}
+                          className="w-full px-3 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm"
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Price (₹)</label>
-                    <input
-                      required
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={classForm.price}
-                      onKeyDown={(e) => {
-                        if (['e', 'E', '+', '-'].includes(e.key)) {
-                          e.preventDefault();
-                        }
-                      }}
-                      onChange={(e) => setClassForm({ ...classForm, price: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all"
-                      placeholder="0.00 for free"
-                    />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-1">Capacity</label>
