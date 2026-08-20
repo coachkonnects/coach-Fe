@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { Music, Palette, Crown, Shield, Camera, MoreHorizontal } from "lucide-react";
 import desktopBg from "@/assets/desktop-bg.png.asset.json";
 import mobileBg from "@/assets/mobile-bg.png.asset.json";
 const logo = { url: "/homelogo.png" };
@@ -231,7 +232,7 @@ function Index() {
 
       <main className="relative z-10 w-full">
         {/* HERO */}
-        <section className="relative isolate w-full overflow-hidden bg-transparent min-h-[75svh] md:min-h-[720px] lg:min-h-[760px] xl:min-h-0 md:aspect-video">
+        <section className="relative isolate w-full sm:overflow-hidden bg-transparent min-h-[75svh] md:min-h-[720px] lg:min-h-[760px] xl:min-h-0 md:aspect-video">
           <picture>
             <source media="(max-width: 639px)" srcSet="/Mobile_BG.jpg" />
             <source media="(min-width: 640px)" srcSet="/Desktop%20BG.png" />
@@ -239,7 +240,7 @@ function Index() {
               src="/Desktop%20BG.png"
               alt="Hero background"
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-10 h-full w-full select-none object-cover object-bottom sm:object-center"
+              className="pointer-events-none absolute inset-0 -z-10 h-full w-full select-none object-cover object-center"
             />
           </picture>
           {/* Soft fade for text legibility on the left */}
@@ -252,7 +253,7 @@ function Index() {
             className="absolute inset-x-0 bottom-0 -z-10 h-40 hidden md:block bg-gradient-to-b from-transparent to-white"
           />
 
-          <header className="relative z-10 w-full pt-8 sm:pt-4">
+          <header className="relative z-10 w-full pt-1 sm:pt-4">
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
               <Logo />
               <nav className="flex shrink-0 items-center gap-3 sm:gap-5">
@@ -281,27 +282,27 @@ function Index() {
           </header>
 
           {/* Hero content */}
-          <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-10 pt-8 sm:px-8 sm:pb-32 sm:pt-14 md:pb-40 md:pt-16 lg:pb-48 text-left flex flex-col justify-between min-h-[80svh] sm:min-h-[unset] sm:block">
-            
+          <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-10 pt-1 sm:px-8 sm:pb-32 sm:pt-14 lg:pb-48 text-left flex flex-col justify-between min-h-[80svh] sm:min-h-[unset] sm:block">
+
             {/* Launching Badge (Mobile) */}
-            <div className="flex sm:hidden justify-center w-full mb-2 mt-2">
-              <span className="inline-block rounded-full border border-white/40 bg-white/40 backdrop-blur-md px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-900 shadow-sm">
+            <div className="flex sm:hidden justify-center w-full mb-1 mt-0">
+              <span className="inline-block rounded-full border border-white/40 bg-white/40 backdrop-blur-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-orange-900 shadow-sm">
                 🚀 Launching in Mumbai & India
               </span>
             </div>
 
             {/* TOP SECTION */}
-            <div className="w-full min-w-0 max-w-lg lg:max-w-[50%] xl:max-w-2xl flex flex-col items-center text-center sm:items-start sm:text-left mx-auto sm:mx-0 bg-white/30 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none p-4 sm:p-0 rounded-[2rem] border border-white/40 sm:border-transparent shadow-lg sm:shadow-none">
+            <div className="w-full min-w-0 max-w-lg lg:max-w-[50%] xl:max-w-2xl flex flex-col items-center text-center sm:items-start sm:text-left mx-auto sm:mx-0 bg-white/30 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none p-3 sm:p-0 rounded-[1.5rem] sm:rounded-none border border-white/40 sm:border-transparent shadow-lg sm:shadow-none">
               <span className="hidden sm:inline-block mb-5 rounded-full border border-orange-200 bg-orange-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-orange-700 shadow-sm backdrop-blur-md">
                 🚀 Launching in Mumbai & India
               </span>
-              <h1 className="font-[var(--font-display)] text-2xl sm:text-[clamp(2rem,7vw,68px)] font-bold leading-[1.08] tracking-tight text-balance text-slate-900">
+              <h1 className="font-[var(--font-display)] text-[22px] sm:text-4xl md:text-5xl lg:text-[68px] font-bold leading-[1.08] tracking-tight text-balance text-slate-900">
                 Find The Perfect Class{" "}
                 <em className="font-medium not-italic text-slate-700 italic">Or</em>{" "}
                 Coach For{" "}
-                <span className="inline-block bg-orange-500 text-white px-2 py-1 mt-1 rounded-xl shadow-sm text-2xl sm:text-[clamp(2rem,7vw,68px)]">Your Child.</span>
+                <span className="inline-block bg-orange-500 text-white px-2 py-0.5 mt-0.5 rounded-lg shadow-sm text-[22px] sm:text-4xl md:text-5xl lg:text-[68px]">Your Child.</span>
               </h1>
-              <p className="hidden sm:block mt-5 max-w-lg text-pretty text-base font-medium leading-relaxed text-slate-600 sm:text-lg md:text-xl">
+              <p className="hidden sm:block mt-5 max-w-lg text-pretty text-base font-medium leading-relaxed text-slate-600 sm:text-lg">
                 Verified hobby coaches near you. Browse, connect directly on WhatsApp,
                 and enroll — zero booking fees.
               </p>
@@ -326,7 +327,7 @@ function Index() {
 
             {/* BOTTOM SECTION (Pushed down on mobile) */}
             <div className="w-full min-w-0 max-w-xl mt-auto pt-8 flex flex-col gap-4">
-              
+
               {/* CTAs (Mobile) */}
               <div className="flex sm:hidden flex-col items-center gap-3 w-full pb-2">
                 <Link
@@ -346,40 +347,40 @@ function Index() {
               {/* Trust chips - white box on mobile, raw on desktop */}
               <div className="hidden sm:block bg-white/90 backdrop-blur-xl sm:bg-transparent sm:backdrop-blur-none rounded-3xl p-4 sm:p-0 shadow-lg sm:shadow-none border border-white sm:border-transparent">
                 <div className="grid grid-cols-4 sm:flex sm:flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm font-semibold text-[color:var(--color-ink)] sm:text-[15px]">
-                  
+
                   <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
                     <svg className="w-6 h-6 sm:w-5 sm:h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    <span>Verified<br className="sm:hidden"/> Coaches</span>
+                    <span>Verified<br className="sm:hidden" /> Coaches</span>
                   </div>
-                  
+
                   <div className="hidden sm:block h-5 w-px bg-slate-300"></div>
-                  
+
                   <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
                     <svg className="w-6 h-6 sm:w-5 sm:h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    <span>Background<br className="sm:hidden"/> Checked</span>
+                    <span>Background<br className="sm:hidden" /> Checked</span>
                   </div>
-                  
+
                   <div className="hidden sm:block h-5 w-px bg-slate-300"></div>
-                  
+
                   <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
                     <svg className="w-6 h-6 sm:w-5 sm:h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span>Direct Connect<br className="sm:hidden"/> on WhatsApp</span>
+                    <span>Direct Connect<br className="sm:hidden" /> on WhatsApp</span>
                   </div>
-                  
+
                   <div className="hidden sm:block h-5 w-px bg-slate-300"></div>
-                  
+
                   <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center sm:text-left">
                     <svg className="w-6 h-6 sm:w-5 sm:h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>No Platform<br className="sm:hidden"/> Fees</span>
+                    <span>No Platform<br className="sm:hidden" /> Fees</span>
                   </div>
 
                 </div>
@@ -426,8 +427,42 @@ function Index() {
           </div>
         </section>
 
-        {/* CATEGORIES — overlapping hero */}
-        <section className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-20 sm:px-8">
+        {/* Quick Categories (Mobile Only) */}
+        <section className="relative z-10 w-full sm:hidden px-3 pb-8 -mt-2">
+          <div className="flex w-full items-start justify-between px-4 py-4 rounded-[2rem] bg-white/30 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.1)]">
+            {[
+              { name: 'Guitar', icon: <Music className="w-6 h-6 drop-shadow-md" strokeWidth={2.5} /> },
+              { name: 'Painting', icon: <Palette className="w-6 h-6 drop-shadow-md" strokeWidth={2.5} /> },
+              { name: 'Chess', icon: <Crown className="w-6 h-6 drop-shadow-md" strokeWidth={2.5} /> },
+              { name: 'Defense', icon: <Shield className="w-6 h-6 drop-shadow-md" strokeWidth={2.5} /> },
+              { name: 'Photo', icon: <Camera className="w-6 h-6 drop-shadow-md" strokeWidth={2.5} /> },
+            ].map((cat, i) => (
+              <div
+                key={i}
+                className="flex flex-col items-center gap-1.5"
+              >
+                <div className="flex items-center justify-center text-orange-600">
+                  {cat.icon}
+                </div>
+                <span className="text-[10px] font-bold text-slate-800">{cat.name}</span>
+              </div>
+            ))}
+            
+            {/* "More" link */}
+            <Link
+              to="/coaches"
+              className="flex flex-col items-center gap-1.5 transition-transform active:scale-95"
+            >
+              <div className="flex items-center justify-center text-orange-600">
+                <MoreHorizontal className="w-6 h-6 drop-shadow-md" strokeWidth={2.5} />
+              </div>
+              <span className="text-[10px] font-bold text-slate-800">More</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* CATEGORIES — overlapping hero (Desktop Only) */}
+        <section className="hidden md:block relative z-10 mx-auto w-full max-w-7xl px-5 pb-20 sm:px-8">
           <div className="rounded-[2.5rem] bg-white/70 backdrop-blur-2xl border border-white p-8 shadow-xl sm:p-12 md:p-16">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 lg:gap-8 justify-center">
               {serverCategories.slice(0, 3).map((category) => (
