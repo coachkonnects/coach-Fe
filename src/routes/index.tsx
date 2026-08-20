@@ -71,7 +71,7 @@ function Logo({ className = "" }: { className?: string }) {
   return (
     <a href="/" className={`flex min-w-0 items-center gap-2 ${className}`} aria-label="CoachKonnects">
       <img src="/favicon.png" alt="CoachKonnects" className="h-10 w-10 sm:hidden rounded-full object-cover shrink-0 bg-white p-1 shadow-sm" />
-      <img src={logo.url} alt="CoachKonnects" className="hidden sm:block h-10 w-auto shrink-0" />
+      <img src={logo.url} alt="CoachKonnects" className="hidden sm:block h-10 w-auto shrink-0 rounded-[1.5rem]" />
     </a>
   );
 }
@@ -259,7 +259,7 @@ function Index() {
               <nav className="flex shrink-0 items-center gap-3 sm:gap-5">
                 <Link
                   to="/login"
-                  className="text-sm font-bold text-slate-800 transition-colors hover:text-[color:var(--color-brand)] px-2 sm:px-0"
+                  className="inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full border-2 border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 transition-all hover:-translate-y-0.5 hover:border-[color:var(--color-brand)] hover:text-[color:var(--color-brand)] sm:px-6 sm:py-2.5"
                 >
                   Log In
                 </Link>
@@ -344,7 +344,7 @@ function Index() {
                     <svg className="w-6 h-6 sm:w-5 sm:h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
-                    <span>Verified<br className="sm:hidden" /> Coaches</span>
+                    <span>Passionate<br className="sm:hidden" /> Coaches</span>
                   </div>
 
                   <div className="hidden sm:block h-5 w-px bg-slate-300"></div>
@@ -353,7 +353,7 @@ function Index() {
                     <svg className="w-6 h-6 sm:w-5 sm:h-5 text-[color:var(--color-brand)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    <span>Background<br className="sm:hidden" /> Checked</span>
+                    <span>Quality<br className="sm:hidden" /> Assured</span>
                   </div>
 
                   <div className="hidden sm:block h-5 w-px bg-slate-300"></div>
@@ -487,11 +487,11 @@ function Index() {
       <section className="w-full bg-[#fdf5ed] px-5 py-20 sm:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-            <div>
+            <div className="text-center md:text-left">
               <h2 className="font-[var(--font-display)] text-3xl font-bold tracking-tight text-[color:var(--color-ink)] md:text-4xl">
                 What students are demanding
               </h2>
-              <p className="mt-4 text-lg text-[color:var(--color-ink-muted)] max-w-2xl">
+              <p className="mt-4 text-lg text-[color:var(--color-ink-muted)] max-w-2xl mx-auto md:mx-0">
                 Can't find the exact skill you're looking for? Students across India are requesting these classes right now. Are you a coach who can teach them?
               </p>
             </div>
@@ -607,7 +607,7 @@ function Index() {
 
       <section className="w-full px-5 py-20 sm:px-8 md:py-28">
         <div className="mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
-          <div className="min-w-0">
+          <div className="min-w-0 text-center md:text-left">
             <span className="mb-4 inline-block rounded-full bg-[color:var(--color-brand-light)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[color:var(--color-brand-dark)]">
               Verified hobby coaches, near you
             </span>
@@ -757,7 +757,7 @@ function Index() {
       <section className="w-full px-5 py-20 sm:px-8 md:py-28">
         <div className="mx-auto w-full max-w-7xl">
           <div className="grid grid-cols-1 items-center gap-10 rounded-3xl bg-[#fdf5ed] p-8 text-[color:var(--color-ink)] sm:p-12 md:grid-cols-2 md:gap-12 md:p-16">
-            <div className="min-w-0">
+            <div className="min-w-0 text-center md:text-left">
               <span className="mb-4 inline-block rounded-full bg-[color:var(--color-brand-light)] px-4 py-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[color:var(--color-brand-dark)]">
                 For Coaches
               </span>
@@ -801,7 +801,7 @@ function Index() {
 
           <div className="mb-20 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { icon: "🛡️", title: "Verified coaches", desc: "Every coach is personally reviewed and Aadhaar-verified by our team before going live." },
+              { icon: "🛡️", title: "Passionate coaches", desc: "Every coach is passionate about their craft and dedicated to helping students discover their hidden talents." },
               { icon: "⚡", title: "Hobby Focused Only", desc: "Dance, art, music, chess, yoga and more. No tuition. No pressure." },
               { icon: "🏅", title: "Direct Coach Connect", desc: "Once matched, connect directly with your coach on WhatsApp. Simple and personal." },
               { icon: "❤️", title: "Discover Near You", desc: "Find hobby coaches in your city or online, across Maharashtra - at your schedule and pace." }
