@@ -453,32 +453,6 @@ function Index() {
           </div>
         </section>
 
-        {/* CATEGORIES — overlapping hero (Desktop Only) */}
-        <section className="hidden md:block relative z-10 mx-auto w-full max-w-7xl px-5 pb-20 sm:px-8">
-          <div className="rounded-[2.5rem] bg-white/70 backdrop-blur-2xl border border-white p-8 shadow-xl sm:p-12 md:p-16">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 lg:gap-8 justify-center">
-              {serverCategories.slice(0, 3).map((category) => (
-                <button
-                  key={category.name}
-                  onClick={() => navigate({ to: `/coaches?category=${encodeURIComponent(category.name)}` as any })}
-                  className="group flex cursor-pointer flex-col items-center rounded-2xl border border-slate-100 bg-white/60 p-6 text-center transition-all hover:-translate-y-2 hover:bg-white hover:border-orange-200 hover:shadow-lg"
-                >
-                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 text-3xl shadow-sm transition-transform group-hover:scale-110 group-hover:bg-orange-200">
-                    ✨
-                  </div>
-                  <h3 className="mb-2 text-lg font-bold text-slate-800 transition-colors group-hover:text-orange-600">
-                    {category.name}
-                  </h3>
-                  <p className="text-sm font-medium leading-relaxed text-slate-500">
-                    Explore top coaches for {category.name}
-                  </p>
-                </button>
-              ))}
-            </div>
-
-
-          </div>
-        </section>
 
 
       </main>
