@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Music, Palette, Crown, Shield, Camera, MoreHorizontal } from "lucide-react";
+import { Music, Palette, Crown, Shield, Camera, Search, MoreHorizontal } from "lucide-react";
 import desktopBg from "@/assets/desktop-bg.png.asset.json";
 import mobileBg from "@/assets/mobile-bg.png.asset.json";
 const logo = { url: "/homelogo.png" };
@@ -258,14 +258,6 @@ function Index() {
               <Logo />
               <nav className="flex shrink-0 items-center gap-3 sm:gap-5">
                 <Link
-                  to="/coaches"
-                  className="sm:hidden flex items-center justify-center w-9 h-9 rounded-full bg-white/80 backdrop-blur-md shadow-sm border border-slate-200 text-slate-700 hover:text-[color:var(--color-brand)] transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </Link>
-                <Link
                   to="/login"
                   className="text-sm font-bold text-slate-800 transition-colors hover:text-[color:var(--color-brand)] px-2 sm:px-0"
                 >
@@ -285,7 +277,7 @@ function Index() {
           <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl px-5 pb-10 pt-1 sm:px-8 sm:pb-32 sm:pt-14 lg:pb-48 text-left flex flex-col justify-between min-h-[80svh] sm:min-h-[unset] sm:block">
 
             {/* Launching Badge (Mobile) */}
-            <div className="flex sm:hidden justify-center w-full mb-1 mt-0">
+            <div className="flex sm:hidden justify-center w-full mb-3 mt-0">
               <span className="inline-block rounded-full border border-white/40 bg-white/40 backdrop-blur-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-orange-900 shadow-sm">
                 🚀 Launching in Mumbai & India
               </span>
@@ -325,7 +317,7 @@ function Index() {
 
             </div>
 
-            {/* BOTTOM SECTION (Pushed down on mobile) */}
+            {/* BOTTOM SECTION  */}
             <div className="w-full min-w-0 max-w-xl mt-auto pt-8 flex flex-col gap-4">
 
               {/* CTAs (Mobile) */}
@@ -447,16 +439,16 @@ function Index() {
                 <span className="text-[10px] font-bold text-slate-800">{cat.name}</span>
               </div>
             ))}
-            
-            {/* "More" link */}
+
+            {/* "Search" link */}
             <Link
               to="/coaches"
               className="flex flex-col items-center gap-1.5 transition-transform active:scale-95"
             >
               <div className="flex items-center justify-center text-orange-600">
-                <MoreHorizontal className="w-6 h-6 drop-shadow-md" strokeWidth={2.5} />
+                <Search className="w-6 h-6 drop-shadow-md" strokeWidth={2.5} />
               </div>
-              <span className="text-[10px] font-bold text-slate-800">More</span>
+              <span className="text-[10px] font-bold text-slate-800">Search</span>
             </Link>
           </div>
         </section>
