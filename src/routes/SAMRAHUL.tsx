@@ -15,6 +15,34 @@ function AdminDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>(() => typeof window !== 'undefined' ? (localStorage.getItem('adminActiveTab') || 'dashboard') : 'dashboard');
   const [coaches, setCoaches] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (activeTab === 'reviews') {
+      fetch('/api/admin/reviews', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+      })
+      .then(res => res.json())
+      .then(data => setReviews(data))
+      .catch(console.error);
+    }
+  }, [activeTab]);
+
+  const deleteReview = async (id: number) => {
+    if(!confirm("Are you sure you want to delete this review?")) return;
+    try {
+      const res = await fetch(`/api/admin/reviews/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+      });
+      if(res.ok) {
+        setReviews(prev => prev.filter(r => r.id !== id));
+      }
+    } catch(err) {
+      console.error(err);
+    }
+  };
+
   const [categories, setCategories] = useState<any[]>([]);
   const [categorySearchQuery, setCategorySearchQuery] = useState('');
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -1929,6 +1957,54 @@ function AdminDashboard() {
                   </table>
                 </div>
               )}
+            </div>
+          )}
+
+          
+          {activeTab === 'reviews' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                  <h1 className="text-3xl font-black text-slate-800 tracking-tight">Platform Reviews</h1>
+                  <p className="text-slate-500 mt-2 font-medium">Manage student reviews.</p>
+                </div>
+              </div>
+              <div className="bg-white rounded-3xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] border border-slate-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50/80 border-b border-slate-100">
+                        <th className="py-4 px-6 font-bold text-slate-500 uppercase text-xs tracking-wider">Date</th>
+                        <th className="py-4 px-6 font-bold text-slate-500 uppercase text-xs tracking-wider">Coach</th>
+                        <th className="py-4 px-6 font-bold text-slate-500 uppercase text-xs tracking-wider">Student</th>
+                        <th className="py-4 px-6 font-bold text-slate-500 uppercase text-xs tracking-wider">Rating</th>
+                        <th className="py-4 px-6 font-bold text-slate-500 uppercase text-xs tracking-wider">Comment</th>
+                        <th className="py-4 px-6 font-bold text-slate-500 uppercase text-xs tracking-wider text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {reviews.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-12 text-center text-slate-500 font-medium">No reviews found.</td>
+                        </tr>
+                      ) : (
+                        reviews.map((r: any) => (
+                          <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
+                            <td className="py-4 px-6 font-medium text-slate-700">{new Date(r.createdAt).toLocaleDateString()}</td>
+                            <td className="py-4 px-6 font-bold text-slate-800">{r.coach?.fullName}</td>
+                            <td className="py-4 px-6 font-medium text-slate-600">{r.student?.parentName || r.student?.user?.fullName || 'Unknown Student'}</td>
+                            <td className="py-4 px-6 text-yellow-500 font-bold">{r.rating} ★</td>
+                            <td className="py-4 px-6 text-slate-600 max-w-xs truncate" title={r.comment}>{r.comment || '-'}</td>
+                            <td className="py-4 px-6 text-right">
+                              <button onClick={() => deleteReview(r.id)} className="text-red-500 hover:text-red-600 font-bold text-sm bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">Delete</button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )}
 

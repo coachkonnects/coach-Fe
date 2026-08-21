@@ -216,6 +216,17 @@ function CoachProfilePage() {
                           {c.price === 0 ? <span className="text-teal-500">Free</span> : `₹${c.price}`}
                         </div>
                       </div>
+                      
+                      <button 
+                        onClick={() => {
+                          setEnquiryMessage(`I would like to enquire about your class: ${c.title}`);
+                          setShowModal(true);
+                        }}
+                        className="w-full mt-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+                      >
+                        Enquire about Class
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                      </button>
                     </div>
                   </div>
                 </div>

@@ -688,7 +688,10 @@ function Index() {
                 <div className="p-5 flex flex-col flex-1">
                   <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.05em] text-[color:var(--color-brand-dark)] flex justify-between">
                     <span>{c.category || c.expertise || 'Expert Coach'}</span>
-                    <span className="text-orange-500 font-black">🎯 {c.studentCount || 0}</span>
+                    <span className="flex items-center gap-2">
+                      <span className="flex items-center text-yellow-500"><svg className="w-3 h-3 mr-1 fill-current" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>{c.averageRating > 0 ? c.averageRating.toFixed(1) : "New"}</span>
+                      <span className="text-orange-500 font-black">🎯 {c.studentCount || 0}</span>
+                    </span>
                   </div>
                   <h4 className="font-[var(--font-display)] text-lg font-bold truncate">{c.fullName}</h4>
                   <p className="mt-1 text-sm text-[color:var(--color-ink-muted)] truncate">📍 {c.area || c.location || 'Mumbai'}</p>

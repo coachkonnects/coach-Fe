@@ -32,6 +32,42 @@ function StudentDashboard() {
   const [isVerifyingParentOtp, setIsVerifyingParentOtp] = useState(false);
   const [parentResendCountdown, setParentResendCountdown] = useState(30);
 
+  const [reviewModalCoach, setReviewModalCoach] = useState<any>(null);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [reviewedCoachIds, setReviewedCoachIds] = useState<number[]>([]);
+
+  const submitReview = async () => {
+    setIsSubmittingReview(true);
+    setReviewError('');
+    try {
+      const res = await fetch(`/api/profile/coach/${reviewModalCoach.id}/review`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(reviewForm)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to submit review');
+      setReviewSuccess(true);
+      setReviewedCoachIds(prev => [...prev, reviewModalCoach.id]);
+      setTimeout(() => {
+        setReviewModalCoach(null);
+        setReviewSuccess(false);
+        setReviewForm({ rating: 5, comment: '' });
+      }, 2000);
+    } catch (err: any) {
+      setReviewError(err.message);
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+
   useEffect(() => {
     let timer: any;
     if (showParentOtpModal && parentResendCountdown > 0) {
@@ -327,7 +363,76 @@ function StudentDashboard() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/30 to-orange-50/30 flex items-center justify-center">
         <div className="animate-spin w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full"></div>
 
-        {showLogoutModal && (
+        
+      {/* Review Modal */}
+      {reviewModalCoach && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-xl font-black text-slate-800">Review {reviewModalCoach.fullName}</h3>
+              <button onClick={() => setReviewModalCoach(null)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {reviewSuccess ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+                  <h4 className="text-xl font-bold text-slate-800 mb-2">Review Submitted!</h4>
+                  <p className="text-slate-500 font-medium">Thank you for your feedback.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-6 text-center">
+                    <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-3">Rating</p>
+                    <div className="flex items-center justify-center gap-2">
+                      {[1,2,3,4,5].map(star => (
+                        <button
+                          key={star}
+                          onClick={() => setReviewForm(prev => ({...prev, rating: star}))}
+                          className={`text-4xl transition-transform hover:scale-110 ${reviewForm.rating >= star ? 'text-yellow-400' : 'text-slate-200'}`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Comment (Optional)</label>
+                    <textarea 
+                      value={reviewForm.comment}
+                      onChange={(e) => setReviewForm(prev => ({...prev, comment: e.target.value}))}
+                      placeholder="How was your experience?"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium h-32 resize-none"
+                    ></textarea>
+                  </div>
+
+                  {reviewError && (
+                    <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl font-bold text-sm flex items-start gap-2 border border-red-100">
+                      <AlertCircle className="w-5 h-5 shrink-0" />
+                      <p>{reviewError}</p>
+                    </div>
+                  )}
+
+                  <button 
+                    onClick={submitReview}
+                    disabled={isSubmittingReview}
+                    className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-slate-800 transition-colors shadow-lg disabled:opacity-50"
+                  >
+                    {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLogoutModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
               <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -358,7 +463,76 @@ function StudentDashboard() {
           </button>
         </div>
 
-        {showLogoutModal && (
+        
+      {/* Review Modal */}
+      {reviewModalCoach && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-xl font-black text-slate-800">Review {reviewModalCoach.fullName}</h3>
+              <button onClick={() => setReviewModalCoach(null)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {reviewSuccess ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+                  <h4 className="text-xl font-bold text-slate-800 mb-2">Review Submitted!</h4>
+                  <p className="text-slate-500 font-medium">Thank you for your feedback.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-6 text-center">
+                    <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-3">Rating</p>
+                    <div className="flex items-center justify-center gap-2">
+                      {[1,2,3,4,5].map(star => (
+                        <button
+                          key={star}
+                          onClick={() => setReviewForm(prev => ({...prev, rating: star}))}
+                          className={`text-4xl transition-transform hover:scale-110 ${reviewForm.rating >= star ? 'text-yellow-400' : 'text-slate-200'}`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Comment (Optional)</label>
+                    <textarea 
+                      value={reviewForm.comment}
+                      onChange={(e) => setReviewForm(prev => ({...prev, comment: e.target.value}))}
+                      placeholder="How was your experience?"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium h-32 resize-none"
+                    ></textarea>
+                  </div>
+
+                  {reviewError && (
+                    <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl font-bold text-sm flex items-start gap-2 border border-red-100">
+                      <AlertCircle className="w-5 h-5 shrink-0" />
+                      <p>{reviewError}</p>
+                    </div>
+                  )}
+
+                  <button 
+                    onClick={submitReview}
+                    disabled={isSubmittingReview}
+                    className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-slate-800 transition-colors shadow-lg disabled:opacity-50"
+                  >
+                    {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLogoutModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
               <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -442,7 +616,76 @@ function StudentDashboard() {
               <p className="text-sm font-medium">We are reviewing your profile. We'll notify you once it's approved.</p>
             </div>
 
-            {showLogoutModal && (
+            
+      {/* Review Modal */}
+      {reviewModalCoach && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-xl font-black text-slate-800">Review {reviewModalCoach.fullName}</h3>
+              <button onClick={() => setReviewModalCoach(null)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {reviewSuccess ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+                  <h4 className="text-xl font-bold text-slate-800 mb-2">Review Submitted!</h4>
+                  <p className="text-slate-500 font-medium">Thank you for your feedback.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-6 text-center">
+                    <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-3">Rating</p>
+                    <div className="flex items-center justify-center gap-2">
+                      {[1,2,3,4,5].map(star => (
+                        <button
+                          key={star}
+                          onClick={() => setReviewForm(prev => ({...prev, rating: star}))}
+                          className={`text-4xl transition-transform hover:scale-110 ${reviewForm.rating >= star ? 'text-yellow-400' : 'text-slate-200'}`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Comment (Optional)</label>
+                    <textarea 
+                      value={reviewForm.comment}
+                      onChange={(e) => setReviewForm(prev => ({...prev, comment: e.target.value}))}
+                      placeholder="How was your experience?"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium h-32 resize-none"
+                    ></textarea>
+                  </div>
+
+                  {reviewError && (
+                    <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl font-bold text-sm flex items-start gap-2 border border-red-100">
+                      <AlertCircle className="w-5 h-5 shrink-0" />
+                      <p>{reviewError}</p>
+                    </div>
+                  )}
+
+                  <button 
+                    onClick={submitReview}
+                    disabled={isSubmittingReview}
+                    className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-slate-800 transition-colors shadow-lg disabled:opacity-50"
+                  >
+                    {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLogoutModal && (
               <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
                 <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
                   <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -744,7 +987,17 @@ function StudentDashboard() {
                 <div className="space-y-4 flex-1 overflow-y-auto pr-2 max-h-[350px]">
                   {enquiries.map((enq: any) => (
                     <div key={enq.id} className="p-5 border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-4">
-                      <img src={enq.coach?.profileImageUrl || '/homelogo.png'} alt="Coach" className="w-16 h-16 rounded-xl object-cover" />
+                      <div className="flex flex-col items-center gap-2">
+                        <img src={enq.coach?.profileImageUrl || '/homelogo.png'} alt="Coach" className="w-16 h-16 rounded-xl object-cover" />
+                        {enq.status === 'APPROVED' && !reviewedCoachIds.includes(enq.coach.id) && (
+                          <button 
+                            onClick={() => setReviewModalCoach(enq.coach)}
+                            className="text-[10px] font-black uppercase tracking-wider bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded-md transition-all shadow-sm w-full text-center"
+                          >
+                            ★ Review
+                          </button>
+                        )}
+                      </div>
                       <div className="flex-1 text-left">
                         <h4 className="text-lg font-bold text-slate-800">{enq.coach?.fullName}</h4>
                         <p className="text-sm text-slate-500 line-clamp-1 mb-2">{enq.message}</p>
@@ -773,6 +1026,7 @@ function StudentDashboard() {
                                   WhatsApp
                                 </a>
                               )}
+
                               {enq.coach?.user?.email && (
                                 <a
                                   href={`mailto:${enq.coach.user.email}`}
@@ -1055,6 +1309,75 @@ function StudentDashboard() {
         </div>
         <p className="text-[11px] text-slate-400 font-medium">© {new Date().getFullYear()} CoachKonnects. All rights reserved.</p>
       </div>
+
+      
+      {/* Review Modal */}
+      {reviewModalCoach && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-xl font-black text-slate-800">Review {reviewModalCoach.fullName}</h3>
+              <button onClick={() => setReviewModalCoach(null)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {reviewSuccess ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+                  <h4 className="text-xl font-bold text-slate-800 mb-2">Review Submitted!</h4>
+                  <p className="text-slate-500 font-medium">Thank you for your feedback.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="mb-6 text-center">
+                    <p className="text-sm text-slate-500 font-bold uppercase tracking-wider mb-3">Rating</p>
+                    <div className="flex items-center justify-center gap-2">
+                      {[1,2,3,4,5].map(star => (
+                        <button
+                          key={star}
+                          onClick={() => setReviewForm(prev => ({...prev, rating: star}))}
+                          className={`text-4xl transition-transform hover:scale-110 ${reviewForm.rating >= star ? 'text-yellow-400' : 'text-slate-200'}`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">Comment (Optional)</label>
+                    <textarea 
+                      value={reviewForm.comment}
+                      onChange={(e) => setReviewForm(prev => ({...prev, comment: e.target.value}))}
+                      placeholder="How was your experience?"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-medium h-32 resize-none"
+                    ></textarea>
+                  </div>
+
+                  {reviewError && (
+                    <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl font-bold text-sm flex items-start gap-2 border border-red-100">
+                      <AlertCircle className="w-5 h-5 shrink-0" />
+                      <p>{reviewError}</p>
+                    </div>
+                  )}
+
+                  <button 
+                    onClick={submitReview}
+                    disabled={isSubmittingReview}
+                    className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-slate-800 transition-colors shadow-lg disabled:opacity-50"
+                  >
+                    {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {showLogoutModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">

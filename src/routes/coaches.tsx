@@ -115,7 +115,7 @@ function CoachesDirectory() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredCoaches.map((coach: any) => {
              const coachClasses = classes.filter(cls => cls.coachId === coach.user?.id);
-             const rating = 4.5; // placeholder
+             const rating = coach.averageRating > 0 ? coach.averageRating.toFixed(1) : "New";
              const reviews = 12; // placeholder
 
              return (
@@ -143,7 +143,9 @@ function CoachesDirectory() {
                      </div>
                    </div>
                    <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white font-bold text-sm flex items-center gap-1 border border-white/30">
-                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" /> {rating}
+                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" /> 
+                      {rating} 
+                      {coach.reviewCount > 0 && <span className="text-[10px] text-white/70 ml-1">({coach.reviewCount})</span>}
                    </div>
                  </div>
 

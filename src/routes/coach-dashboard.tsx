@@ -510,7 +510,7 @@ function CoachDashboard() {
       });
       if (res.ok) {
         const data = await res.json();
-        setProfile({ ...data, ...editForm });
+        setProfile(data);
         setIsEditing(false);
         alert("Profile updated successfully! Note: Your profile is now Pending Approval.");
       } else {
