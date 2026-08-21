@@ -17,6 +17,7 @@ function CoachDashboard() {
   const [enquiries, setEnquiries] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
   const [availabilities, setAvailabilities] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"overview" | "classes" | "enquiries">(
     "overview",
   );
@@ -149,7 +150,8 @@ function CoachDashboard() {
       fetch(`/api/enquiries/coach?email=${email}`),
       fetch(`/api/classes?email=${email}`),
       fetch(`/api/availability?email=${email}`),
-      fetch(`/api/config/blocked-words`)
+      fetch(`/api/config/blocked-words`),
+      fetch(`/api/categories`)
     ])
       .then(async (responses) => {
         if (responses.some(r => r.status === 401 || r.status === 403)) {
@@ -166,12 +168,14 @@ function CoachDashboard() {
           responses[2].ok ? responses[2].json() : [],
           responses[3].ok ? responses[3].json() : [],
           responses[4].ok ? responses[4].json() : { words: [] },
+          responses[5].ok ? responses[5].json() : [],
         ]);
       })
       .then((results) => {
         if (!results) return;
-        const [data, enquiriesData, classesData, availData, blockedWordsData] = results;
+        const [data, enquiriesData, classesData, availData, blockedWordsData, catsData] = results;
         if (blockedWordsData?.words) setBlockedWords(blockedWordsData.words);
+        setCategories(catsData || []);
         if (data && data.profile) {
           setProfile(data.profile);
           setFlags(data.flags || []);
@@ -1127,6 +1131,21 @@ function CoachDashboard() {
                           <option value="Online">Online</option>
                           <option value="Offline">Offline</option>
                           <option value="Hybrid">Hybrid</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                          Category <span className="text-orange-500">*</span>
+                        </label>
+                        <select
+                          value={editForm.category || ""}
+                          onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                          className="w-full px-4 py-2 border rounded-xl"
+                        >
+                          <option value="">Select Category</option>
+                          {categories.map((c: any) => (
+                            <option key={c.id} value={c.name}>{c.name}</option>
+                          ))}
                         </select>
                       </div>
                       <div>

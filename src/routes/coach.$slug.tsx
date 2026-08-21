@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
+import { Users, DollarSign, Star } from 'lucide-react';
 
 export const Route = createFileRoute('/coach/$slug')({
   component: CoachProfilePage,
@@ -121,9 +122,9 @@ function CoachProfilePage() {
         {/* Profile Header (Glassmorphic) */}
         <div className="bg-white/80 backdrop-blur-2xl border border-white rounded-[3rem] shadow-xl p-8 md:p-12 mb-12 relative overflow-hidden flex flex-col md:flex-row items-center md:items-start gap-8">
            {(coach.groupImageUrl || coach.coverPhotoUrl) && (
-             <div className="absolute inset-0 z-[-1] opacity-20">
+             <div className="absolute inset-0 z-[-1] opacity-60">
                <img src={coach.groupImageUrl || coach.coverPhotoUrl} alt="Cover Background" className="w-full h-full object-cover" />
-               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/90"></div>
+               <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-white/95"></div>
              </div>
            )}
            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-bl-full -z-10 blur-3xl"></div>
@@ -146,15 +147,33 @@ function CoachProfilePage() {
 
            <div className="flex-1 text-center md:text-left z-10 w-full">
              <h1 className="text-4xl md:text-5xl font-black text-slate-800 mb-2 tracking-tight">{coach.fullName}</h1>
-             <p className="text-xl font-bold text-orange-500 mb-6 uppercase tracking-wider">{coach.headline || coach.category || 'Professional Coach'}</p>
+             <p className="text-xl font-bold text-orange-500 mb-6 uppercase tracking-wider">{coach.expertise || coach.headline || coach.category || 'Professional Coach'}</p>
              
-             <p className="text-lg text-slate-600 mb-8 leading-relaxed max-w-2xl mx-auto md:mx-0">{coach.bio || coach.description || 'Passionate about sharing knowledge.'}</p>
+             <p className="text-lg text-slate-800 font-medium mb-8 leading-relaxed max-w-2xl mx-auto md:mx-0">{coach.bio || coach.description || 'Passionate about sharing knowledge.'}</p>
              
              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-8">
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-md border border-slate-100 rounded-xl text-slate-700 font-bold text-sm shadow-sm">
-                  <svg className="w-5 h-5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                  {coach.area ? `${coach.area}, ` : ''}{coach.district}
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md border border-slate-100 rounded-xl text-slate-800 font-bold text-sm shadow-sm">
+                  <svg className="w-5 h-5 text-teal-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  {[coach.area, coach.district, coach.state, coach.pincode].filter(Boolean).join(', ') || "Location not specified"}
                 </div>
+                {coach.targetAudience && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-md border border-slate-100 rounded-xl text-slate-700 font-bold text-sm shadow-sm">
+                    <Users className="w-5 h-5 text-indigo-500 shrink-0" />
+                    {coach.targetAudience}
+                  </div>
+                )}
+                {(coach.minPrice !== null && coach.minPrice !== undefined) && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-md border border-slate-100 rounded-xl text-slate-700 font-bold text-sm shadow-sm">
+                    <DollarSign className="w-5 h-5 text-green-500 shrink-0" />
+                    ₹{coach.minPrice} {coach.maxPrice ? `- ₹${coach.maxPrice}` : ''}
+                  </div>
+                )}
+                {reviews && reviews.length > 0 && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-md border border-slate-100 rounded-xl text-slate-700 font-bold text-sm shadow-sm">
+                    <Star className="w-5 h-5 text-amber-500 shrink-0 fill-amber-500" />
+                    { (reviews.reduce((acc: any, r: any) => acc + r.rating, 0) / reviews.length).toFixed(1) } ({reviews.length} Reviews)
+                  </div>
+                )}
              </div>
 
              <button 
