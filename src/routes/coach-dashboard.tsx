@@ -1,4 +1,4 @@
-import { Sparkles, Edit3, X } from "lucide-react";
+import { Sparkles, Edit3, X, Link } from "lucide-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router"; // test
 import { useState, useEffect, useCallback } from "react";
 import * as faceapi from "face-api.js";
@@ -457,6 +457,9 @@ function CoachDashboard() {
       if (parseInt(editForm.maxPrice) <= parseInt(editForm.minPrice)) {
         return alert("Max Price must be greater than Min Price!");
       }
+      if (parseInt(editForm.maxPrice) > 100000) {
+        return alert("Maximum price cannot exceed ₹1,00,000!");
+      }
     }
 
     if (editForm.mobile && (!/^[6-9]/.test(editForm.mobile) || editForm.mobile.length !== 10)) {
@@ -764,6 +767,19 @@ function CoachDashboard() {
                       <p className="text-slate-500">Manage your coaching profile and status.</p>
                     </div>
                     <div className="flex items-center gap-4">
+                      {profile?.slug && (
+                        <button
+                          onClick={() => {
+                            const url = `${window.location.origin}/coach/${profile.slug}`;
+                            navigator.clipboard.writeText(url);
+                            alert("Profile link copied to clipboard!");
+                          }}
+                          className="p-2 bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer shadow-sm border border-slate-200"
+                          title="Copy Public Profile Link"
+                        >
+                          <Link className="w-5 h-5" />
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           if (profile?.status === 'PENDING_APPROVAL') {

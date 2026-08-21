@@ -1066,14 +1066,7 @@ function AdminDashboard() {
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Expertise</h3>
-                    <input
-                      type="text"
-                      defaultValue={selectedCoach.expertise || ''}
-                      onBlur={(e) => handleExpertiseChange(e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base font-medium bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
-                      placeholder="e.g. Yoga, Guitar, Python..."
-                    />
-                    <p className="text-xs text-gray-400 mt-1">Click away to save</p>
+                    <p className="font-medium text-lg">{selectedCoach.expertise || 'Not specified'}</p>
                   </div>
                   <div className="md:col-span-2">
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">About / Description</h3>
