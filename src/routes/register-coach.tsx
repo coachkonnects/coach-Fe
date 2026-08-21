@@ -121,7 +121,8 @@ function CoachRegisterPage() {
     instagram: '',
     socialLinks: '',
     consent: true,
-    isFresher: false
+    isFresher: false,
+    noInstagram: false
   });
 
   const handlePincodeChange = async (pincode: string) => {
@@ -533,7 +534,7 @@ function CoachRegisterPage() {
     if (step === 5) {
       if (!formData.profileImageUrl) return alert("Please upload a profile headshot!");
       if (!formData.isFresher && !formData.groupImageUrl) return alert("Please upload a group action photo!");
-      if (!formData.instagram) return alert("Please enter your Instagram handle!");
+      if (!formData.noInstagram && !formData.instagram) return alert("Please enter your Instagram handle!");
     }
 
     const payload = {
@@ -1054,15 +1055,27 @@ function CoachRegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 ml-1">Instagram Handle <span className="text-orange-500">*</span></label>
+                <div className="flex items-center justify-between ml-1">
+                  <label className="text-sm font-bold text-slate-700">Instagram Handle {!formData.noInstagram && <span className="text-orange-500">*</span>}</label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-600 font-medium">
+                    <input 
+                      type="checkbox" 
+                      checked={formData.noInstagram || false} 
+                      onChange={e => setFormData({ ...formData, noInstagram: e.target.checked, instagram: e.target.checked ? '' : formData.instagram })}
+                      className="rounded border-slate-300 text-orange-500 focus:ring-orange-500" 
+                    />
+                    I don't have Instagram
+                  </label>
+                </div>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">@</span>
                   <input
                     type="text"
+                    disabled={formData.noInstagram}
                     value={formData.instagram}
                     onChange={e => setFormData({ ...formData, instagram: e.target.value.replace(/[^a-zA-Z0-9_.]/g, '') })}
                     placeholder="yourhandle"
-                    className="w-full pl-10 pr-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm"
+                    className="w-full pl-10 pr-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm disabled:opacity-50 disabled:bg-slate-50"
                   />
                 </div>
               </div>
