@@ -289,7 +289,7 @@ function RegisterPage() {
         } else {
           localStorage.setItem('token', authToken || '');
           localStorage.setItem('userEmail', formData.email);
-          localStorage.setItem('userRole', 'STUDENT');
+          localStorage.setItem('userRole', 'student');
           alert(`Success! Your Student profile has been submitted`);
           navigate({ to: '/student-dashboard' });
         }
@@ -336,7 +336,7 @@ function RegisterPage() {
       if (res.ok) {
         localStorage.setItem('token', authToken || '');
         localStorage.setItem('userEmail', formData.email);
-        localStorage.setItem('userRole', 'STUDENT');
+        localStorage.setItem('userRole', 'student');
         alert("Parental consent verified! Profile registration complete.");
         setShowParentOtpModal(false);
         navigate({ to: '/student-dashboard' });

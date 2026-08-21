@@ -561,7 +561,7 @@ function CoachRegisterPage() {
         if (!isEditMode) {
           localStorage.setItem('token', authToken || '');
           localStorage.setItem('userEmail', formData.email);
-          localStorage.setItem('userRole', 'COACH');
+          localStorage.setItem('userRole', 'coach');
         }
         alert(isEditMode ? `Success! Your Coach profile has been updated and sent for Review!` : `Success! Your Coach profile has been submitted and is Pending Admin Approval!`);
         navigate({ to: '/coach-dashboard' });
@@ -1061,7 +1061,7 @@ function CoachRegisterPage() {
                     <input 
                       type="checkbox" 
                       checked={formData.noInstagram || false} 
-                      onChange={e => setFormData({ ...formData, noInstagram: e.target.checked, instagram: e.target.checked ? '' : formData.instagram })}
+                      onChange={e => setFormData({ ...formData, noInstagram: e.target.checked, instagram: e.target.checked ? `New_${formData.fullName.replace(/\s+/g, '')}` : formData.instagram })}
                       className="rounded border-slate-300 text-orange-500 focus:ring-orange-500" 
                     />
                     I don't have Instagram
