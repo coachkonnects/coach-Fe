@@ -558,7 +558,7 @@ function CoachDashboard() {
       const finishRes = await fetch(`/api/passkeys/register/finish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(asseResp)
+        body: JSON.stringify({ email, response: asseResp })
       });
 
       if (!finishRes.ok) throw new Error("Failed to finish passkey registration");

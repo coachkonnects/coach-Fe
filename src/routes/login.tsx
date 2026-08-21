@@ -69,7 +69,7 @@ function LoginPage() {
       const verifyRes = await fetch("/api/passkeys/login/finish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(asseResp)
+        body: JSON.stringify({ email, response: asseResp })
       });
 
       if (!verifyRes.ok) throw new Error("Passkey login failed. Invalid passcode.");
