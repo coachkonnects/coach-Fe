@@ -82,7 +82,7 @@ function CoachDashboard() {
     if (classForm.description && classForm.description.trim().split(/\s+/).length > 250) {
       return alert("Class/Workshop Description must not exceed 250 words!");
     }
-    
+
     if (checkRestrictedWords(classForm.title) || checkRestrictedWords(classForm.description)) {
       return alert("Title or Description contains restricted words!");
     }
@@ -380,7 +380,7 @@ function CoachDashboard() {
     }
   };
 
-  
+
   const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value.replace(/\D/g, '');
     if (val.length > 8) val = val.slice(0, 8);
@@ -456,8 +456,13 @@ function CoachDashboard() {
     if (editForm.mobile && (!/^[6-9]/.test(editForm.mobile) || editForm.mobile.length !== 10)) {
       return alert("Mobile number must be 10 digits and start with 6, 7, 8, or 9!");
     }
-    if (editForm.description && editForm.description.trim().split(/\s+/).length > 250) {
-      return alert("About Me / Description must not exceed 250 words!");
+    if (editForm.description) {
+      if (editForm.description.trim().split(/\s+/).length > 150) {
+        return alert("Description / Bio must not exceed 150 words!");
+      }
+      if (/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(editForm.description) || /[^a-zA-Z\s.,!?'\n\r-]/.test(editForm.description) || /\d/.test(editForm.description)) {
+        return alert("Description / Bio cannot contain numbers, emails, or special characters.");
+      }
     }
     if (dobError) {
       return alert(dobError);
@@ -466,7 +471,7 @@ function CoachDashboard() {
     if (!editForm.dob || editForm.dob.length !== 10) {
       return alert("Please enter a complete Date of Birth (DD/MM/YYYY)!");
     }
-    
+
     const dobParts = editForm.dob.split('/');
     if (dobParts.length === 3) {
       const day = parseInt(dobParts[0], 10);
@@ -475,7 +480,7 @@ function CoachDashboard() {
       const dobDate = new Date(year, month, day);
       const currentYear = new Date().getFullYear();
       if (isNaN(year) || year < 1940 || year > currentYear) return alert(`Please enter a valid year between 1940 and ${currentYear}!`);
-      
+
       let age = currentYear - year;
       const today = new Date();
       const m = today.getMonth() - dobDate.getMonth();
@@ -787,7 +792,7 @@ function CoachDashboard() {
                         <input type="text" placeholder="DD/MM/YYYY" value={editForm.dob || editForm.dateOfBirth || ""} onChange={handleDobChange} className={`w-full px-4 py-2 border rounded-xl ${dobError ? 'border-red-500' : ''}`} />
                         {dobError && <p className="text-red-500 text-xs font-bold mt-1">{dobError}</p>}
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">Class Mode</label>
                         <select value={editForm.classMode || ""} onChange={e => setEditForm({ ...editForm, classMode: e.target.value })} className="w-full px-4 py-2 border rounded-xl">
@@ -808,7 +813,7 @@ function CoachDashboard() {
                           className="w-full px-4 py-2 border rounded-xl"
                         />
                       </div>
-                      
+
                       <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">
                           Mobile Number
@@ -986,7 +991,7 @@ function CoachDashboard() {
                         { label: 'Email', value: profile?.user?.email || (typeof window !== 'undefined' ? localStorage.getItem('userEmail') : null) },
                         { label: 'Mobile Number', value: profile?.user?.phoneNumber || profile?.mobile },
                         { label: 'Date of Birth', value: profile?.dob || profile?.dateOfBirth },
-                        
+
                         { label: 'Class Mode', value: profile?.classMode },
                         { label: 'Pricing', value: profile?.pricing },
                         { label: 'Target Audience', value: profile?.targetAudience },
@@ -1008,7 +1013,7 @@ function CoachDashboard() {
                         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Intro Video URL (YouTube)</h3>
                         {profile?.introVideoUrl ? (
                           <a href={profile.introVideoUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-teal-600 hover:text-teal-700 text-sm hover:underline flex items-center gap-2">
-                            <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                            <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" /></svg>
                             {profile.introVideoUrl}
                           </a>
                         ) : (
@@ -1071,7 +1076,7 @@ function CoachDashboard() {
                               </span>
                             )}
                           </div>
-                          
+
                         </div>
                         <p className="text-slate-600 mb-4 line-clamp-2">{c.description}</p>
 
@@ -1337,7 +1342,7 @@ function CoachDashboard() {
                                   let newDays = [...currentDays].filter(Boolean);
                                   if (isSelected) newDays = newDays.filter(x => x !== d);
                                   else newDays.push(d);
-                                  
+
                                   const parts = classForm.schedule.split(' ');
                                   const start = parts[1] || '';
                                   const end = parts[3] || '';
