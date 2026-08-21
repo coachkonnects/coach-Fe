@@ -279,6 +279,7 @@ function AdminDashboard() {
   const [enquiries, setEnquiries] = useState<any[]>([]);
   const [demands, setDemands] = useState<any[]>([]);
   const [passkeyRegistered, setPasskeyRegistered] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
     const email = localStorage.getItem("adminEmail") || "";
     return localStorage.getItem(`passkey_registered_${email}`) === "true";
   });

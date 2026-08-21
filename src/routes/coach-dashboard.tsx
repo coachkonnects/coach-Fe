@@ -517,8 +517,12 @@ function CoachDashboard() {
         setIsEditing(false);
         alert("Profile updated successfully! Note: Your profile is now Pending Approval.");
       } else {
-        const errorText = await res.text();
-        alert("Failed to update profile: " + errorText);
+        try {
+          const errorData = await res.json();
+          alert("Failed to update profile: " + (errorData.error || "Unknown error"));
+        } catch {
+          alert("Failed to update profile. Please try again.");
+        }
       }
     } catch (e) {
       alert("Error connecting to server.");
