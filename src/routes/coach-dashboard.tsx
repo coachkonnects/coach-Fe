@@ -621,8 +621,7 @@ function CoachDashboard() {
               Profile Under Review
             </h2>
             <p className="mt-2 text-amber-700">
-              Your profile has been submitted and is currently being reviewed by our team. You will
-              be notified once it is live!
+              Your profile has been submitted and is currently being reviewed by our team. You will be able to review and edit your profile after it is approved by the admin.
             </p>
           </div>
         );

@@ -13,7 +13,7 @@ function AdminDashboard() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>(() => localStorage.getItem('adminActiveTab') || 'dashboard');
+  const [activeTab, setActiveTab] = useState<string>(() => typeof window !== 'undefined' ? (localStorage.getItem('adminActiveTab') || 'dashboard') : 'dashboard');
   const [coaches, setCoaches] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [categorySearchQuery, setCategorySearchQuery] = useState('');
