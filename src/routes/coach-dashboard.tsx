@@ -145,11 +145,13 @@ function CoachDashboard() {
       return;
     }
 
+    const headers = { 'Authorization': `Bearer ${typeof window !== "undefined" ? localStorage.getItem("token") : ''}` };
+
     Promise.all([
-      fetch(`/api/profile/coach/me?email=${email}`),
-      fetch(`/api/enquiries/coach?email=${email}`),
-      fetch(`/api/classes?email=${email}`),
-      fetch(`/api/availability?email=${email}`),
+      fetch(`/api/profile/coach/me?email=${email}`, { headers }),
+      fetch(`/api/enquiries/coach?email=${email}`, { headers }),
+      fetch(`/api/classes?email=${email}`, { headers }),
+      fetch(`/api/availability?email=${email}`, { headers }),
       fetch(`/api/config/blocked-words`),
       fetch(`/api/categories`)
     ])

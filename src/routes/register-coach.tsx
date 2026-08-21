@@ -1078,6 +1078,11 @@ function CoachRegisterPage() {
                     className="w-full pl-10 pr-5 py-3.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-orange-500 shadow-sm disabled:opacity-50 disabled:bg-slate-50"
                   />
                 </div>
+                {formData.noInstagram && (
+                  <p className="text-xs text-orange-600 font-medium mt-1 ml-1">
+                    We've generated a temporary handle for you. Please create an Instagram account with this handle so students can find you!
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
