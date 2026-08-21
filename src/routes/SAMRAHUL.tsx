@@ -28,6 +28,24 @@ function AdminDashboard() {
     }
   }, [activeTab]);
 
+  const changeReviewStatus = async (id: number, newStatus: string) => {
+    try {
+      const res = await fetch(`/api/admin/reviews/${id}/status`, {
+        method: 'PUT',
+        headers: { 
+          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if(res.ok) {
+        setReviews(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r));
+      }
+    } catch(err) {
+      console.error(err);
+    }
+  };
+
   const deleteReview = async (id: number) => {
     if(!confirm("Are you sure you want to delete this review?")) return;
     try {
@@ -1979,6 +1997,7 @@ function AdminDashboard() {
                         <th className="py-4 px-6 font-bold text-slate-500 uppercase text-xs tracking-wider">Student</th>
                         <th className="py-4 px-6 font-bold text-slate-500 uppercase text-xs tracking-wider">Rating</th>
                         <th className="py-4 px-6 font-bold text-slate-500 uppercase text-xs tracking-wider">Comment</th>
+                        <th className="py-4 px-6 font-bold text-slate-500 uppercase text-xs tracking-wider">Status</th>
                         <th className="py-4 px-6 font-bold text-slate-500 uppercase text-xs tracking-wider text-right">Actions</th>
                       </tr>
                     </thead>
@@ -1995,7 +2014,18 @@ function AdminDashboard() {
                             <td className="py-4 px-6 font-medium text-slate-600">{r.student?.parentName || r.student?.user?.fullName || 'Unknown Student'}</td>
                             <td className="py-4 px-6 text-yellow-500 font-bold">{r.rating} ★</td>
                             <td className="py-4 px-6 text-slate-600 max-w-xs truncate" title={r.comment}>{r.comment || '-'}</td>
-                            <td className="py-4 px-6 text-right">
+                            <td className="py-4 px-6">
+                              <span className={`px-2 py-1 text-xs font-bold rounded-lg ${r.status === 'APPROVED' ? 'bg-teal-100 text-teal-700' : r.status === 'REJECTED' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                                {r.status || 'PENDING'}
+                              </span>
+                            </td>
+                            <td className="py-4 px-6 text-right flex gap-2 justify-end">
+                              {(!r.status || r.status === 'PENDING') && (
+                                <>
+                                  <button onClick={() => changeReviewStatus(r.id, 'APPROVED')} className="text-teal-600 hover:text-teal-700 font-bold text-sm bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors">Approve</button>
+                                  <button onClick={() => changeReviewStatus(r.id, 'REJECTED')} className="text-amber-600 hover:text-amber-700 font-bold text-sm bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors">Reject</button>
+                                </>
+                              )}
                               <button onClick={() => deleteReview(r.id)} className="text-red-500 hover:text-red-600 font-bold text-sm bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">Delete</button>
                             </td>
                           </tr>
