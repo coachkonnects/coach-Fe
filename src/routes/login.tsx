@@ -186,27 +186,27 @@ function LoginPage() {
       <div className="min-h-screen bg-[#FFF8F0] flex flex-col md:flex-row overflow-hidden font-sans">
         <div
           onClick={() => setActivePath('student')}
-          className="flex-1 relative group cursor-pointer overflow-hidden flex flex-col items-center justify-center p-12 min-h-[50vh] md:min-h-screen border-b-4 md:border-b-0 md:border-r-4 border-[#FFF8F0]"
+          className="flex-1 relative group cursor-pointer overflow-hidden flex flex-col items-center justify-center p-6 py-10 md:p-12 min-h-[50vh] md:min-h-screen border-b-4 md:border-b-0 md:border-r-4 border-[#FFF8F0]"
         >
           <div className="absolute inset-0 bg-[#FF7F5C] transition-transform duration-700 ease-out group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B35] to-[#FF7F5C] opacity-90" />
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
 
-          <div className="relative z-10 text-center transform transition-all duration-500 group-hover:-translate-y-2">
-            <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-2xl border border-white/30 group-hover:rotate-6 transition-all duration-500">
-              <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="relative z-10 text-center transform transition-all duration-500 group-hover:-translate-y-2 flex flex-col items-center">
+            <div className="w-16 h-16 md:w-24 md:h-24 bg-white/20 backdrop-blur-md rounded-3xl mx-auto mb-4 md:mb-8 flex items-center justify-center shadow-2xl border border-white/30 group-hover:rotate-6 transition-all duration-500">
+              <svg className="w-8 h-8 md:w-12 md:h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
               </svg>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight drop-shadow-md">
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-2 md:mb-4 tracking-tight drop-shadow-md">
               I'm a Student
             </h2>
-            <p className="text-white/90 text-lg font-medium max-w-xs mx-auto drop-shadow-sm">
+            <p className="text-white/90 text-sm md:text-lg font-medium max-w-xs mx-auto drop-shadow-sm hidden sm:block">
               Ready to learn, explore, and connect with amazing coaches.
             </p>
 
-            <div className="mt-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-2 text-white font-bold bg-white/20 w-max mx-auto px-6 py-3 rounded-full backdrop-blur-sm border border-white/30">
+            <div className="mt-6 md:mt-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-2 text-white font-bold bg-white/20 w-max mx-auto px-6 py-3 rounded-full backdrop-blur-sm border border-white/30">
               Login as Student
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </div>
@@ -215,26 +215,26 @@ function LoginPage() {
 
         <div
           onClick={() => setActivePath('coach')}
-          className="flex-1 relative group cursor-pointer overflow-hidden flex flex-col items-center justify-center p-12 min-h-[50vh] md:min-h-screen"
+          className="flex-1 relative group cursor-pointer overflow-hidden flex flex-col items-center justify-center p-6 py-10 pb-24 md:p-12 min-h-[50vh] md:min-h-screen"
         >
           <div className="absolute inset-0 bg-[#0f172a] transition-transform duration-700 ease-out group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-br from-teal-900 to-teal-950 opacity-95" />
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay" />
 
-          <div className="relative z-10 text-center transform transition-all duration-500 group-hover:-translate-y-2">
-            <div className="w-24 h-24 bg-teal-500/20 backdrop-blur-md rounded-3xl mx-auto mb-8 flex items-center justify-center shadow-2xl border border-teal-500/30 group-hover:-rotate-6 transition-all duration-500">
-              <svg className="w-12 h-12 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="relative z-10 text-center transform transition-all duration-500 group-hover:-translate-y-2 flex flex-col items-center">
+            <div className="w-16 h-16 md:w-24 md:h-24 bg-teal-500/20 backdrop-blur-md rounded-3xl mx-auto mb-4 md:mb-8 flex items-center justify-center shadow-2xl border border-teal-500/30 group-hover:-rotate-6 transition-all duration-500">
+              <svg className="w-8 h-8 md:w-12 md:h-12 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight drop-shadow-md group-hover:scale-105 transition-transform">
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-2 md:mb-4 tracking-tight drop-shadow-md group-hover:scale-105 transition-transform">
               I'm a Coach
             </h2>
-            <p className="text-teal-200/70 text-lg font-medium max-w-xs mx-auto drop-shadow-sm mb-8">
+            <p className="text-teal-200/70 text-sm md:text-lg font-medium max-w-xs mx-auto drop-shadow-sm mb-4 md:mb-8 hidden sm:block">
               Manage your students, schedule classes, and grow your impact.
             </p>
 
-            <div className="mt-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-2 text-white font-bold bg-teal-500/20 border border-teal-500/30 w-max mx-auto px-6 py-3 rounded-full backdrop-blur-sm group-hover:bg-emerald-500 group-hover:border-emerald-500">
+            <div className="mt-6 md:mt-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-2 text-white font-bold bg-teal-500/20 border border-teal-500/30 w-max mx-auto px-6 py-3 rounded-full backdrop-blur-sm group-hover:bg-emerald-500 group-hover:border-emerald-500">
               Login as Coach
               <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </div>
@@ -242,16 +242,16 @@ function LoginPage() {
         </div>
 
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-auto">
-          <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full p-2 md:p-3 shadow-2xl flex items-center justify-center hover:scale-105 transition-transform">
-            <Link to="/" className="w-full h-full bg-[#FFF8F0] rounded-full border-[4px] md:border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden hover:opacity-90 transition-opacity">
-              <img src="/homelogo.png" alt="Logo" className="w-16 md:w-20 h-auto object-contain" />
+          <div className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full p-1.5 sm:p-2 md:p-3 shadow-2xl flex items-center justify-center hover:scale-105 transition-transform">
+            <Link to="/" className="w-full h-full bg-[#FFF8F0] rounded-full border-[3px] sm:border-[4px] md:border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden hover:opacity-90 transition-opacity">
+              <img src="/homelogo.png" alt="Logo" className="w-10 sm:w-16 md:w-20 h-auto object-contain" />
             </Link>
           </div>
         </div>
 
         {/* Register link */}
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30 w-[90%] max-w-sm">
-          <div className="bg-white/95 backdrop-blur-md px-6 py-3.5 rounded-2xl shadow-2xl border border-white/50 text-sm md:text-base font-bold text-[#2C1810] text-center w-full">
+        <div className="fixed bottom-4 sm:bottom-6 left-1/2 transform -translate-x-1/2 z-30 w-[85%] sm:w-[90%] max-w-xs sm:max-w-sm">
+          <div className="bg-white/95 backdrop-blur-md px-4 py-2.5 sm:px-6 sm:py-3.5 rounded-xl sm:rounded-2xl shadow-2xl border border-white/50 text-xs sm:text-sm md:text-base font-bold text-[#2C1810] text-center w-full">
             Don't have an account?{' '}
             <a href="/register" className="text-[#FF6B35] hover:text-[#B85C38] transition-colors ml-1 inline-block">
               Register
@@ -265,7 +265,7 @@ function LoginPage() {
   // --- PREMIUM STUDENT LOGIN VIEW ---
   if (activePath === 'student') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#FFF8F0] via-[#FFEFE0] to-[#FFD5BA] relative overflow-hidden font-sans flex flex-col lg:flex-row items-center justify-center p-4 md:p-8 pt-12 pb-40">
+      <div className="h-screen lg:min-h-screen bg-gradient-to-br from-[#FFF8F0] via-[#FFEFE0] to-[#FFD5BA] relative overflow-hidden font-sans flex flex-col lg:flex-row items-center justify-center p-3 lg:p-8 pt-4 pb-28 lg:pt-12 lg:pb-40">
         {/* Animated Background Elements */}
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-br from-[#FF7F5C]/20 to-[#FF6B35]/20 blur-[100px] pointer-events-none animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-[#F4A460]/30 to-[#B85C38]/10 blur-[120px] pointer-events-none animate-pulse" style={{ animationDelay: '2s' }} />
@@ -282,10 +282,10 @@ function LoginPage() {
         </div>
 
         {/* Left Side: Creative Illustration Area */}
-        <div className="flex-1 w-full h-full hidden lg:flex flex-col items-center justify-center relative z-10 p-10">
-          <div className="relative w-full max-w-lg aspect-square flex items-center justify-center">
+        <div className="w-full lg:flex-1 flex flex-col items-center justify-center relative z-10 p-2 lg:p-10 mt-1 lg:mt-0 shrink-0">
+          <div className="relative w-full max-w-[280px] sm:max-w-lg lg:aspect-square flex items-center justify-center">
             {/* Main Illustration */}
-            <div className="w-64 h-64 md:w-80 md:h-80 rounded-full shadow-[0_20px_50px_rgba(255,107,53,0.3)] overflow-hidden relative z-20 border-[6px] border-white">
+            <div className="w-24 h-24 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full shadow-[0_20px_50px_rgba(255,107,53,0.3)] overflow-hidden relative z-20 border-[4px] sm:border-[6px] border-white">
               <img
                 src="/student.png"
                 alt="Student"
@@ -294,7 +294,7 @@ function LoginPage() {
             </div>
 
             {/* Floating Orbits with Icons */}
-            <div className="absolute w-[120%] h-[120%] border border-dashed border-[#B85C38]/20 rounded-full animate-[spin_30s_linear_infinite]">
+            <div className="hidden sm:block absolute w-[120%] h-[120%] border border-dashed border-[#B85C38]/20 rounded-full animate-[spin_30s_linear_infinite]">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center transform -rotate-12">
                 <Music className="w-8 h-8 text-[#FF6B35]" />
               </div>
@@ -309,33 +309,33 @@ function LoginPage() {
         </div>
 
         {/* Right Side: Glassmorphic Login Card */}
-        <div className="flex-1 w-full flex items-center justify-center z-10 w-full px-2 mt-4 lg:mt-0">
-          <div className="w-full max-w-lg lg:max-w-xl bg-white/60 backdrop-blur-2xl rounded-[2.5rem] border border-white/80 shadow-[0_8px_32px_rgba(44,24,16,0.1)] p-6 sm:p-10 md:p-14 relative overflow-hidden">
+        <div className="w-full lg:flex-1 flex items-center justify-center z-10 px-2 mt-2 lg:mt-0 min-h-0">
+          <div className="w-full max-w-lg lg:max-w-xl bg-white/60 backdrop-blur-2xl rounded-[1.8rem] lg:rounded-[2.5rem] border border-white/80 shadow-[0_8px_32px_rgba(44,24,16,0.1)] p-4 pb-20 sm:p-10 md:p-14 relative overflow-hidden">
 
             <button
               onClick={handleBackToSelection}
-              className="absolute top-6 left-6 flex items-center gap-1 text-sm font-bold text-[#8B4726] hover:text-[#FF6B35] transition-colors"
+              className="absolute top-4 left-4 lg:top-6 lg:left-6 flex items-center gap-1 text-xs lg:text-sm font-bold text-[#8B4726] hover:text-[#FF6B35] transition-colors"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5" />
               Back
             </button>
 
-            <div className="text-center mt-8 mb-8">
-              <h1 className="text-3xl font-black text-[#2C1810] mb-2 tracking-tight flex items-center justify-center gap-2">
-                Welcome Back! <span className="text-2xl animate-bounce">👋</span>
+            <div className="text-center mt-4 lg:mt-8 mb-4 lg:mb-8">
+              <h1 className="text-2xl lg:text-3xl font-black text-[#2C1810] mb-1 lg:mb-2 tracking-tight flex items-center justify-center gap-2">
+                Welcome Back! <span className="text-xl lg:text-2xl animate-bounce">👋</span>
               </h1>
-              <p className="text-sm font-bold text-[#8B4726]">Log in to continue your hobby journey</p>
+              <p className="text-xs lg:text-sm font-bold text-[#8B4726]">Log in to continue your hobby journey</p>
             </div>
 
-            <form className="space-y-5" onSubmit={step === 'email' ? handleRequestOtp : handleVerifyOtp}>
+            <form className="space-y-3.5 lg:space-y-5" onSubmit={step === 'email' ? handleRequestOtp : handleVerifyOtp}>
               {error && (
-                <div className="text-[#B85C38] text-sm font-bold text-center bg-[#FF7F5C]/10 py-3 px-4 rounded-xl border border-[#FF7F5C]/20 flex items-center gap-2 justify-center">
+                <div className="text-[#B85C38] text-xs lg:text-sm font-bold text-center bg-[#FF7F5C]/10 py-2.5 px-4 rounded-xl border border-[#FF7F5C]/20 flex items-center gap-2 justify-center">
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="text-emerald-600 text-sm font-bold text-center bg-emerald-50 py-3 px-4 rounded-xl border border-emerald-200 flex items-center gap-2 justify-center">
+                <div className="text-emerald-600 text-xs lg:text-sm font-bold text-center bg-emerald-50 py-2.5 px-4 rounded-xl border border-emerald-200 flex items-center gap-2 justify-center">
                   {success}
                 </div>
               )}
@@ -352,7 +352,7 @@ function LoginPage() {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email"
                       disabled={isLoading}
-                      className="w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-[#F4A460]/20 focus:outline-none focus:border-[#FF6B35] text-[#2C1810] transition-all font-medium placeholder:text-[#8B4726]/40 shadow-sm"
+                      className="w-full pl-10 lg:pl-12 pr-4 py-2.5 lg:py-4 bg-white/80 backdrop-blur-sm rounded-xl lg:rounded-2xl border-2 border-[#F4A460]/20 focus:outline-none focus:border-[#FF6B35] text-[#2C1810] transition-all font-medium placeholder:text-[#8B4726]/40 shadow-sm text-sm lg:text-base"
                       required
                     />
                   </div>
@@ -366,24 +366,24 @@ function LoginPage() {
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                     placeholder="------"
                     disabled={isLoading}
-                    className="w-full px-5 py-4 bg-white/80 backdrop-blur-sm text-center tracking-widest font-mono text-3xl font-black text-[#FF6B35] rounded-2xl border-2 border-[#F4A460]/20 focus:outline-none focus:border-[#FF6B35] transition-all placeholder:text-[#8B4726]/20 shadow-sm"
+                    className="w-full px-5 py-2.5 lg:py-4 bg-white/80 backdrop-blur-sm text-center tracking-widest font-mono text-2xl lg:text-3xl font-black text-[#FF6B35] rounded-xl lg:rounded-2xl border-2 border-[#F4A460]/20 focus:outline-none focus:border-[#FF6B35] transition-all placeholder:text-[#8B4726]/20 shadow-sm"
                     required
                   />
                   <div className="flex justify-between items-center px-1">
-                    <p className="text-sm text-[#8B4726] font-medium">
+                    <p className="text-xs text-[#8B4726] font-medium">
                       Code sent to <span className="font-bold text-[#2C1810]">{email}</span>
                     </p>
                     <div className="flex items-center space-x-3">
-                      <button type="button" onClick={() => { setStep('email'); setSuccess(''); setError(''); }} className="text-[#FF6B35] hover:underline text-sm font-bold">
+                      <button type="button" onClick={() => { setStep('email'); setSuccess(''); setError(''); }} className="text-[#FF6B35] hover:underline text-xs lg:text-sm font-bold">
                         Edit
                       </button>
                       <button
                         type="button"
                         onClick={handleRequestOtp}
                         disabled={countdown > 0 || isLoading}
-                        className="text-[#FF6B35] disabled:text-[#8B4726]/40 hover:underline text-sm font-bold transition-all"
+                        className="text-[#FF6B35] disabled:text-[#8B4726]/40 hover:underline text-xs lg:text-sm font-bold transition-all"
                       >
-                        {countdown > 0 ? `Resend OTP (${countdown}s)` : 'Resend OTP'}
+                        {countdown > 0 ? `Resend (${countdown}s)` : 'Resend'}
                       </button>
                     </div>
                   </div>
@@ -393,7 +393,7 @@ function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-[#FF6B35] to-[#FF7F5C] hover:from-[#FF7F5C] hover:to-[#FF6B35] text-white font-bold text-lg py-4 rounded-2xl transition-all transform active:scale-95 shadow-[0_8px_20px_rgba(255,107,53,0.3)] hover:shadow-[0_12px_25px_rgba(255,107,53,0.4)] flex items-center justify-center gap-3 group disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+                className="w-full bg-gradient-to-r from-[#FF6B35] to-[#FF7F5C] hover:from-[#FF7F5C] hover:to-[#FF6B35] text-white font-bold text-base lg:text-lg py-2.5 lg:py-4 rounded-xl lg:rounded-2xl transition-all transform active:scale-95 shadow-[0_8px_20px_rgba(255,107,53,0.3)] hover:shadow-[0_12px_25px_rgba(255,107,53,0.4)] flex items-center justify-center gap-2 lg:gap-3 group disabled:opacity-70 disabled:cursor-not-allowed mt-1 lg:mt-2"
               >
                 {isLoading ? (
                   <span className="flex items-center gap-2">
@@ -414,17 +414,17 @@ function LoginPage() {
               </button>
 
               {step === 'email' && (
-                <div className="mt-4">
-                  <div className="relative flex items-center py-2">
+                <div className="mt-2.5 lg:mt-4">
+                  <div className="relative flex items-center py-1.5 lg:py-2">
                     <div className="flex-grow border-t border-[#F4A460]/30"></div>
-                    <span className="flex-shrink-0 mx-4 text-[#8B4726]/50 text-sm font-bold">OR</span>
+                    <span className="flex-shrink-0 mx-4 text-[#8B4726]/50 text-xs lg:text-sm font-bold">OR</span>
                     <div className="flex-grow border-t border-[#F4A460]/30"></div>
                   </div>
                   <button
                     type="button"
                     onClick={handlePasskeyLogin}
                     disabled={isLoading || !email || !email.includes('@')}
-                    className="w-full bg-white hover:bg-[#FFF8F0] text-[#2C1810] font-bold text-lg py-4 rounded-2xl transition-all transform active:scale-95 border-2 border-[#F4A460]/20 hover:border-[#FF6B35] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                    className="w-full bg-white hover:bg-[#FFF8F0] text-[#2C1810] font-bold text-base lg:text-lg py-2.5 lg:py-4 rounded-xl lg:rounded-2xl transition-all transform active:scale-95 border-2 border-[#F4A460]/20 hover:border-[#FF6B35] flex items-center justify-center gap-2 lg:gap-3 disabled:opacity-50 disabled:cursor-not-allowed mt-1 lg:mt-2"
                   >
                     <Key className="w-5 h-5 text-[#FF6B35]" />
                     Sign in with Passkey
@@ -432,7 +432,7 @@ function LoginPage() {
                 </div>
               )}
 
-              <div className="mt-8 text-center text-sm font-medium text-[#8B4726]">
+              <div className="mt-4 lg:mt-8 text-center text-xs lg:text-sm font-medium text-[#8B4726]">
                 New here?{' '}
                 <a href="/register-student" className="font-black text-[#FF6B35] hover:underline transition-colors">
                   Create an account
@@ -454,7 +454,7 @@ function LoginPage() {
               { icon: <Music className="w-5 h-5 md:w-6 md:h-6" />, label: 'Music' },
               { icon: <MoreHorizontal className="w-5 h-5 md:w-6 md:h-6" />, label: 'More' },
             ].map((item, i) => (
-              <div key={i} className="flex flex-col items-center gap-2 cursor-pointer group">
+              <div key={i} className={`flex-col items-center gap-2 cursor-pointer group ${i >= 4 ? 'hidden md:flex' : 'flex'}`}>
                 <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/50 border border-white/60 flex items-center justify-center text-[#8B4726] shadow-sm transition-all duration-300 group-hover:bg-[#FF6B35] group-hover:text-white group-hover:-translate-y-1 group-hover:shadow-[0_8px_20px_rgba(255,107,53,0.3)]">
                   {item.icon}
                 </div>
@@ -469,7 +469,7 @@ function LoginPage() {
 
   // --- PREMIUM COACH LOGIN VIEW ---
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-900 via-teal-800 to-teal-950 relative overflow-hidden font-sans flex flex-col lg:flex-row items-center justify-center p-4 md:p-8 pt-12 pb-40">
+    <div className="h-screen lg:min-h-screen bg-gradient-to-br from-teal-900 via-teal-800 to-teal-950 relative overflow-hidden font-sans flex flex-col lg:flex-row items-center justify-center p-3 lg:p-8 pt-4 pb-28 lg:pt-12 lg:pb-40">
       {/* Animated Background Elements */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-br from-teal-500/20 to-teal-400/20 blur-[100px] pointer-events-none animate-pulse" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-gradient-to-br from-emerald-500/10 to-teal-300/10 blur-[120px] pointer-events-none animate-pulse" style={{ animationDelay: '2s' }} />
@@ -485,10 +485,10 @@ function LoginPage() {
       </div>
 
       {/* Left Side: Creative Illustration Area */}
-      <div className="flex-1 w-full h-full hidden lg:flex flex-col items-center justify-center relative z-10 p-10">
-        <div className="relative w-full max-w-lg aspect-square flex items-center justify-center">
+      <div className="w-full lg:flex-1 flex flex-col items-center justify-center relative z-10 p-2 lg:p-10 mt-1 lg:mt-0 shrink-0">
+        <div className="relative w-full max-w-[280px] sm:max-w-lg lg:aspect-square flex items-center justify-center">
           {/* Main Illustration */}
-          <div className="w-64 h-64 md:w-80 md:h-80 rounded-full shadow-[0_20px_50px_rgba(13,148,136,0.3)] overflow-hidden relative z-20 border-[6px] border-white">
+          <div className="w-24 h-24 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full shadow-[0_20px_50px_rgba(13,148,136,0.3)] overflow-hidden relative z-20 border-[4px] sm:border-[6px] border-white">
             <img
               src="/coach.png"
               alt="Coaches"
@@ -497,7 +497,7 @@ function LoginPage() {
           </div>
 
           {/* Floating Orbits with Icons */}
-          <div className="absolute w-[120%] h-[120%] border border-dashed border-teal-400/20 rounded-full animate-[spin_30s_linear_infinite]">
+          <div className="hidden sm:block absolute w-[120%] h-[120%] border border-dashed border-teal-400/20 rounded-full animate-[spin_30s_linear_infinite]">
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl shadow-xl flex items-center justify-center transform -rotate-12 border border-teal-300/20">
               <Users className="w-8 h-8 text-teal-300" />
             </div>
@@ -512,36 +512,36 @@ function LoginPage() {
       </div>
 
       {/* Right Side: Glassmorphic Login Card */}
-      <div className="flex-1 w-full flex items-center justify-center z-10 w-full px-2 mt-4 lg:mt-0">
-        <div className="w-full max-w-lg lg:max-w-xl bg-[#0f172a]/60 backdrop-blur-2xl rounded-[2.5rem] border border-teal-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-6 sm:p-10 md:p-14 relative overflow-hidden">
+      <div className="w-full lg:flex-1 flex items-center justify-center z-10 px-2 mt-2 lg:mt-0 min-h-0">
+        <div className="w-full max-w-lg lg:max-w-xl bg-[#0f172a]/60 backdrop-blur-2xl rounded-[1.8rem] lg:rounded-[2.5rem] border border-teal-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-4 pb-20 sm:p-10 md:p-14 relative overflow-hidden">
 
           {/* Subtle top border accent */}
           <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-teal-400 to-emerald-400" />
 
           <button
             onClick={handleBackToSelection}
-            className="absolute top-6 left-6 flex items-center gap-1 text-sm font-bold text-teal-400/70 hover:text-teal-300 transition-colors"
+            className="absolute top-4 left-4 lg:top-6 lg:left-6 flex items-center gap-1 text-xs lg:text-sm font-bold text-teal-400/70 hover:text-teal-300 transition-colors"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5" />
             Back
           </button>
 
-          <div className="text-center mt-8 mb-8">
-            <h1 className="text-3xl font-black text-white mb-2 tracking-tight flex items-center justify-center gap-2">
-              Coach Portal <span className="text-2xl animate-pulse">✨</span>
+          <div className="text-center mt-4 lg:mt-8 mb-4 lg:mb-8">
+            <h1 className="text-2xl lg:text-3xl font-black text-white mb-1 lg:mb-2 tracking-tight flex items-center justify-center gap-2">
+              Coach Portal <span className="text-xl lg:text-2xl animate-pulse">✨</span>
             </h1>
-            <p className="text-sm font-bold text-teal-200/70">Sign in to manage your students</p>
+            <p className="text-xs lg:text-sm font-bold text-teal-200/70">Sign in to manage your students</p>
           </div>
 
-          <form className="space-y-5" onSubmit={step === 'email' ? handleRequestOtp : handleVerifyOtp}>
+          <form className="space-y-3.5 lg:space-y-5" onSubmit={step === 'email' ? handleRequestOtp : handleVerifyOtp}>
             {error && (
-              <div className="text-red-300 text-sm font-bold text-center bg-red-500/10 py-3 px-4 rounded-xl border border-red-500/20 flex items-center gap-2 justify-center">
+              <div className="text-red-300 text-xs lg:text-sm font-bold text-center bg-red-500/10 py-2.5 px-4 rounded-xl border border-red-500/20 flex items-center gap-2 justify-center">
                 {error}
               </div>
             )}
 
             {success && (
-              <div className="text-emerald-300 text-sm font-bold text-center bg-emerald-500/10 py-3 px-4 rounded-xl border border-emerald-500/20 flex items-center gap-2 justify-center">
+              <div className="text-emerald-300 text-xs lg:text-sm font-bold text-center bg-emerald-500/10 py-2.5 px-4 rounded-xl border border-emerald-500/20 flex items-center gap-2 justify-center">
                 {success}
               </div>
             )}
@@ -558,7 +558,7 @@ function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
                     disabled={isLoading}
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-sm rounded-2xl border-2 border-teal-500/20 focus:outline-none focus:border-teal-400 text-white transition-all font-medium placeholder:text-teal-200/30 shadow-inner"
+                    className="w-full pl-10 lg:pl-12 pr-4 py-2.5 lg:py-4 bg-white/5 backdrop-blur-sm rounded-xl lg:rounded-2xl border-2 border-teal-500/20 focus:outline-none focus:border-teal-400 text-white transition-all font-medium placeholder:text-teal-200/30 shadow-inner text-sm lg:text-base"
                     required
                   />
                 </div>
@@ -572,22 +572,22 @@ function LoginPage() {
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
                   placeholder="------"
                   disabled={isLoading}
-                  className="w-full px-5 py-4 bg-white/5 backdrop-blur-sm text-center tracking-[1em] font-mono text-3xl font-black text-teal-300 rounded-2xl border-2 border-teal-500/20 focus:outline-none focus:border-teal-400 transition-all placeholder:text-teal-200/20 shadow-inner"
+                  className="w-full px-5 py-2.5 lg:py-4 bg-white/5 backdrop-blur-sm text-center tracking-[1em] font-mono text-2xl lg:text-3xl font-black text-teal-300 rounded-xl lg:rounded-2xl border-2 border-teal-500/20 focus:outline-none focus:border-teal-400 transition-all placeholder:text-teal-200/20 shadow-inner"
                   required
                 />
                 <div className="flex justify-between items-center px-1">
-                  <p className="text-sm text-teal-200/60 font-medium">
+                  <p className="text-xs text-teal-200/60 font-medium">
                     Code sent to <span className="font-bold text-white">{email}</span>
                   </p>
                   <div className="flex items-center space-x-3">
-                    <button type="button" onClick={() => { setStep('email'); setSuccess(''); setError(''); }} className="text-teal-400 hover:underline text-sm font-bold">
+                    <button type="button" onClick={() => { setStep('email'); setSuccess(''); setError(''); }} className="text-teal-400 hover:underline text-xs lg:text-sm font-bold">
                       Edit
                     </button>
                     <button
                       type="button"
                       onClick={handleRequestOtp}
                       disabled={countdown > 0 || isLoading}
-                      className="text-teal-400 disabled:text-teal-200/30 hover:underline text-sm font-bold transition-all"
+                      className="text-teal-400 disabled:text-teal-200/30 hover:underline text-xs lg:text-sm font-bold transition-all"
                     >
                       {countdown > 0 ? `Resend (${countdown}s)` : 'Resend'}
                     </button>
@@ -599,7 +599,7 @@ function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-900 font-bold text-lg py-4 rounded-2xl transition-all transform active:scale-95 shadow-[0_8px_20px_rgba(20,184,166,0.2)] hover:shadow-[0_12px_25px_rgba(20,184,166,0.3)] flex items-center justify-center gap-3 group disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+              className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-900 font-bold text-base lg:text-lg py-2.5 lg:py-4 rounded-xl lg:rounded-2xl transition-all transform active:scale-95 shadow-[0_8px_20px_rgba(20,184,166,0.2)] hover:shadow-[0_12px_25px_rgba(20,184,166,0.3)] flex items-center justify-center gap-2 lg:gap-3 group disabled:opacity-70 disabled:cursor-not-allowed mt-1 lg:mt-2"
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">
@@ -620,17 +620,17 @@ function LoginPage() {
             </button>
 
             {step === 'email' && (
-              <div className="mt-4">
-                <div className="relative flex items-center py-2">
+              <div className="mt-2.5 lg:mt-4">
+                <div className="relative flex items-center py-1.5 lg:py-2">
                   <div className="flex-grow border-t border-teal-500/20"></div>
-                  <span className="flex-shrink-0 mx-4 text-teal-200/50 text-sm font-bold">OR</span>
+                  <span className="flex-shrink-0 mx-4 text-teal-200/50 text-xs lg:text-sm font-bold">OR</span>
                   <div className="flex-grow border-t border-teal-500/20"></div>
                 </div>
                 <button
                   type="button"
                   onClick={handlePasskeyLogin}
                   disabled={isLoading || !email || !email.includes('@')}
-                  className="w-full bg-white/5 hover:bg-white/10 text-white font-bold text-lg py-4 rounded-2xl transition-all transform active:scale-95 border-2 border-teal-500/20 hover:border-teal-400 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                  className="w-full bg-white/5 hover:bg-white/10 text-white font-bold text-base lg:text-lg py-2.5 lg:py-4 rounded-xl lg:rounded-2xl transition-all transform active:scale-95 border-2 border-teal-500/20 hover:border-teal-400 flex items-center justify-center gap-2 lg:gap-3 disabled:opacity-50 disabled:cursor-not-allowed mt-1 lg:mt-2"
                 >
                   <Key className="w-5 h-5 text-teal-300" />
                   Sign in with Passkey
@@ -638,7 +638,7 @@ function LoginPage() {
               </div>
             )}
 
-            <div className="mt-8 text-center text-sm font-medium text-teal-200/60">
+            <div className="mt-4 lg:mt-8 text-center text-xs lg:text-sm font-medium text-teal-200/60">
               New to CoachKonnects?{' '}
               <a href="/register" className="font-black text-teal-400 hover:underline transition-colors">
                 Apply as a Coach
@@ -658,7 +658,7 @@ function LoginPage() {
             { icon: <Award className="w-5 h-5 md:w-6 md:h-6" />, label: 'Certificates' },
             { icon: <BookOpen className="w-5 h-5 md:w-6 md:h-6" />, label: 'Curriculum' },
           ].map((item, i) => (
-            <div key={i} className="flex flex-col items-center gap-2 cursor-pointer group">
+            <div key={i} className={`flex-col items-center gap-2 cursor-pointer group ${i >= 4 ? 'hidden md:flex' : 'flex'}`}>
               <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/5 border border-teal-500/20 flex items-center justify-center text-teal-400/80 shadow-sm transition-all duration-300 group-hover:bg-teal-500 group-hover:text-slate-900 group-hover:-translate-y-1 group-hover:shadow-[0_8px_20px_rgba(20,184,166,0.3)]">
                 {item.icon}
               </div>
