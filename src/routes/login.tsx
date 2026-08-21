@@ -24,14 +24,38 @@ function LoginPage() {
 
   useEffect(() => {
     const animate = () => {
-      if (!isDragging.current && Math.abs(velocity) > 0.05) {
-        setRotation((prev) => prev + velocity);
-        setVelocity((prev) => prev * 0.97); // friction coefficient
-        requestRef.current = requestAnimationFrame(animate);
-      }
+      if (isDragging.current) return;
+
+      let currentVelocity = velocity;
+      let currentRotation = rotation;
+
+      const step = () => {
+        if (isDragging.current) return;
+
+        if (Math.abs(currentVelocity) > 0.05) {
+          currentRotation += currentVelocity;
+          currentVelocity *= 0.97; // friction
+          setRotation(currentRotation);
+          requestRef.current = requestAnimationFrame(step);
+        } else {
+          // Snap back to upright (nearest multiple of 360)
+          const targetRotation = Math.round(currentRotation / 360) * 360;
+          const diff = targetRotation - currentRotation;
+          if (Math.abs(diff) > 0.1) {
+            currentRotation += diff * 0.15; // snap strength
+            setRotation(currentRotation);
+            requestRef.current = requestAnimationFrame(step);
+          } else {
+            setRotation(targetRotation);
+            setVelocity(0);
+          }
+        }
+      };
+
+      requestRef.current = requestAnimationFrame(step);
     };
 
-    if (Math.abs(velocity) > 0.05 && !isDragging.current) {
+    if (!isDragging.current && (Math.abs(velocity) > 0.05 || rotation % 360 !== 0)) {
       requestRef.current = requestAnimationFrame(animate);
     }
 
@@ -334,10 +358,10 @@ function LoginPage() {
               onPointerUp={handlePointerUp}
               onDoubleClick={handleDoubleClick}
               style={{ transform: `rotate(${rotation}deg)` }}
-              className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full p-1.5 sm:p-2 md:p-3 shadow-2xl flex items-center justify-center cursor-grab active:cursor-grabbing"
+              className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full p-1.5 sm:p-2 md:p-3 shadow-2xl flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
             >
               <div className="w-full h-full bg-[#FFF8F0] rounded-full border-[3px] sm:border-[4px] md:border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden pointer-events-none">
-                <img src="/homelogo.png" alt="Logo" className="w-10 sm:w-16 md:w-20 h-auto object-contain select-none" />
+                <img src="/homelogo.png" alt="Logo" className="w-14 sm:w-16 md:w-20 h-auto object-contain select-none" />
               </div>
             </div>
           </div>
