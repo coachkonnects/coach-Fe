@@ -10,7 +10,7 @@ function RegisterSelectionPage() {
   return (
     <div className="min-h-screen bg-[#FFF8F0] flex flex-col md:flex-row overflow-hidden font-sans">
       {/* Student Half */}
-      <div 
+      <div
         onClick={() => navigate({ to: '/register-student' })}
         className="flex-1 relative group cursor-pointer overflow-hidden flex flex-col items-center justify-center p-6 py-10 md:p-12 min-h-[50vh] md:min-h-screen border-b-4 md:border-b-0 md:border-r-4 border-[#FFF8F0]"
       >
@@ -18,7 +18,7 @@ function RegisterSelectionPage() {
         <div className="absolute inset-0 bg-[#FF7F5C] transition-transform duration-700 ease-out group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B35] to-[#FF7F5C] opacity-90" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
-        
+
         <div className="relative z-10 text-center transform transition-all duration-500 group-hover:-translate-y-2 flex flex-col items-center">
           <div className="w-16 h-16 md:w-24 md:h-24 bg-white/20 backdrop-blur-md rounded-3xl mx-auto mb-4 md:mb-8 flex items-center justify-center shadow-2xl border border-white/30 group-hover:rotate-6 transition-all duration-500">
             <svg className="w-8 h-8 md:w-12 md:h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -32,7 +32,7 @@ function RegisterSelectionPage() {
           <p className="text-white/90 text-sm md:text-lg font-medium max-w-xs mx-auto drop-shadow-sm hidden sm:block">
             Ready to learn, explore, and connect with amazing coaches.
           </p>
-          
+
           <div className="mt-6 md:mt-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-2 text-white font-bold bg-white/20 w-max mx-auto px-6 py-3 rounded-full backdrop-blur-sm border border-white/30">
             Register as Student
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
@@ -41,7 +41,7 @@ function RegisterSelectionPage() {
       </div>
 
       {/* Coach Half */}
-      <div 
+      <div
         onClick={() => navigate({ to: '/register-coach' })}
         className="flex-1 relative group cursor-pointer overflow-hidden flex flex-col items-center justify-center p-6 py-10 pb-24 md:p-12 min-h-[50vh] md:min-h-screen"
       >
@@ -49,7 +49,7 @@ function RegisterSelectionPage() {
         <div className="absolute inset-0 bg-[#0f172a] transition-transform duration-700 ease-out group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-br from-teal-900 to-teal-950 opacity-95" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay" />
-        
+
         <div className="relative z-10 text-center transform transition-all duration-500 group-hover:-translate-y-2 flex flex-col items-center">
           <div className="w-16 h-16 md:w-24 md:h-24 bg-teal-500/20 backdrop-blur-md rounded-3xl mx-auto mb-4 md:mb-8 flex items-center justify-center shadow-2xl border border-teal-500/30 group-hover:-rotate-6 transition-all duration-500">
             <svg className="w-8 h-8 md:w-12 md:h-12 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,12 +69,12 @@ function RegisterSelectionPage() {
           </div>
         </div>
       </div>
-      
+
       {/* Center Logo Overlay */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-auto">
-        <div className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full p-1.5 sm:p-2 md:p-3 shadow-2xl flex items-center justify-center hover:scale-105 transition-transform">
+        <div className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full p-1.5 sm:p-2 md:p-3 shadow-2xl flex items-center justify-center hover:scale-105 transition-transform animate-[spin_20s_linear_infinite]">
           <a href="/" className="w-full h-full bg-[#FFF8F0] rounded-full border-[3px] sm:border-[4px] md:border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden">
-             <img src="/homelogo.png" alt="Logo" className="w-10 sm:w-16 md:w-20 h-auto object-contain hover:opacity-90 transition-opacity" />
+            <img src="/homelogo.png" alt="Logo" className="w-10 sm:w-16 md:w-20 h-auto object-contain hover:opacity-90 transition-opacity" />
           </a>
         </div>
       </div>

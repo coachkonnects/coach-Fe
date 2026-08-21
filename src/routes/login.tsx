@@ -77,7 +77,7 @@ function LoginPage() {
       const data = await verifyRes.json();
       localStorage.setItem('token', data.token);
       localStorage.setItem('userEmail', data.email || email);
-      
+
       if (data.role && data.role.toLowerCase() !== roleStr.toLowerCase()) {
         throw new Error(`This email is registered as a ${data.role}, not a ${roleStr}.`);
       }
@@ -242,7 +242,7 @@ function LoginPage() {
         </div>
 
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-auto">
-          <div className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full p-1.5 sm:p-2 md:p-3 shadow-2xl flex items-center justify-center hover:scale-105 transition-transform">
+          <div className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full p-1.5 sm:p-2 md:p-3 shadow-2xl flex items-center justify-center hover:scale-105 transition-transform animate-[spin_20s_linear_infinite]">
             <Link to="/" className="w-full h-full bg-[#FFF8F0] rounded-full border-[3px] sm:border-[4px] md:border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden hover:opacity-90 transition-opacity">
               <img src="/homelogo.png" alt="Logo" className="w-10 sm:w-16 md:w-20 h-auto object-contain" />
             </Link>
