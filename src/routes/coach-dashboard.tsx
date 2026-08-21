@@ -737,7 +737,7 @@ function CoachDashboard() {
                   {/* Profile Info Overlay */}
                   <div className="absolute -bottom-20 sm:-bottom-12 left-4 sm:left-8 flex flex-col sm:flex-row items-start sm:items-end gap-2 sm:gap-3 w-[calc(100%-2rem)] sm:w-auto">
                     <img
-                      src={profile?.profileImageUrl || "/placeholder.png"}
+                      src={profile?.profileImageUrl || "/coach.png"}
                       alt="Profile"
                       className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-white shadow-xl bg-white"
                     />

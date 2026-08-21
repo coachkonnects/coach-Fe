@@ -491,7 +491,7 @@ function LoginPage() {
           <div className="w-64 h-64 md:w-80 md:h-80 rounded-full shadow-[0_20px_50px_rgba(13,148,136,0.3)] overflow-hidden relative z-20 border-[6px] border-white">
             <img
               src="/coach.png"
-              alt="Female Coach"
+              alt="Coaches"
               className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
             />
           </div>
