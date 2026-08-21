@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { Sparkles, Edit3, X } from "lucide-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router"; // test
 import { useState, useEffect, useCallback } from "react";
 import * as faceapi from "face-api.js";
@@ -453,12 +453,18 @@ function CoachDashboard() {
       return alert("Please enter a valid 6-digit Pincode!");
     }
 
+    if (editForm.minPrice !== undefined && editForm.maxPrice !== undefined && editForm.minPrice !== '' && editForm.maxPrice !== '') {
+      if (parseInt(editForm.maxPrice) <= parseInt(editForm.minPrice)) {
+        return alert("Max Price must be greater than Min Price!");
+      }
+    }
+
     if (editForm.mobile && (!/^[6-9]/.test(editForm.mobile) || editForm.mobile.length !== 10)) {
       return alert("Mobile number must be 10 digits and start with 6, 7, 8, or 9!");
     }
     if (editForm.description) {
-      if (editForm.description.trim().split(/\s+/).length > 150) {
-        return alert("Description / Bio must not exceed 150 words!");
+      if (editForm.description.trim().split(/\s+/).length > 140) {
+        return alert("Description / Bio must not exceed 140 words!");
       }
       if (/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(editForm.description) || /[^a-zA-Z\s.,!?'\n\r-]/.test(editForm.description) || /\d/.test(editForm.description)) {
         return alert("Description / Bio cannot contain numbers, emails, or special characters.");
@@ -504,7 +510,7 @@ function CoachDashboard() {
       });
       if (res.ok) {
         const data = await res.json();
-        setProfile(data);
+        setProfile({ ...data, ...editForm });
         setIsEditing(false);
         alert("Profile updated successfully! Note: Your profile is now Pending Approval.");
       } else {
@@ -761,232 +767,22 @@ function CoachDashboard() {
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => {
-                          if (isEditing) {
-                            setIsEditing(false);
-                          } else {
-                            setEditForm({ ...profile, mobile: profile?.user?.phoneNumber || "" });
-                            setIsEditing(true);
+                          if (profile?.status === 'PENDING_APPROVAL') {
+                            alert("Your profile is currently pending approval. Please wait for admin approval before making further edits.");
+                            return;
                           }
+                          setEditForm({ ...profile, mobile: profile?.user?.phoneNumber || "" });
+                          setIsEditing(true);
                         }}
-                        className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-colors"
+                        className="p-2 bg-slate-50 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-colors cursor-pointer shadow-sm border border-slate-200"
+                        title="Edit Profile"
                       >
-                        {isEditing ? "Cancel Edit" : "Edit Profile"}
+                        <Edit3 className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
 
-                  {isEditing ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 relative z-10 bg-white/60 backdrop-blur-md p-4 sm:p-6 rounded-3xl shadow-sm border border-white">
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                          Full Name
-                        </label>
-                        <input
-                          type="text"
-                          value={editForm.fullName || ""}
-                          onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-                          className="w-full px-4 py-2 border rounded-xl"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Date of Birth</label>
-                        <input type="text" placeholder="DD/MM/YYYY" value={editForm.dob || editForm.dateOfBirth || ""} onChange={handleDobChange} className={`w-full px-4 py-2 border rounded-xl ${dobError ? 'border-red-500' : ''}`} />
-                        {dobError && <p className="text-red-500 text-xs font-bold mt-1">{dobError}</p>}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Class Mode</label>
-                        <select value={editForm.classMode || ""} onChange={e => setEditForm({ ...editForm, classMode: e.target.value })} className="w-full px-4 py-2 border rounded-xl">
-                          <option value="">Select Class Mode</option>
-                          <option value="Online">Online</option>
-                          <option value="Offline">Offline</option>
-                          <option value="Hybrid">Hybrid</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                          Expertise / Title
-                        </label>
-                        <input
-                          type="text"
-                          value={editForm.expertise || ""}
-                          onChange={(e) => setEditForm({ ...editForm, expertise: e.target.value })}
-                          className="w-full px-4 py-2 border rounded-xl"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                          Mobile Number
-                        </label>
-                        <input
-                          type="text"
-                          maxLength={10}
-                          value={editForm.mobile || ""}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, '');
-                            if (val.length <= 10) setEditForm({ ...editForm, mobile: val });
-                          }}
-                          className="w-full px-4 py-2 border rounded-xl"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                          Pricing
-                        </label>
-                        <input
-                          type="text"
-                          value={editForm.pricing || ""}
-                          onChange={(e) => setEditForm({ ...editForm, pricing: e.target.value })}
-                          className="w-full px-4 py-2 border rounded-xl"
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                          Target Audience
-                        </label>
-                        <select
-                          value={editForm.targetAudience || ""}
-                          onChange={(e) => setEditForm({ ...editForm, targetAudience: e.target.value })}
-                          className="w-full px-4 py-2 border rounded-xl bg-white"
-                        >
-                          <option value="" disabled>Select age group</option>
-                          <option value="Beginners">Beginners</option>
-                          <option value="Advanced / Professionals">Advanced / Professionals</option>
-                          <option value="Kids & Teens">Kids & Teens</option>
-                          <option value="All Ages & Levels">All Ages & Levels</option>
-                        </select>
-                      </div>
-
-
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Pincode</label>
-                        <input type="text" maxLength={6} value={editForm.pincode || ""} onChange={(e) => handlePincodeChange(e.target.value.replace(/\D/g, ''))} className="w-full px-4 py-2 border rounded-xl" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Area / Location Name</label>
-                        <input type="text" value={editForm.area || ""} readOnly className="w-full px-4 py-2 border rounded-xl bg-slate-50" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">District / City</label>
-                        <input type="text" value={editForm.district || ""} readOnly className="w-full px-4 py-2 border rounded-xl bg-slate-50" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">State</label>
-                        <input type="text" value={editForm.state || ""} readOnly className="w-full px-4 py-2 border rounded-xl bg-slate-50" />
-                      </div>
-
-                      <div className="col-span-1 sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                          <label className="block text-sm font-bold text-slate-700 mb-2">
-                            Profile Picture (Headshot)
-                          </label>
-                          <p className="text-xs text-slate-500 mb-4">
-                            Must clearly show your face.
-                          </p>
-                          {editForm.profileImageUrl ? (
-                            <div className="relative w-32 h-32 mb-4 mx-auto">
-                              <img
-                                src={editForm.profileImageUrl}
-                                alt="Preview"
-                                className="w-full h-full object-cover rounded-full border-4 border-white shadow-lg"
-                              />
-                              <button
-                                onClick={() => setEditForm({ ...editForm, profileImageUrl: "" })}
-                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 shadow hover:bg-red-600"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-white transition-colors cursor-pointer relative overflow-hidden">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleSelectFile(e, "profile")}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                              />
-                              <span className="text-3xl mb-2 block">📸</span>
-                              <span className="text-sm font-medium text-slate-600">
-                                {isUploading ? "Uploading..." : "Click or drop headshot"}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                          <label className="block text-sm font-bold text-slate-700 mb-2">
-                            Cover Banner (Group Image)
-                          </label>
-                          <p className="text-xs text-slate-500 mb-4">
-                            Must contain 2 or more people.
-                          </p>
-                          {editForm.groupImageUrl ? (
-                            <div className="relative w-full h-32 mb-4">
-                              <img
-                                src={editForm.groupImageUrl}
-                                alt="Preview"
-                                className="w-full h-full object-cover rounded-xl border-4 border-white shadow-lg"
-                              />
-                              <button
-                                onClick={() => setEditForm({ ...editForm, groupImageUrl: "" })}
-                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 shadow hover:bg-red-600"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-white transition-colors cursor-pointer relative overflow-hidden">
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleSelectFile(e, "group")}
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                              />
-                              <span className="text-3xl mb-2 block">👥</span>
-                              <span className="text-sm font-medium text-slate-600">
-                                {isUploadingGroup ? "Uploading..." : "Click or drop group photo"}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                          Intro Video URL (YouTube)
-                        </label>
-                        <input
-                          type="text"
-                          value={editForm.introVideoUrl || ""}
-                          onChange={(e) => setEditForm({ ...editForm, introVideoUrl: e.target.value })}
-                          className="w-full px-4 py-2 border rounded-xl mb-6"
-                          placeholder="https://youtube.com/watch?v=..."
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2">
-                        <label className="block text-sm font-bold text-slate-700 mb-2">
-                          Description / Bio
-                        </label>
-                        <textarea
-                          rows={4}
-                          value={editForm.description || ""}
-                          onChange={(e) =>
-                            setEditForm({ ...editForm, description: e.target.value })
-                          }
-                          className="w-full px-4 py-2 border rounded-xl"
-                        />
-                      </div>
-                      <div className="col-span-1 sm:col-span-2 flex justify-end pt-4 border-t">
-                        <button
-                          onClick={handleSaveProfile}
-                          disabled={isSaving}
-                          className="px-6 py-3 bg-[#f26b21] hover:bg-[#e05a10] text-white font-bold rounded-xl shadow-md disabled:opacity-50"
-                        >
-                          {isSaving ? "Saving..." : "Save Changes"}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
+                  <div className="grid grid-cols-1 gap-4 relative z-10 mt-6">
                     <div className="grid grid-cols-1 gap-4 relative z-10">
                       {[
                         { label: 'Email', value: profile?.user?.email || (typeof window !== 'undefined' ? localStorage.getItem('userEmail') : null) },
@@ -994,7 +790,7 @@ function CoachDashboard() {
                         { label: 'Date of Birth', value: profile?.dob || profile?.dateOfBirth },
 
                         { label: 'Class Mode', value: profile?.classMode },
-                        { label: 'Pricing', value: profile?.pricing },
+                        { label: 'Pricing', value: profile?.minPrice && profile?.maxPrice ? `₹${profile.minPrice} - ₹${profile.maxPrice}` : profile?.pricing },
                         { label: 'Target Audience', value: profile?.targetAudience },
                         { label: 'Pincode', value: profile?.pincode },
                         { label: 'Area / District', value: `${profile?.area || ''} ${profile?.district ? ', ' + profile.district : ''}` },
@@ -1022,7 +818,7 @@ function CoachDashboard() {
                         )}
                       </div>
                     </div>
-                  )}
+                    </div>
 
 
                 </div>
@@ -1269,6 +1065,236 @@ function CoachDashboard() {
           </div>
         </div>
       </main>
+
+            {isEditing && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col relative my-auto animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center p-6 sm:p-8 border-b border-slate-100 shrink-0">
+              <div>
+                <h2 className="text-2xl font-extrabold text-slate-800">Edit Profile</h2>
+                <p className="text-slate-500 mt-1">Update your coaching information and settings.</p>
+              </div>
+              <button
+                onClick={() => setIsEditing(false)}
+                className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 sm:p-8 overflow-y-auto custom-scrollbar">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 relative z-10 bg-white/60 backdrop-blur-md p-4 sm:p-6 rounded-3xl shadow-sm border border-white">
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                          Full Name
+                        </label>
+                        <input
+                          type="text"
+                          value={editForm.fullName || ""}
+                          onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                          className="w-full px-4 py-2 border rounded-xl"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Date of Birth</label>
+                        <input type="text" placeholder="DD/MM/YYYY" value={editForm.dob || editForm.dateOfBirth || ""} onChange={handleDobChange} className={`w-full px-4 py-2 border rounded-xl ${dobError ? 'border-red-500' : ''}`} />
+                        {dobError && <p className="text-red-500 text-xs font-bold mt-1">{dobError}</p>}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Class Mode</label>
+                        <select value={editForm.classMode || ""} onChange={e => setEditForm({ ...editForm, classMode: e.target.value })} className="w-full px-4 py-2 border rounded-xl">
+                          <option value="">Select Class Mode</option>
+                          <option value="Online">Online</option>
+                          <option value="Offline">Offline</option>
+                          <option value="Hybrid">Hybrid</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                          Expertise / Title
+                        </label>
+                        <input
+                          type="text"
+                          value={editForm.expertise || ""}
+                          onChange={(e) => setEditForm({ ...editForm, expertise: e.target.value })}
+                          className="w-full px-4 py-2 border rounded-xl"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                          Mobile Number
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={10}
+                          value={editForm.mobile || ""}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            if (val.length <= 10) setEditForm({ ...editForm, mobile: val });
+                          }}
+                          className="w-full px-4 py-2 border rounded-xl"
+                        />
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Price Range (₹)</label>
+                        <div className="flex items-center gap-4">
+                          <input type="text" placeholder="Min" value={editForm.minPrice || ""} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setEditForm({...editForm, minPrice: val ? parseInt(val) : ''}) }} className="w-full px-4 py-2 border rounded-xl" />
+                          <span className="text-slate-400 font-bold">-</span>
+                          <input type="text" placeholder="Max" value={editForm.maxPrice || ""} onChange={e => { const val = e.target.value.replace(/\D/g, ''); setEditForm({...editForm, maxPrice: val ? parseInt(val) : ''}) }} className="w-full px-4 py-2 border rounded-xl" />
+                        </div>
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                          Target Audience
+                        </label>
+                        <select
+                          value={editForm.targetAudience || ""}
+                          onChange={(e) => setEditForm({ ...editForm, targetAudience: e.target.value })}
+                          className="w-full px-4 py-2 border rounded-xl bg-white"
+                        >
+                          <option value="" disabled>Select age group</option>
+                          <option value="Beginners">Beginners</option>
+                          <option value="Advanced / Professionals">Advanced / Professionals</option>
+                          <option value="Kids & Teens">Kids & Teens</option>
+                          <option value="All Ages & Levels">All Ages & Levels</option>
+                        </select>
+                      </div>
+
+
+                      <div className="flex flex-col justify-end">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Pincode</label>
+                        <input type="text" maxLength={6} value={editForm.pincode || ""} onChange={(e) => handlePincodeChange(e.target.value.replace(/\D/g, ''))} className="w-full px-4 py-2 border rounded-xl" />
+                      </div>
+                      <div className="flex flex-col justify-end">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">Area / Location Name</label>
+                        <input type="text" value={editForm.area || ""} readOnly className="w-full px-4 py-2 border rounded-xl bg-slate-50" />
+                      </div>
+                      <div className="flex flex-col justify-end">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">District / City</label>
+                        <input type="text" value={editForm.district || ""} readOnly className="w-full px-4 py-2 border rounded-xl bg-slate-50" />
+                      </div>
+                      <div className="flex flex-col justify-end">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">State</label>
+                        <input type="text" value={editForm.state || ""} readOnly className="w-full px-4 py-2 border rounded-xl bg-slate-50" />
+                      </div>
+
+                      <div className="col-span-1 sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                          <label className="block text-sm font-bold text-slate-700 mb-2">
+                            Profile Picture (Headshot)
+                          </label>
+                          <p className="text-xs text-slate-500 mb-4">
+                            Must clearly show your face.
+                          </p>
+                          {editForm.profileImageUrl ? (
+                            <div className="relative w-32 h-32 mb-4 mx-auto">
+                              <img
+                                src={editForm.profileImageUrl}
+                                alt="Preview"
+                                className="w-full h-full object-cover rounded-full border-4 border-white shadow-lg"
+                              />
+                              <button
+                                onClick={() => setEditForm({ ...editForm, profileImageUrl: "" })}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 shadow hover:bg-red-600"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-white transition-colors cursor-pointer relative overflow-hidden">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleSelectFile(e, "profile")}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              />
+                              <span className="text-3xl mb-2 block">📸</span>
+                              <span className="text-sm font-medium text-slate-600">
+                                {isUploading ? "Uploading..." : "Click or drop headshot"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                          <label className="block text-sm font-bold text-slate-700 mb-2">
+                            Cover Banner (Group Image)
+                          </label>
+                          <p className="text-xs text-slate-500 mb-4">
+                            Must contain 2 or more people.
+                          </p>
+                          {editForm.groupImageUrl ? (
+                            <div className="relative w-full h-32 mb-4">
+                              <img
+                                src={editForm.groupImageUrl}
+                                alt="Preview"
+                                className="w-full h-full object-cover rounded-xl border-4 border-white shadow-lg"
+                              />
+                              <button
+                                onClick={() => setEditForm({ ...editForm, groupImageUrl: "" })}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 shadow hover:bg-red-600"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-white transition-colors cursor-pointer relative overflow-hidden">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleSelectFile(e, "group")}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              />
+                              <span className="text-3xl mb-2 block">👥</span>
+                              <span className="text-sm font-medium text-slate-600">
+                                {isUploadingGroup ? "Uploading..." : "Click or drop group photo"}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                          Intro Video URL (YouTube)
+                        </label>
+                        <input
+                          type="text"
+                          value={editForm.introVideoUrl || ""}
+                          onChange={(e) => setEditForm({ ...editForm, introVideoUrl: e.target.value })}
+                          className="w-full px-4 py-2 border rounded-xl mb-6"
+                          placeholder="https://youtube.com/watch?v=..."
+                        />
+                      </div>
+                      <div className="col-span-1 sm:col-span-2">
+                        <label className="block text-sm font-bold text-slate-700 mb-2">
+                          Description / Bio
+                        </label>
+                        <textarea
+                          rows={4}
+                          value={editForm.description || ""}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, description: e.target.value })
+                          }
+                          className="w-full px-4 py-2 border rounded-xl"
+                        />
+                      </div>
+                      <div className="col-span-1 sm:col-span-2 flex justify-end pt-4 border-t">
+                        <button
+                          onClick={handleSaveProfile}
+                          disabled={isSaving}
+                          className="px-6 py-3 bg-[#f26b21] hover:bg-[#e05a10] text-white font-bold rounded-xl shadow-md disabled:opacity-50"
+                        >
+                          {isSaving ? "Saving..." : "Save Changes"}
+                        </button>
+                      </div>
+                    </div>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {cropModalOpen && cropImageSrc && (
         <div className="fixed inset-0 bg-slate-900/90 z-[60] flex items-center justify-center p-4">

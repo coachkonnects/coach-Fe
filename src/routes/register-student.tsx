@@ -287,8 +287,11 @@ function RegisterPage() {
         if (isUnder18) {
           setShowParentOtpModal(true);
         } else {
+          localStorage.setItem('token', authToken || '');
+          localStorage.setItem('userEmail', formData.email);
+          localStorage.setItem('userRole', 'STUDENT');
           alert(`Success! Your Student profile has been submitted`);
-          navigate({ to: '/' });
+          navigate({ to: '/student-dashboard' });
         }
       } else {
         const err = await res.text();
@@ -331,9 +334,12 @@ function RegisterPage() {
         body: JSON.stringify({ otp: parentOtp })
       });
       if (res.ok) {
+        localStorage.setItem('token', authToken || '');
+        localStorage.setItem('userEmail', formData.email);
+        localStorage.setItem('userRole', 'STUDENT');
         alert("Parental consent verified! Profile registration complete.");
         setShowParentOtpModal(false);
-        navigate({ to: '/' });
+        navigate({ to: '/student-dashboard' });
       } else {
         const err = await res.json();
         alert(err.error || "Invalid OTP!");
