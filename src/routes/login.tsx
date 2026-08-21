@@ -57,7 +57,11 @@ function LoginPage() {
     try {
       const roleStr = activePath as string;
 
-      const res = await fetch("/api/passkeys/login/start");
+      const res = await fetch("/api/passkeys/login/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
       const optionsRaw = await res.json();
       const options = optionsRaw.publicKey ?? optionsRaw;
       const asseResp = await startAuthentication({ optionsJSON: options });
