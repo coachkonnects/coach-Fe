@@ -56,7 +56,6 @@ function LoginPage() {
     setIsLoading(true);
     try {
       const roleStr = activePath as string;
-      }
 
       const res = await fetch("/api/passkeys/login/start");
       const optionsRaw = await res.json();
