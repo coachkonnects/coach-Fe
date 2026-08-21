@@ -1297,7 +1297,7 @@ function CoachDashboard() {
 
 
       {cropModalOpen && cropImageSrc && (
-        <div className="fixed inset-0 bg-slate-900/90 z-[60] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-slate-900/90 z-[200] flex items-center justify-center p-4">
           <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] border border-white w-full max-w-2xl overflow-hidden flex flex-col shadow-2xl">
             <div className="p-6 border-b">
               <h3 className="text-xl font-bold">Crop Image</h3>
