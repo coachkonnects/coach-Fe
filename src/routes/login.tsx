@@ -1,5 +1,5 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Mail, Music, Palette, Crown, Shield, Camera, MoreHorizontal, Sparkles, ChevronLeft, Calendar, Users, TrendingUp, Award, BookOpen, Key } from 'lucide-react';
 import { startAuthentication } from '@simplewebauthn/browser';
 
@@ -12,6 +12,90 @@ type AuthPath = 'selection' | 'student' | 'coach';
 function LoginPage() {
   const navigate = useNavigate();
   const [activePath, setActivePath] = useState<AuthPath>('selection');
+
+  // Interactive Spinner State & Logic
+  const spinnerRef = useRef<HTMLDivElement>(null);
+  const [rotation, setRotation] = useState(0);
+  const [velocity, setVelocity] = useState(0);
+  const isDragging = useRef(false);
+  const prevAngle = useRef(0);
+  const lastTime = useRef(0);
+  const requestRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const animate = () => {
+      if (!isDragging.current && Math.abs(velocity) > 0.05) {
+        setRotation((prev) => prev + velocity);
+        setVelocity((prev) => prev * 0.97); // friction coefficient
+        requestRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    if (Math.abs(velocity) > 0.05 && !isDragging.current) {
+      requestRef.current = requestAnimationFrame(animate);
+    }
+
+    return () => {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    };
+  }, [velocity]);
+
+  const getAngle = (clientX: number, clientY: number) => {
+    if (!spinnerRef.current) return 0;
+    const rect = spinnerRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    return Math.atan2(clientY - centerY, clientX - centerX);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    prevAngle.current = getAngle(e.clientX, e.clientY);
+    lastTime.current = Date.now();
+    setVelocity(0);
+    if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging.current) return;
+    const currentAngle = getAngle(e.clientX, e.clientY);
+    const currentTime = Date.now();
+    const dt = Math.max(1, currentTime - lastTime.current);
+
+    let angleDiff = currentAngle - prevAngle.current;
+    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+
+    const angleDiffDegrees = (angleDiff * 180) / Math.PI;
+    const newVelocity = angleDiffDegrees / (dt / 16);
+
+    setRotation((prev) => prev + angleDiffDegrees);
+    setVelocity(newVelocity);
+
+    prevAngle.current = currentAngle;
+    lastTime.current = currentTime;
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    isDragging.current = false;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    if (Math.abs(velocity) > 0.05) {
+      const animate = () => {
+        if (!isDragging.current && Math.abs(velocity) > 0.05) {
+          setRotation((prev) => prev + velocity);
+          setVelocity((prev) => prev * 0.97);
+          requestRef.current = requestAnimationFrame(animate);
+        }
+      };
+      requestRef.current = requestAnimationFrame(animate);
+    }
+  };
+
+  const handleDoubleClick = () => {
+    navigate({ to: '/' });
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -242,10 +326,20 @@ function LoginPage() {
         </div>
 
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-auto">
-          <div className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full p-1.5 sm:p-2 md:p-3 shadow-2xl flex items-center justify-center hover:scale-105 transition-transform animate-[spin_20s_linear_infinite]">
-            <Link to="/" className="w-full h-full bg-[#FFF8F0] rounded-full border-[3px] sm:border-[4px] md:border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden hover:opacity-90 transition-opacity">
-              <img src="/homelogo.png" alt="Logo" className="w-10 sm:w-16 md:w-20 h-auto object-contain" />
-            </Link>
+          <div className="hover:scale-105 transition-transform duration-300 select-none">
+            <div 
+              ref={spinnerRef}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onDoubleClick={handleDoubleClick}
+              style={{ transform: `rotate(${rotation}deg)` }}
+              className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full p-1.5 sm:p-2 md:p-3 shadow-2xl flex items-center justify-center cursor-grab active:cursor-grabbing"
+            >
+              <div className="w-full h-full bg-[#FFF8F0] rounded-full border-[3px] sm:border-[4px] md:border-[6px] border-[#FFF8F0] flex items-center justify-center overflow-hidden pointer-events-none">
+                <img src="/homelogo.png" alt="Logo" className="w-10 sm:w-16 md:w-20 h-auto object-contain select-none" />
+              </div>
+            </div>
           </div>
         </div>
 
