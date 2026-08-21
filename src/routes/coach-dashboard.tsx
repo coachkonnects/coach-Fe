@@ -551,7 +551,8 @@ function CoachDashboard() {
       });
       if (!startRes.ok) throw new Error("Failed to start passkey registration");
 
-      const options = await startRes.json();
+      const optionsRaw = await startRes.json();
+      const options = optionsRaw.publicKey ?? optionsRaw;
       const asseResp = await startRegistration({ optionsJSON: options });
 
       const finishRes = await fetch(`/api/passkeys/register/finish`, {

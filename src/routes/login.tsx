@@ -62,7 +62,8 @@ function LoginPage() {
       }
 
       const res = await fetch("/api/passkeys/login/start");
-      const options = await res.json();
+      const optionsRaw = await res.json();
+      const options = optionsRaw.publicKey ?? optionsRaw;
       const asseResp = await startAuthentication({ optionsJSON: options });
 
       const verifyRes = await fetch("/api/passkeys/login/finish", {
