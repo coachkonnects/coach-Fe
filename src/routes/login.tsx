@@ -56,9 +56,6 @@ function LoginPage() {
     setIsLoading(true);
     try {
       const roleStr = activePath as string;
-      const profileRes = await fetch(`/api/profile/${roleStr === 'coach' ? 'coach' : 'student'}/me?email=${email}`);
-      if (!profileRes.ok) {
-        throw new Error(`This email is not registered as a ${roleStr}. Please register first.`);
       }
 
       const res = await fetch("/api/passkeys/login/start");
@@ -77,7 +74,12 @@ function LoginPage() {
       const data = await verifyRes.json();
       localStorage.setItem('token', data.token);
       localStorage.setItem('userEmail', data.email || email);
+      
+      if (data.role && data.role.toLowerCase() !== roleStr.toLowerCase()) {
+        throw new Error(`This email is registered as a ${data.role}, not a ${roleStr}.`);
+      }
       localStorage.setItem('userRole', roleStr);
+
       navigate({ to: `/${roleStr}-dashboard` });
     } catch (err: any) {
       setError(err.message || "Failed to authenticate with Passkey");
