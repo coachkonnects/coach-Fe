@@ -123,20 +123,26 @@ function StudentDashboard() {
     setPasskeyMessage("");
     try {
       const email = localStorage.getItem('userEmail');
+      // Step 1: Start — send token so backend knows role
       const startRes = await fetch(`/api/passkeys/register/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ token: "student", email })
       });
       if (!startRes.ok) throw new Error("Failed to start passkey registration");
-      const options = await startRes.json();
 
+      // Step 2: Unwrap nested publicKey field
+      const optionsRaw = await startRes.json();
+      const options = optionsRaw.publicKey ?? optionsRaw;
+
+      // Step 3: Show biometric prompt
       const asseResp = await startRegistration({ optionsJSON: options });
 
+      // Step 4: Finish — send email alongside the credential response
       const finishRes = await fetch(`/api/passkeys/register/finish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(asseResp)
+        body: JSON.stringify({ email, response: asseResp })
       });
       if (!finishRes.ok) throw new Error("Failed to finish passkey registration");
       setPasskeyStatus("SUCCESS");
