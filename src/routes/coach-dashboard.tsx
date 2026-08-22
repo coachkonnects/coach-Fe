@@ -18,6 +18,7 @@ function CoachDashboard() {
   const [classes, setClasses] = useState<any[]>([]);
   const [availabilities, setAvailabilities] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"overview" | "classes" | "enquiries">(
     "overview",
   );
@@ -47,9 +48,13 @@ function CoachDashboard() {
     capacity: "1",
     description: "",
     imageUrl: "",
+    startDate: "",
+    endDate: "",
   });
   const [isUploadingWorkshopImage, setIsUploadingWorkshopImage] = useState(false);
   const [blockedWords, setBlockedWords] = useState<string[]>([]);
+  const [classTitleError, setClassTitleError] = useState("");
+  const [classDescError, setClassDescError] = useState("");
 
   const [passkeyStatus, setPasskeyStatus] = useState<"SUCCESS" | "ERROR" | null>(
     (typeof window !== "undefined" && localStorage.getItem("hasPasskeyRegistered") === "true") ? "SUCCESS" : null
@@ -72,10 +77,15 @@ function CoachDashboard() {
     e.target.value = "";
   };
 
-  const checkRestrictedWords = (text: string) => {
-    if (!text || !blockedWords || blockedWords.length === 0) return false;
+  const validateNoBlockedWords = (text: string): string | null => {
+    if (!text || !blockedWords || blockedWords.length === 0) return null;
     const words = text.toLowerCase().split(/\s+/);
-    return blockedWords.some((word: string) => words.includes(word.toLowerCase()));
+    for (const word of blockedWords) {
+      if (words.includes(word.toLowerCase())) {
+        return `The word "${word}" is not allowed.`;
+      }
+    }
+    return null;
   };
 
   const handleCreateClassSubmit = async (e: React.FormEvent) => {
@@ -84,8 +94,8 @@ function CoachDashboard() {
       return alert("Class/Workshop Description must not exceed 250 words!");
     }
 
-    if (checkRestrictedWords(classForm.title) || checkRestrictedWords(classForm.description)) {
-      return alert("Title or Description contains restricted words!");
+    if (classTitleError || classDescError) {
+      return alert("Please remove restricted words before submitting!");
     }
     if (classForm.type === "WORKSHOP" && !classForm.imageUrl) {
       alert("Workshop banner image is mandatory!");
@@ -114,7 +124,7 @@ function CoachDashboard() {
           setClasses([...classes, newClass]);
         }
         setClassModalOpen(false);
-        setClassForm({ id: null, title: "", type: "REGULAR", schedule: "", price: "", capacity: "1", description: "", imageUrl: "" });
+        setClassForm({ id: null, title: "", type: "REGULAR", schedule: "", price: "", capacity: "1", description: "", imageUrl: "", startDate: "", endDate: "" });
       } else {
         alert("Error saving class");
       }
@@ -153,7 +163,8 @@ function CoachDashboard() {
       fetch(`/api/classes?email=${email}`, { headers }),
       fetch(`/api/availability?email=${email}`, { headers }),
       fetch(`/api/config/blocked-words`),
-      fetch(`/api/categories`)
+      fetch(`/api/categories`),
+      fetch(`/api/profile/coach/me/reviews`, { headers })
     ])
       .then(async (responses) => {
         if (responses.some(r => r.status === 401 || r.status === 403)) {
@@ -171,11 +182,13 @@ function CoachDashboard() {
           responses[3].ok ? responses[3].json() : [],
           responses[4].ok ? responses[4].json() : { words: [] },
           responses[5].ok ? responses[5].json() : [],
+          responses[6] && responses[6].ok ? responses[6].json() : [],
         ]);
       })
       .then((results) => {
         if (!results) return;
-        const [data, enquiriesData, classesData, availData, blockedWordsData, catsData] = results;
+        const [data, enquiriesData, classesData, availData, blockedWordsData, catsData, reviewsData] = results;
+        if (reviewsData) setReviews(reviewsData);
         if (blockedWordsData?.words) setBlockedWords(blockedWordsData.words);
         setCategories(catsData || []);
         if (data && data.profile) {
@@ -922,6 +935,8 @@ function CoachDashboard() {
                                 capacity: c.capacity,
                                 description: c.description || "",
                                 imageUrl: c.imageUrl || "",
+                                startDate: c.startDate || "",
+                                endDate: c.endDate || "",
                               });
                               setClassModalOpen(true);
                             }}
@@ -1059,7 +1074,60 @@ function CoachDashboard() {
           </div>
         </div>
 
-        <div className="mt-8 bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] shadow-xl overflow-hidden relative group hover:shadow-2xl transition-all duration-300 p-8">
+        
+        {/* Reviews Section */}
+        <div className="mt-8 bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] shadow-xl overflow-hidden relative group p-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-extrabold text-slate-900">Student Reviews</h2>
+              <p className="text-slate-500 mt-1 font-medium">What students are saying about you</p>
+            </div>
+            <div className="bg-orange-50 p-3 rounded-2xl text-orange-500">
+              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </div>
+          </div>
+
+          {reviews.length === 0 ? (
+            <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="text-5xl mb-4">⭐</div>
+              <h3 className="text-xl font-bold text-slate-700">No reviews yet</h3>
+              <p className="text-slate-500 mt-2">When students review your classes, they will appear here.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {reviews.map((review, idx) => (
+                <div key={idx} className="bg-slate-50 border border-slate-100 rounded-2xl p-6 relative">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-lg">
+                      {review.student?.fullName ? review.student.fullName.charAt(0).toUpperCase() : 'S'}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-800">{review.student?.fullName || "Student"}</h4>
+                      <div className="flex text-amber-400 text-sm">
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i}>{i < (review.rating || 0) ? "★" : "☆"}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-slate-600 italic">"{review.comment}"</p>
+                  <div className="mt-4 pt-4 border-t border-slate-200/60 flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-400">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </span>
+                    {review.status === 'PENDING' && (
+                       <span className="bg-amber-100 text-amber-800 px-2 py-1 rounded text-[10px] font-bold uppercase">Pending Approval</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+<div className="mt-8 bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] shadow-xl overflow-hidden relative group hover:shadow-2xl transition-all duration-300 p-8">
           <div className="flex items-start gap-4">
             <div className="bg-orange-50 p-4 rounded-2xl text-orange-500">
               <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1397,10 +1465,14 @@ function CoachDashboard() {
                     required
                     type="text"
                     value={classForm.title}
-                    onChange={(e) => setClassForm({ ...classForm, title: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all"
+                    onChange={(e) => {
+                      setClassForm({ ...classForm, title: e.target.value });
+                      setClassTitleError(validateNoBlockedWords(e.target.value) || "");
+                    }}
+                    className={`w-full px-4 py-3 rounded-xl bg-white/60 border ${classTitleError ? 'border-red-500' : 'border-white/80 focus:border-[#f26b21]'} focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all`}
                     placeholder="e.g. Summer Coding Bootcamp"
                   />
+                  {classTitleError && <p className="text-red-500 text-xs font-bold mt-1">{classTitleError}</p>}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1418,8 +1490,29 @@ function CoachDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Schedule</label>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">
+                      {classForm.type === 'WORKSHOP' ? 'Workshop Dates & Time' : 'Schedule'}
+                    </label>
                     <div className="grid grid-cols-1 gap-3 items-start">
+                      {classForm.type === 'WORKSHOP' ? (
+                        <div className="flex gap-2 items-center">
+                          <input
+                            required
+                            type="date"
+                            value={classForm.startDate || ''}
+                            onChange={(e) => setClassForm({ ...classForm, startDate: e.target.value })}
+                            className="w-full px-3 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm text-slate-600"
+                          />
+                          <span className="text-slate-400 font-bold flex-shrink-0">to</span>
+                          <input
+                            required
+                            type="date"
+                            value={classForm.endDate || ''}
+                            onChange={(e) => setClassForm({ ...classForm, endDate: e.target.value })}
+                            className="w-full px-3 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm text-slate-600"
+                          />
+                        </div>
+                      ) : (
                       <details className="relative group">
                         <summary className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm cursor-pointer list-none flex justify-between items-center select-none shadow-sm [&::-webkit-details-marker]:hidden">
                           <span className="truncate font-medium text-slate-700">
@@ -1458,6 +1551,8 @@ function CoachDashboard() {
                           })}
                         </div>
                       </details>
+                      )}
+                      
                       <div className="flex gap-2 items-center">
                         <input
                           required
@@ -1488,6 +1583,9 @@ function CoachDashboard() {
                           className="w-full px-3 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm"
                         />
                       </div>
+                      <p className="text-[10px] text-slate-500 font-medium px-1 leading-tight">
+                        * Time format (AM/PM or 24h) is automatically set by your device's clock settings.
+                      </p>
                     </div>
                   </div>
                   <div>
@@ -1509,10 +1607,14 @@ function CoachDashboard() {
                   <textarea
                     rows={3}
                     value={classForm.description}
-                    onChange={(e) => setClassForm({ ...classForm, description: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all resize-none"
+                    onChange={(e) => {
+                      setClassForm({ ...classForm, description: e.target.value });
+                      setClassDescError(validateNoBlockedWords(e.target.value) || "");
+                    }}
+                    className={`w-full px-4 py-3 rounded-xl bg-white/60 border ${classDescError ? 'border-red-500' : 'border-white/80 focus:border-[#f26b21]'} focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all resize-none`}
                     placeholder="Describe what students will learn..."
                   />
+                  {classDescError && <p className="text-red-500 text-xs font-bold mt-1">{classDescError}</p>}
                 </div>
 
                 {classForm.type === "WORKSHOP" && (
