@@ -703,7 +703,7 @@ function Index() {
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {featuredCoaches.map((c) => (
               <Link
-                to="/coach/$slug" params={{ slug: c.id }}
+                to="/portfolio/$slug" params={{ slug: c.id }}
                 key={c.id}
                 className="flex flex-col h-full overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(242,107,33,0.15)] relative"
               >

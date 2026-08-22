@@ -121,7 +121,7 @@ function CoachesDirectory() {
              return (
                <Link 
                  key={coach.id} 
-                 to="/coach/$slug" params={{ slug: coach.id }}
+                 to="/portfolio/$slug" params={{ slug: coach.id }}
                  className="group bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 overflow-hidden flex flex-col"
                >
                  {/* Top Image/Gradient Section */}
