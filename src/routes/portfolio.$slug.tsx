@@ -607,7 +607,7 @@ function ClassCard({ c, onEnquire }: { c: any, onEnquire: () => void }) {
         
         <div className="flex items-center justify-between mt-auto">
           <div className="text-2xl font-black text-slate-800">
-            {c.price === 0 ? <span className="text-teal-500 bg-teal-50 px-3 py-1 rounded-lg text-lg">FREE</span> : `₹${c.price}`}
+            {c.price > 0 ? `₹${c.price}` : ''}
           </div>
           <button onClick={onEnquire} className="px-5 py-2.5 bg-[#f26b21] hover:bg-[#d95d1c] text-white rounded-xl font-bold transition-all shadow-md active:scale-95 text-sm">
             Enquire
