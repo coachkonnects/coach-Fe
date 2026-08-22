@@ -716,9 +716,17 @@ function CoachDashboard() {
             </div>
             <span className="text-xl font-black text-slate-800 tracking-tight hidden sm:block">CoachKonnects</span>
           </div>
-          <div className="flex items-center gap-4">
-            <button onClick={() => setShowLogoutModal(true)} className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-sm transition-colors border border-slate-200/50">
+          <div className="flex flex-col items-end gap-2 mt-2">
+            <button onClick={() => setShowLogoutModal(true)} className="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-sm transition-colors border border-slate-200/50">
               Logout
+            </button>
+            <button
+              onClick={handleSetupPasskey}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold rounded-lg transition-colors border ${passkeyStatus === 'SUCCESS' ? 'text-teal-600 bg-teal-50 border-teal-200' : 'text-slate-500 bg-slate-50 border-slate-200 hover:text-orange-500 hover:bg-orange-50'}`}
+              title={passkeyStatus === 'SUCCESS' ? "Passkey Registered" : "Setup Biometric Login"}
+            >
+              <Fingerprint className="w-3.5 h-3.5" />
+              {passkeyStatus === 'SUCCESS' ? 'Passkey Ready' : 'Setup Passkey'}
             </button>
           </div>
         </div>
@@ -1130,43 +1138,11 @@ function CoachDashboard() {
               ))}
             </div>
           )}
-        </div>
-
-<div className="mt-8 bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] shadow-xl overflow-hidden relative group hover:shadow-2xl transition-all duration-300 p-8">
-          <div className="flex items-start gap-4">
-            <div className="bg-orange-50 p-4 rounded-2xl text-orange-500">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="font-black text-slate-800 text-2xl">Biometric Login</h3>
-              <p className="text-slate-500 mt-1 font-medium">Register your Face ID, Touch ID, or Windows Hello to log into the Coach Portal instantly without a password or OTP.</p>
-              <button
-                onClick={handleSetupPasskey}
-                className={`mt-6 flex items-center gap-2 font-bold px-6 py-3 rounded-xl transition-all shadow-md ${passkeyStatus === 'SUCCESS'
-                    ? "bg-teal-500 text-white hover:bg-teal-600 ring-2 ring-teal-200"
-                    : "bg-[#f26b21] text-white hover:bg-[#e05a10]"
-                  }`}
-              >
-                {passkeyStatus === 'SUCCESS' ? (
-                  <>
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    Passkey Registered ✓
-                  </>
-                ) : "Register Passkey"}
-              </button>
-              {passkeyMessage && passkeyStatus === 'ERROR' && (
-                 <p className="mt-3 text-red-500 text-sm font-bold">{passkeyMessage}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </main>
+        </div>      </main>
 
             {isEditing && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col relative my-auto animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex justify-end">
+          <div className="bg-white shadow-2xl w-full max-w-xl h-full flex flex-col relative animate-in slide-in-from-right duration-300 overflow-y-auto">
             <div className="flex justify-between items-center p-6 sm:p-8 border-b border-slate-100 shrink-0">
               <div>
                 <h2 className="text-2xl font-extrabold text-slate-800">Edit Profile</h2>
@@ -1448,8 +1424,8 @@ function CoachDashboard() {
       )}
 
       {classModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white/80 backdrop-blur-xl border border-white/50 w-full max-w-xl rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] sm:max-h-[90vh]">
+        <div className="fixed inset-0 z-[100] flex justify-end bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white shadow-2xl w-full max-w-md h-full flex flex-col animate-in slide-in-from-right duration-300 overflow-y-auto">
             <div className="p-6 border-b border-white/40 flex justify-between items-center bg-white/40">
               <h2 className="text-2xl font-extrabold text-slate-900">
                 {classForm.type === "WORKSHOP" ? "Create Workshop" : "Create Class"}

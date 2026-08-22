@@ -718,6 +718,7 @@ function AdminDashboard() {
       if (res.ok) {
         if (type === 'coach') fetchCoaches();
         else setStudents(students.filter((s: any) => s.id !== id));
+        setActiveTab('security');
       } else {
         alert("Failed to ban " + type);
       }
@@ -1438,6 +1439,36 @@ function AdminDashboard() {
                       className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#f26b21] focus:bg-white text-sm w-full md:w-64"
                     />
                   </div>
+                </div>
+
+                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm mb-6 flex flex-col md:flex-row gap-4 items-end">
+                  <div className="flex-1 w-full">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">New Category Name</label>
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={e => setNewCategoryName(e.target.value)}
+                      placeholder="e.g. Martial Arts"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                    />
+                  </div>
+                  <div className="flex-1 w-full">
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Expertises (Comma separated)</label>
+                    <input
+                      type="text"
+                      value={newCategoryExpertises}
+                      onChange={e => setNewCategoryExpertises(e.target.value)}
+                      placeholder="e.g. Karate, Judo, Taekwondo"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                    />
+                  </div>
+                  <button
+                    onClick={handleAddCategory}
+                    disabled={!newCategoryName.trim()}
+                    className="w-full md:w-auto px-6 py-2 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 disabled:opacity-50 transition-colors"
+                  >
+                    Add Category
+                  </button>
                 </div>
 
                 <div className="overflow-x-auto">

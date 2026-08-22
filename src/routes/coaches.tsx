@@ -152,7 +152,10 @@ function CoachesDirectory() {
                  {/* Body */}
                  <div className="pt-14 p-6 flex-1 flex flex-col">
                    <h2 className="text-xl font-black text-slate-800 mb-1 group-hover:text-teal-600 transition-colors">{coach.fullName}</h2>
-                   <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 line-clamp-1">
+                   <p className="text-xs font-bold text-orange-500 uppercase tracking-wider mb-1 line-clamp-1">
+                     {coach.category || coach.expertises || 'Professional Coach'}
+                   </p>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-4 line-clamp-1">
                      {coach.headline || 'Professional Coach'}
                    </p>
                    
