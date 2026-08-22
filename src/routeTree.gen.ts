@@ -20,6 +20,7 @@ import { Route as RegisterCoachRouteImport } from './routes/register-coach'
 import { Route as RegisterStudentRouteImport } from './routes/register-student'
 import { Route as StudentDashboardRouteImport } from './routes/student-dashboard'
 import { Route as CoachSlugRouteImport } from './routes/coach.$slug'
+import { Route as PortfolioSlugRouteImport } from './routes/portfolio.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -76,6 +77,11 @@ const CoachSlugRoute = CoachSlugRouteImport.update({
   path: '/coach/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortfolioSlugRoute = PortfolioSlugRouteImport.update({
+  id: '/portfolio/$slug',
+  path: '/portfolio/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/register-student': typeof RegisterStudentRoute
   '/student-dashboard': typeof StudentDashboardRoute
   '/coach/$slug': typeof CoachSlugRoute
+  '/portfolio/$slug': typeof PortfolioSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/register-student': typeof RegisterStudentRoute
   '/student-dashboard': typeof StudentDashboardRoute
   '/coach/$slug': typeof CoachSlugRoute
+  '/portfolio/$slug': typeof PortfolioSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/register-student': typeof RegisterStudentRoute
   '/student-dashboard': typeof StudentDashboardRoute
   '/coach/$slug': typeof CoachSlugRoute
+  '/portfolio/$slug': typeof PortfolioSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/register-student'
     | '/student-dashboard'
     | '/coach/$slug'
+    | '/portfolio/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/register-student'
     | '/student-dashboard'
     | '/coach/$slug'
+    | '/portfolio/$slug'
   id:
     | '__root__'
     | '/'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/register-student'
     | '/student-dashboard'
     | '/coach/$slug'
+    | '/portfolio/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -171,6 +183,7 @@ export interface RootRouteChildren {
   RegisterStudentRoute: typeof RegisterStudentRoute
   StudentDashboardRoute: typeof StudentDashboardRoute
   CoachSlugRoute: typeof CoachSlugRoute
+  PortfolioSlugRoute: typeof PortfolioSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -252,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoachSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portfolio/$slug': {
+      id: '/portfolio/$slug'
+      path: '/portfolio/$slug'
+      fullPath: '/portfolio/$slug'
+      preLoaderRoute: typeof PortfolioSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -267,6 +287,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterStudentRoute: RegisterStudentRoute,
   StudentDashboardRoute: StudentDashboardRoute,
   CoachSlugRoute: CoachSlugRoute,
+  PortfolioSlugRoute: PortfolioSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -216,12 +216,12 @@ function LoginPage() {
 
       if (!res.ok) {
         const text = await res.text();
+        let errorMessage = `Server Error (${res.status})`;
         try {
           const data = JSON.parse(text);
-          throw new Error(data.error || 'Failed to send OTP');
-        } catch (e) {
-          throw new Error(`Server Error (${res.status})`);
-        }
+          if (data.error) errorMessage = data.error;
+        } catch (e) {}
+        throw new Error(errorMessage);
       }
 
       setStep('otp');

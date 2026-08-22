@@ -62,6 +62,9 @@ function CoachDashboard() {
   const [passkeyMessage, setPasskeyMessage] = useState(
     (typeof window !== "undefined" && localStorage.getItem("hasPasskeyRegistered") === "true") ? "Passkey successfully registered!" : ""
   );
+  
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const handleWorkshopImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -618,21 +621,7 @@ function CoachDashboard() {
             you right now.
           </p>
 
-          {showLogoutModal && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-              <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-slate-100 transform transition-all">
-                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-8 h-8 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                </div>
-                <h3 className="text-2xl font-black text-center text-slate-800 mb-2">Done Coaching?</h3>
-                <p className="text-center text-slate-500 mb-8">Taking a breather from shaping minds and changing lives? We get it. Are you sure you want to log out?</p>
-                <div className="flex gap-4">
-                  <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Keep Coaching</button>
-                  <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-all">Yes, Log out</button>
-                </div>
-              </div>
-            </div>
-          )}
+
         </div>
       );
     }
@@ -793,9 +782,7 @@ function CoachDashboard() {
                       {profile?.slug && (
                         <button
                           onClick={() => {
-                            const url = `${window.location.origin}/coach/${profile.slug}`;
-                            navigator.clipboard.writeText(url);
-                            alert("Profile link copied to clipboard!");
+                            setShowLinkModal(true);
                           }}
                           className="p-2 bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer shadow-sm border border-slate-200"
                           title="Copy Public Profile Link"
@@ -1705,6 +1692,56 @@ function CoachDashboard() {
               <button onClick={() => setShowLogoutModal(false)} className="flex-1 px-6 py-3 font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Keep Coaching</button>
               <button onClick={() => { localStorage.clear(); setShowLogoutModal(false); navigate({ to: '/' }); }} className="flex-1 px-6 py-3 font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-all">Yes, Log out</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Link Modal */}
+      {showLinkModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md p-8 relative animate-in fade-in zoom-in-95 duration-200 text-center">
+            <button 
+              onClick={() => { setShowLinkModal(false); setLinkCopied(false); }}
+              className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            
+            <div className="w-16 h-16 bg-orange-100 text-[#f26b21] rounded-full flex items-center justify-center mx-auto mb-6">
+              <Link className="w-8 h-8" />
+            </div>
+            
+            <h3 className="text-2xl font-black text-slate-800 mb-2">Share Your Profile</h3>
+            <p className="text-slate-500 font-medium mb-8">
+              Copy this link and share it on WhatsApp, Instagram, or anywhere to get more students!
+            </p>
+            
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-6 flex items-center justify-between gap-3">
+              <div className="text-sm font-bold text-slate-600 truncate flex-1 text-left select-all">
+                {window.location.origin}/portfolio/{profile?.slug}
+              </div>
+            </div>
+            
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(`${window.location.origin}/portfolio/${profile?.slug}`);
+                setLinkCopied(true);
+                setTimeout(() => setLinkCopied(false), 3000);
+              }}
+              className={`w-full py-4 rounded-xl font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 ${linkCopied ? 'bg-teal-500 hover:bg-teal-600 text-white shadow-teal-500/20' : 'bg-[#f26b21] hover:bg-[#d95d1c] text-white shadow-orange-500/20'}`}
+            >
+              {linkCopied ? (
+                <>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                  Copied to Clipboard!
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                  Copy Link
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}
