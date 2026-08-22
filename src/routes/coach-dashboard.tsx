@@ -1,4 +1,4 @@
-import { Sparkles, Edit3, X, Link } from "lucide-react";
+import { Sparkles, Edit3, X, Link, Fingerprint } from "lucide-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router"; // test
 import { useState, useEffect, useCallback } from "react";
 import * as faceapi from "face-api.js";
