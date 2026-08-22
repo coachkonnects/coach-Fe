@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import { Users, DollarSign, Star, MapPin, Calendar, Clock, Globe, Briefcase, ChevronLeft, Link as LinkIcon, Facebook, Instagram, Youtube, Twitter } from 'lucide-react';
 
@@ -26,6 +26,53 @@ function CoachPortfolioPage() {
   const [selectedSkill, setSelectedSkill] = useState('');
   const [selectedTiming, setSelectedTiming] = useState('');
   const [sending, setSending] = useState(false);
+  const navigate = useNavigate();
+  const [enquiryPincode, setEnquiryPincode] = useState('');
+  const [pincodeError, setPincodeError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+
+  const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setEnquiryPincode(val);
+    if (val.length === 6) {
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${val}`);
+        const data = await res.json();
+        if (data && data[0].Status === 'Success') {
+          const location = data[0].PostOffice[0];
+          setEnquiryLocation(`${location.District}, ${location.State}`);
+          setPincodeError('');
+        } else {
+          setPincodeError('Invalid Pincode');
+        }
+      } catch (err) {
+        setPincodeError('Error verifying pincode');
+      }
+    } else {
+      setPincodeError('');
+    }
+  };
+
+  const checkDuplicate = async (type: string, value: string) => {
+    if (!value) return;
+    try {
+      const res = await fetch(`/api/auth/check-${type}?${type === 'mobile' ? 'mobile' : 'email'}=${encodeURIComponent(value)}`);
+      if (!res.ok) {
+        // Backend returns 400 with {error: ...} if exists
+        const data = await res.json().catch(() => ({}));
+        if (data.error) {
+          if (type === 'email') setEmailError('Email already registered. Please log in first.');
+          if (type === 'mobile') setPhoneError('Phone already registered. Please log in first.');
+        }
+      } else {
+        if (type === 'email') setEmailError('');
+        if (type === 'mobile') setPhoneError('');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
   
   const userEmail = typeof window !== 'undefined' ? localStorage.getItem('userEmail') : null;
 
@@ -63,6 +110,10 @@ function CoachPortfolioPage() {
 
   const handleSendEnquiry = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (pincodeError || emailError || phoneError) {
+      alert("Please fix the validation errors before submitting.");
+      return;
+    }
 
     setSending(true);
     try {
@@ -81,8 +132,18 @@ function CoachPortfolioPage() {
 
       const data = await res.json();
       if (res.ok) {
-        alert('Your enquiry has been sent to the coach successfully!');
-        setShowModal(false);
+        if (data.token) {
+           localStorage.setItem('token', data.token);
+           localStorage.setItem('userEmail', userEmail || enquiryEmail);
+           navigate({ to: '/student-dashboard' });
+        } else {
+           setEnquiryMessage('');
+           setShowModal(false);
+           alert('Enquiry sent successfully!');
+           if (userEmail || localStorage.getItem('userEmail')) {
+             navigate({ to: '/student-dashboard' });
+           }
+        }
       } else {
         alert(data.error || 'Failed to send enquiry. Please try again.');
       }
@@ -392,23 +453,30 @@ function CoachPortfolioPage() {
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 ml-1">Full Name *</label>
+                      <label className="text-sm font-bold text-slate-700 ml-1">Full Name <span className="text-orange-500">*</span></label>
                       <input type="text" required value={enquiryName} onChange={e => setEnquiryName(e.target.value)} placeholder="John Doe" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#f26b21] focus:ring-4 focus:ring-orange-500/10 transition-all font-medium" />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 ml-1">Phone *</label>
-                      <input type="tel" required pattern="[0-9]{10}" maxLength={10} value={enquiryPhone} onChange={e => setEnquiryPhone(e.target.value.replace(/\D/g, ''))} placeholder="9876543210" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#f26b21] focus:ring-4 focus:ring-orange-500/10 transition-all font-medium" />
+                      <label className="text-sm font-bold text-slate-700 ml-1">Phone <span className="text-orange-500">*</span></label>
+                      <input type="tel" required pattern="[0-9]{10}" maxLength={10} value={enquiryPhone} onChange={e => setEnquiryPhone(e.target.value.replace(/\D/g, ''))} onBlur={() => checkDuplicate('mobile', enquiryPhone)} placeholder="9876543210" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#f26b21] focus:ring-4 focus:ring-orange-500/10 transition-all font-medium" />
+                      {phoneError && <p className="text-xs text-red-500 ml-1 font-semibold">{phoneError}</p>}
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 ml-1">Email Address *</label>
-                      <input type="email" required value={enquiryEmail} onChange={e => setEnquiryEmail(e.target.value)} placeholder="hello@example.com" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#f26b21] focus:ring-4 focus:ring-orange-500/10 transition-all font-medium" />
+                      <label className="text-sm font-bold text-slate-700 ml-1">Email Address <span className="text-orange-500">*</span></label>
+                      <input type="email" required value={enquiryEmail} onChange={e => setEnquiryEmail(e.target.value)} onBlur={() => checkDuplicate('email', enquiryEmail)} placeholder="hello@example.com" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#f26b21] focus:ring-4 focus:ring-orange-500/10 transition-all font-medium" />
+                      {emailError && <p className="text-xs text-red-500 ml-1 font-semibold">{emailError}</p>}
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 ml-1">Location *</label>
-                      <input type="text" required value={enquiryLocation} onChange={e => setEnquiryLocation(e.target.value)} placeholder="Mumbai, MH" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#f26b21] focus:ring-4 focus:ring-orange-500/10 transition-all font-medium" />
+                      <label className="text-sm font-bold text-slate-700 ml-1">Pincode <span className="text-orange-500">*</span></label>
+                      <input type="text" required pattern="[0-9]{6}" maxLength={6} value={enquiryPincode} onChange={handlePincodeChange} placeholder="e.g. 400001" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-[#f26b21] focus:ring-4 focus:ring-orange-500/10 transition-all font-medium" />
+                      {pincodeError && <p className="text-xs text-red-500 ml-1 font-semibold">{pincodeError}</p>}
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700 ml-1">Location <span className="text-slate-400 font-normal">(Auto-filled)</span></label>
+                    <input type="text" required readOnly value={enquiryLocation} placeholder="City, State" className="w-full px-5 py-3.5 bg-slate-100 border border-slate-200 rounded-2xl text-slate-600 focus:outline-none cursor-not-allowed font-medium" />
                   </div>
                 </>
               )}
