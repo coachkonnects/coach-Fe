@@ -190,6 +190,9 @@ function LoginPage() {
         throw new Error(`This email is registered as a ${data.role}, not a ${roleStr}.`);
       }
       localStorage.setItem('userRole', roleStr);
+      // Clear admin sessions to prevent mix-ups
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminEmail");
 
       navigate({ to: `/${roleStr}-dashboard` });
     } catch (err: any) {
@@ -259,6 +262,9 @@ function LoginPage() {
       localStorage.setItem('token', data.token);
       localStorage.setItem('userEmail', email);
       localStorage.setItem('userRole', activePath as string);
+      // Clear admin sessions to prevent mix-ups
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminEmail");
 
       if (activePath === 'coach') {
         navigate({ to: '/coach-dashboard' });

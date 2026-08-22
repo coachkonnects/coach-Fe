@@ -76,6 +76,10 @@ function AdminLogin() {
       const data = await res.json();
       localStorage.setItem("adminToken", data.token || "dummy-admin-token");
       localStorage.setItem("adminEmail", email);
+      // Clear non-admin sessions to prevent cache/session mix-ups
+      localStorage.removeItem("token");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userRole");
       localStorage.removeItem("adminActiveTab"); // always start at Coaches tab
       navigate({ to: "/SAMRAHUL", replace: true });
     } catch (err: any) {
@@ -120,6 +124,10 @@ function AdminLogin() {
       const data = await verifyRes.json();
       localStorage.setItem("adminToken", data.token);
       localStorage.setItem("adminEmail", data.email || email);
+      // Clear non-admin sessions to prevent cache/session mix-ups
+      localStorage.removeItem("token");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userRole");
       localStorage.removeItem("adminActiveTab"); // always start at Coaches tab
       navigate({ to: "/SAMRAHUL", replace: true });
     } catch (err: any) {
