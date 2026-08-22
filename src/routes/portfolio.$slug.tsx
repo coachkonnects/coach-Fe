@@ -62,7 +62,7 @@ function CoachPortfolioPage() {
         const data = await res.json().catch(() => ({}));
         if (data.exists) {
           if (type === 'email') setEmailError('Whoa there! Looks like you already have an account! 😎 Please login first.');
-          if (type === 'mobile') setPhoneError('Whoa there! Looks like this number is already VIP! 😎 Please login first.');
+          if (type === 'mobile') setPhoneError('number already registered try new number');
         } else {
           if (type === 'email') setEmailError('');
           if (type === 'mobile') setPhoneError('');

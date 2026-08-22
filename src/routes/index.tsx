@@ -99,7 +99,7 @@ function Index() {
         const data = await res.json().catch(() => ({}));
         if (data.exists) {
           if (type === 'email') setEmailError('Whoa there! Looks like you already have an account! 😎 Please login first.');
-          if (type === 'mobile') setPhoneError('Whoa there! Looks like this number is already VIP! 😎 Please login first.');
+          if (type === 'mobile') setPhoneError('number already registered try new number');
         } else {
           if (type === 'email') setEmailError('');
           if (type === 'mobile') setPhoneError('');
@@ -247,7 +247,13 @@ function Index() {
           setDemands(sorted);
         });
       } else {
-        setDemandStatus('Error submitting request.');
+        const data = await res.json().catch(() => ({}));
+        if (data.error && (data.error.includes("phone_number") || data.error.includes("phone number is already"))) {
+          setPhoneError('number already registered try new number');
+          setDemandStatus('Please fix validation errors before submitting.');
+        } else {
+          setDemandStatus('Error submitting request.');
+        }
       }
     } catch {
       setDemandStatus('Error connecting to server.');
