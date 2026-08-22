@@ -314,9 +314,11 @@ function Index() {
                   👤 Are You A Hobby Coach?
                 </Link>
               </div>
-              <p className="hidden sm:block mt-4 text-[13px] font-bold text-orange-600/90">
-                ✨ <span className="underline decoration-orange-300 underline-offset-4">Registration is 100% free</span> for the first few coaches!
-              </p>
+              <div className="hidden sm:inline-block mt-6 px-6 py-3 bg-[#f26b21] rounded-2xl shadow-lg border border-orange-400 transform hover:-translate-y-1 transition-all">
+                <p className="text-lg md:text-xl font-black text-white tracking-wide">
+                  ✨ Registration is 100% free for the first few coaches!
+                </p>
+              </div>
 
             </div>
 
