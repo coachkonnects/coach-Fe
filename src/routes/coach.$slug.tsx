@@ -61,15 +61,21 @@ function CoachProfilePage() {
     if (!value) return;
     try {
       const res = await fetch(`/api/auth/check-${type}?${type === 'mobile' ? 'mobile' : 'email'}=${encodeURIComponent(value)}`);
-      if (!res.ok) {
+      if (res.ok) {
         const data = await res.json().catch(() => ({}));
-        if (data.error) {
+        if (data.exists) {
           if (type === 'email') setEmailError('Whoa there! Looks like you already have an account! 😎 Please login first.');
           if (type === 'mobile') setPhoneError('Whoa there! Looks like this number is already VIP! 😎 Please login first.');
+        } else {
+          if (type === 'email') setEmailError('');
+          if (type === 'mobile') setPhoneError('');
         }
       } else {
-        if (type === 'email') setEmailError('');
-        if (type === 'mobile') setPhoneError('');
+         const data = await res.json().catch(() => ({}));
+         if (data.error) {
+            if (type === 'email') setEmailError(data.error);
+            if (type === 'mobile') setPhoneError(data.error);
+         }
       }
     } catch (e) {
       console.error(e);
@@ -163,8 +169,8 @@ function CoachProfilePage() {
       <nav className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-sm transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.location.href = '/'}>
-             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
-               <img src="/homelogo.png" alt="Logo" className="w-8 h-8" />
+             <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
+               <img src="/homelogo.png" alt="Logo" className="w-10 h-10 object-contain" />
              </div>
              <span className="text-xl font-black text-slate-800 tracking-tight hidden sm:block">CoachKonnects</span>
           </div>

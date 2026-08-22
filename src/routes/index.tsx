@@ -95,15 +95,21 @@ function Index() {
     if (!value) return;
     try {
       const res = await fetch(`/api/auth/check-${type}?${type === 'mobile' ? 'mobile' : 'email'}=${encodeURIComponent(value)}`);
-      if (!res.ok) {
+      if (res.ok) {
         const data = await res.json().catch(() => ({}));
-        if (data.error) {
+        if (data.exists) {
           if (type === 'email') setEmailError('Whoa there! Looks like you already have an account! 😎 Please login first.');
           if (type === 'mobile') setPhoneError('Whoa there! Looks like this number is already VIP! 😎 Please login first.');
+        } else {
+          if (type === 'email') setEmailError('');
+          if (type === 'mobile') setPhoneError('');
         }
       } else {
-        if (type === 'email') setEmailError('');
-        if (type === 'mobile') setPhoneError('');
+         const data = await res.json().catch(() => ({}));
+         if (data.error) {
+            if (type === 'email') setEmailError(data.error);
+            if (type === 'mobile') setPhoneError(data.error);
+         }
       }
     } catch (e) {
       console.error(e);

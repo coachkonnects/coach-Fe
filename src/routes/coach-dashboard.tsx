@@ -711,8 +711,8 @@ function CoachDashboard() {
       <nav className="sticky top-0 z-40 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
-              <img src="/homelogo.png" alt="Logo" className="w-8 h-8" />
+            <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100">
+              <img src="/homelogo.png" alt="Logo" className="w-10 h-10 object-contain" />
             </div>
             <span className="text-xl font-black text-slate-800 tracking-tight hidden sm:block">CoachKonnects</span>
           </div>

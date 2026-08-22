@@ -195,7 +195,7 @@ function CoachPortfolioPage() {
         <nav className="absolute top-0 left-0 right-0 z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div className="flex items-center gap-3 cursor-pointer bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 shadow-sm" onClick={() => window.location.href = '/'}>
-               <img src="/homelogo.png" alt="Logo" className="w-6 h-6 brightness-0 invert" />
+               <img src="/homelogo.png" alt="Logo" className="w-10 h-10 object-contain" />
                <span className="text-lg font-black text-white tracking-tight hidden sm:block">CoachKonnects</span>
             </div>
             <button onClick={() => window.history.back()} className="px-5 py-2 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white rounded-full font-bold text-sm transition-colors border border-white/20 shadow-sm flex items-center gap-2">
