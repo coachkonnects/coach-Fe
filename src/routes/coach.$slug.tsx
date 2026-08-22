@@ -64,8 +64,8 @@ function CoachProfilePage() {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         if (data.error) {
-          if (type === 'email') setEmailError('Email already registered. Please log in first.');
-          if (type === 'mobile') setPhoneError('Phone already registered. Please log in first.');
+          if (type === 'email') setEmailError('Whoa there! Looks like you already have an account! 😎 Please login first.');
+          if (type === 'mobile') setPhoneError('Whoa there! Looks like this number is already VIP! 😎 Please login first.');
         }
       } else {
         if (type === 'email') setEmailError('');
@@ -112,7 +112,7 @@ function CoachProfilePage() {
   const handleSendEnquiry = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pincodeError || emailError || phoneError) {
-      alert("Please fix the validation errors before submitting.");
+      alert("Hold your horses! 🐎 Looks like you're already registered. Please log in to your profile first so we can tie this enquiry to your VIP account!");
       return;
     }
 

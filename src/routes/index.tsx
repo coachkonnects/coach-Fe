@@ -98,8 +98,8 @@ function Index() {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         if (data.error) {
-          if (type === 'email') setEmailError('Email already registered. Please log in first.');
-          if (type === 'mobile') setPhoneError('Phone already registered. Please log in first.');
+          if (type === 'email') setEmailError('Whoa there! Looks like you already have an account! 😎 Please login first.');
+          if (type === 'mobile') setPhoneError('Whoa there! Looks like this number is already VIP! 😎 Please login first.');
         }
       } else {
         if (type === 'email') setEmailError('');
@@ -186,7 +186,7 @@ function Index() {
   const handleDemandSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (emailError || phoneError) {
-      setDemandStatus('Please fix validation errors before submitting.');
+      setDemandStatus('Hold your horses! 🐎 Looks like you\'re already registered. Please log in first!');
       return;
     }
     if (!demandForm.mobileNumber || demandForm.mobileNumber.length !== 10) {
