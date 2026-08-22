@@ -115,7 +115,7 @@ function CoachDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...classForm,
-          price: 0,
+          price: classForm.price ? parseInt(classForm.price) : 0,
           capacity: parseInt(classForm.capacity || "1"),
         }),
       });
@@ -761,52 +761,66 @@ function CoachDashboard() {
                       alt="Profile"
                       className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-white shadow-xl bg-white"
                     />
-                    <div className="pb-1 sm:pb-1.5 bg-white/60 sm:bg-white/40 backdrop-blur-md px-3 sm:px-3 py-1 sm:py-1.5 rounded-xl shadow-sm border border-white/50 mb-1 sm:mb-2">
-                      <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 drop-shadow-sm line-clamp-1">
-                        {profile?.fullName}
-                      </h2>
-                      <p className="text-slate-800 font-bold text-sm sm:text-base mt-0.5 sm:mt-0.5 drop-shadow-sm line-clamp-1">
-                        {profile?.expertise} {profile?.location ? `• ${profile.location}` : ""}
-                      </p>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 pb-1 sm:pb-1.5 bg-white/60 sm:bg-white/40 backdrop-blur-md px-3 sm:px-3 py-1 sm:py-1.5 rounded-xl shadow-sm border border-white/50 mb-1 sm:mb-2">
+                      <div>
+                        <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 drop-shadow-sm line-clamp-1">
+                          {profile?.fullName}
+                        </h2>
+                        <p className="text-slate-800 font-bold text-sm sm:text-base mt-0.5 sm:mt-0.5 drop-shadow-sm line-clamp-1">
+                          {profile?.expertise} {profile?.location ? `• ${profile.location}` : ""}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2 sm:mt-0">
+                        {profile?.slug && (
+                          <button
+                            onClick={() => setShowLinkModal(true)}
+                            className="p-2 bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer shadow-sm border border-slate-200"
+                            title="Copy Public Profile Link"
+                          >
+                            <Link className="w-4 h-4 sm:w-5 sm:h-5" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            if (profile?.status === 'PENDING_APPROVAL') {
+                              alert("Your profile is currently pending approval. Please wait for admin approval before making further edits.");
+                              return;
+                            }
+                            setEditForm({ ...profile, mobile: profile?.user?.phoneNumber || "" });
+                            setIsEditing(true);
+                          }}
+                          className="p-2 bg-slate-50 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-colors cursor-pointer shadow-sm border border-slate-200"
+                          title="Edit Profile"
+                        >
+                          <Edit3 className="w-4 h-4 sm:w-5 sm:h-5" />
+                        </button>
+                      </div>
                     </div>
+
                   </div>
                 </div>
 
                 <div className="mt-8 px-4 sm:px-8 pb-8">
                   <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
-                    <div>
-                      <h1 className="text-2xl font-extrabold text-slate-900">Dashboard</h1>
-                      <p className="text-slate-500">Manage your coaching profile and status.</p>
+
+                    <div className="w-full">
+                      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                        <div>
+                          <h1 className="text-2xl font-extrabold text-slate-900">Dashboard</h1>
+                          <p className="text-slate-500">Manage your coaching profile and status.</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2 w-full bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
+                        <button onClick={() => setActiveTab("overview")} className={`px-4 py-2 font-bold rounded-xl transition-all text-sm ${activeTab === "overview" ? "bg-[#f26b21] text-white shadow-md" : "text-slate-500 hover:text-slate-700 hover:bg-white"}`}>Profile Overview</button>
+                        <button onClick={() => setActiveTab("classes")} className={`px-4 py-2 font-bold rounded-xl transition-all text-sm ${activeTab === "classes" ? "bg-[#f26b21] text-white shadow-md" : "text-slate-500 hover:text-slate-700 hover:bg-white"}`}>Classes & Workshops</button>
+                        <button onClick={() => setActiveTab("enquiries")} className={`px-4 py-2 font-bold rounded-xl transition-all text-sm ${activeTab === "enquiries" ? "bg-[#f26b21] text-white shadow-md" : "text-slate-500 hover:text-slate-700 hover:bg-white"}`}>Leads / Enquiries {enquiries.length > 0 ? `(${enquiries.length})` : ''}</button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      {profile?.slug && (
-                        <button
-                          onClick={() => {
-                            setShowLinkModal(true);
-                          }}
-                          className="p-2 bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer shadow-sm border border-slate-200"
-                          title="Copy Public Profile Link"
-                        >
-                          <Link className="w-5 h-5" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => {
-                          if (profile?.status === 'PENDING_APPROVAL') {
-                            alert("Your profile is currently pending approval. Please wait for admin approval before making further edits.");
-                            return;
-                          }
-                          setEditForm({ ...profile, mobile: profile?.user?.phoneNumber || "" });
-                          setIsEditing(true);
-                        }}
-                        className="p-2 bg-slate-50 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-colors cursor-pointer shadow-sm border border-slate-200"
-                        title="Edit Profile"
-                      >
-                        <Edit3 className="w-5 h-5" />
-                      </button>
-                    </div>
+
                   </div>
 
+                  {activeTab === "overview" && (
                   <div className="grid grid-cols-1 gap-4 relative z-10 mt-6">
                     <div className="grid grid-cols-1 gap-4 relative z-10">
                       {[
@@ -844,7 +858,7 @@ function CoachDashboard() {
                       </div>
                     </div>
                     </div>
-
+                  )}
 
                 </div>
               </div>
@@ -852,6 +866,7 @@ function CoachDashboard() {
           </div>
 
           <div className="lg:col-span-2 space-y-8">
+            {activeTab === "classes" && (
             <div className="bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] shadow-xl p-8 relative overflow-hidden flex flex-col">
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -953,7 +968,9 @@ function CoachDashboard() {
                 )}
               </div>
             </div>
+            )}
 
+            {activeTab === "enquiries" && (
             <div className="bg-white/80 backdrop-blur-xl border border-white/50 rounded-[2rem] shadow-xl p-8 relative overflow-hidden flex flex-col">
               <div>
                 <h2 className="text-2xl font-extrabold text-slate-900 mb-6">Leads / Enquiries</h2>
@@ -1058,6 +1075,7 @@ function CoachDashboard() {
                 )}
               </div>
             </div>
+            )}
           </div>
         </div>
 
@@ -1544,13 +1562,17 @@ function CoachDashboard() {
                         <input
                           required
                           type="time"
-                          value={classForm.schedule.split(' ')[1] || ''}
+                          value={classForm.type === 'WORKSHOP' ? (classForm.schedule.split(' ')[0] || '') : (classForm.schedule.split(' ')[1] || '')}
                           onChange={(e) => {
                             const parts = classForm.schedule.split(' ');
-                            const day = parts[0] || '';
-                            const end = parts[3] || '';
-                            const newSched = `${day} ${e.target.value} - ${end}`.trim().replace(/(^\s*-\s*$|^\s*-\s*|\s*-\s*$)/, '');
-                            setClassForm({ ...classForm, schedule: newSched })
+                            if (classForm.type === 'WORKSHOP') {
+                              const end = parts[2] || '';
+                              setClassForm({ ...classForm, schedule: `${e.target.value} - ${end}`.replace(/ - $/, '') });
+                            } else {
+                              const day = parts[0] || '';
+                              const end = parts[3] || '';
+                              setClassForm({ ...classForm, schedule: `${day} ${e.target.value} - ${end}`.trim().replace(/(^\s*-\s*$|^\s*-\s*|\s*-\s*$)/, '') });
+                            }
                           }}
                           className="w-full px-3 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm"
                         />
@@ -1558,14 +1580,19 @@ function CoachDashboard() {
                         <input
                           required
                           type="time"
-                          value={classForm.schedule.split(' ')[3] || ''}
+                          value={classForm.type === 'WORKSHOP' ? (classForm.schedule.split(' ')[2] || '') : (classForm.schedule.split(' ')[3] || '')}
                           onChange={(e) => {
                             const parts = classForm.schedule.split(' ');
-                            const day = parts[0] || '';
-                            const start = parts[1] || '';
-                            let newSched = `${day} ${start} - ${e.target.value}`.trim();
-                            if (newSched === '-') newSched = '';
-                            setClassForm({ ...classForm, schedule: newSched })
+                            if (classForm.type === 'WORKSHOP') {
+                              const start = parts[0] || '';
+                              setClassForm({ ...classForm, schedule: `${start} - ${e.target.value}`.replace(/^ - /, '') });
+                            } else {
+                              const day = parts[0] || '';
+                              const start = parts[1] || '';
+                              let newSched = `${day} ${start} - ${e.target.value}`.trim();
+                              if (newSched === '-') newSched = '';
+                              setClassForm({ ...classForm, schedule: newSched });
+                            }
                           }}
                           className="w-full px-3 py-3 rounded-xl bg-white/60 border border-white/80 focus:outline-none focus:ring-2 focus:ring-[#f26b21] transition-all text-sm"
                         />
