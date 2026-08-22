@@ -314,6 +314,9 @@ function Index() {
                   👤 Are You A Hobby Coach?
                 </Link>
               </div>
+              <p className="hidden sm:block mt-4 text-[13px] font-bold text-orange-600/90">
+                ✨ <span className="underline decoration-orange-300 underline-offset-4">Registration is 100% free</span> for the first few coaches!
+              </p>
 
             </div>
 
@@ -343,6 +346,9 @@ function Index() {
                   <span>👤 Are You Coach?</span>
                 </Link>
               </div>
+              <p className="sm:hidden text-[11px] font-bold text-center text-orange-600/90 bg-white/40 backdrop-blur-md py-1.5 rounded-full border border-white/40 shadow-sm mx-1 mt-1">
+                ✨ Registration is <span className="underline decoration-orange-300 underline-offset-2">100% free</span> for the first few coaches!
+              </p>
 
               {/* Trust chips - white box on mobile, raw on desktop */}
               <div className="hidden sm:block bg-white/90 backdrop-blur-xl sm:bg-transparent sm:backdrop-blur-none rounded-3xl p-4 sm:p-0 shadow-lg sm:shadow-none border border-white sm:border-transparent">
