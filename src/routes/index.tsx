@@ -88,6 +88,27 @@ function Index() {
   const [showDemandModal, setShowDemandModal] = useState(false);
   const [demandForm, setDemandForm] = useState({ skillName: '', location: '', email: '', mobileNumber: '', pincode: '', area: '', district: '', state: '' });
   const [demandStatus, setDemandStatus] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+
+  const checkDuplicate = async (type: string, value: string) => {
+    if (!value) return;
+    try {
+      const res = await fetch(`/api/auth/check-${type}?${type === 'mobile' ? 'mobile' : 'email'}=${encodeURIComponent(value)}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (data.error) {
+          if (type === 'email') setEmailError('Email already registered. Please log in first.');
+          if (type === 'mobile') setPhoneError('Phone already registered. Please log in first.');
+        }
+      } else {
+        if (type === 'email') setEmailError('');
+        if (type === 'mobile') setPhoneError('');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
   const [serverCategories, setServerCategories] = useState<any[]>([]);
   const [showAllCatsModal, setShowAllCatsModal] = useState(false);
 
@@ -164,6 +185,10 @@ function Index() {
 
   const handleDemandSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (emailError || phoneError) {
+      setDemandStatus('Please fix validation errors before submitting.');
+      return;
+    }
     if (!demandForm.mobileNumber || demandForm.mobileNumber.length !== 10) {
       setDemandStatus('Please enter a valid 10-digit mobile number.');
       return;
