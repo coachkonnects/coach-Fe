@@ -584,11 +584,11 @@ function Index() {
               </div>
               <div>
                 <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-                <input required type="email" pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}" title="Please enter a valid email address (e.g. name@example.com)" value={demandForm.email} onChange={e => setDemandForm({ ...demandForm, email: e.target.value })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
+                <input required type="email" pattern="[a-zA-Z0-9._%+\-]+@(gmail\.com|outlook\.com|yahoo\.com)" title="Only Gmail, Outlook, or Yahoo emails are allowed (no spaces)" value={demandForm.email} onChange={e => setDemandForm({ ...demandForm, email: e.target.value.replace(/\s/g, '') })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" />
               </div>
               <div>
                 <label className="text-sm font-bold text-slate-700 ml-1">Mobile Number</label>
-                <input required type="tel" maxLength={10} pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" value={demandForm.mobileNumber} onChange={e => setDemandForm({ ...demandForm, mobileNumber: e.target.value.replace(/\D/g, '') })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" placeholder="10-digit mobile number" />
+                <input required type="tel" maxLength={10} pattern="[6789][0-9]{9}" title="Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9" value={demandForm.mobileNumber} onChange={e => setDemandForm({ ...demandForm, mobileNumber: e.target.value.replace(/\D/g, '') })} className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus:border-orange-500 focus:bg-white outline-none" placeholder="10-digit mobile number" />
               </div>
               <div>
                 <label className="text-sm font-bold text-slate-700 ml-1">Pincode</label>
